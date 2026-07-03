@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary } from '@/app/actions/whatsapp';
-import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
+import { IconCheckCircle, IconAlertTriangle, IconSparkles } from '@/app/components/icons';
 
 export default function WhatsAppSettingsClient({ config, classes = [] }) {
   const [provider, setProvider]         = useState(config?.provider || 'ULTRAMSG');
@@ -117,7 +117,10 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
             // Custom Self-Hosted API Panel
             <div className="space-y-4 pt-2">
               <div className="p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 space-y-2">
-                <p className="font-bold text-white">✨ Free &amp; Unlimited WhatsApp Sending</p>
+                <p className="font-bold text-white flex items-center gap-2">
+                  <IconSparkles className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                  Free &amp; Unlimited WhatsApp Sending
+                </p>
                 <p>
                   We have generated a custom microservice script for you in this codebase under:
                   <code className="text-white bg-black/40 px-1 py-0.5 rounded ml-1 font-mono">scratch/whatsapp-gateway.js</code>

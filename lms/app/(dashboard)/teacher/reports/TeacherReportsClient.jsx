@@ -12,7 +12,10 @@ import {
   IconGraduationCap,
   IconSettings,
   IconPlus,
-  IconBookOpen
+  IconBookOpen,
+  IconBuilding,
+  IconClipboard,
+  IconSave,
 } from '@/app/components/icons';
 import { getClassAttendanceReport } from '@/app/actions/reports';
 import {
@@ -220,23 +223,23 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
       <div className="flex border-b border-[#1e233d] gap-2">
         <button
           onClick={() => setActiveTab('attendance')}
-          className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-lg -mb-px cursor-pointer ${
+          className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-lg -mb-px cursor-pointer flex items-center gap-2 ${
             activeTab === 'attendance'
               ? 'border-cyan-500 text-cyan-400 bg-[#0d0f1a]/40'
               : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
-          🏫 Class Attendance Grid
+          <IconBuilding className="w-4 h-4" /> Class Attendance Grid
         </button>
         <button
           onClick={() => setActiveTab('exams')}
-          className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-lg -mb-px cursor-pointer ${
+          className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-lg -mb-px cursor-pointer flex items-center gap-2 ${
             activeTab === 'exams'
               ? 'border-cyan-500 text-cyan-400 bg-[#0d0f1a]/40'
               : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
-          📝 Test Result Marks Entry
+          <IconClipboard className="w-4 h-4" /> Test Result Marks Entry
         </button>
       </div>
 
@@ -410,9 +413,9 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                     <button
                       onClick={handleSaveMarks}
                       disabled={savingMarks}
-                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black uppercase tracking-wider rounded-lg cursor-pointer"
+                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black uppercase tracking-wider rounded-lg cursor-pointer inline-flex items-center justify-center gap-1.5"
                     >
-                      {savingMarks ? 'Saving...' : '💾 Save All Results'}
+                      {savingMarks ? 'Saving...' : <><IconSave className="w-3.5 h-3.5" /> Save All Results</>}
                     </button>
                   </div>
                 </div>
@@ -486,7 +489,9 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
           <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex justify-between items-center">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">➕ Create New Test / Exam</h3>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <IconPlus className="w-4 h-4 text-cyan-400" /> Create New Test / Exam
+              </h3>
               <button onClick={() => setShowCreateExam(false)} className="text-zinc-500 hover:text-white text-lg font-black">&times;</button>
             </div>
             

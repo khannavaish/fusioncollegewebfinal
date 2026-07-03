@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { IconChevronLeft, IconChevronRight, IconEdit } from '@/app/components/icons';
 import { createSubject, updateSubject, deleteSubject } from '@/app/actions/admin';
 
 export default async function AdminSubjectsPage() {
@@ -30,7 +31,9 @@ export default async function AdminSubjectsPage() {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Subjects</h1>
           <p className="text-zinc-400 text-sm mt-1">{subjects.length} subject{subjects.length !== 1 ? 's' : ''} total</p>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
+        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
       </div>
 
       {/* Add Subject */}
@@ -60,8 +63,8 @@ export default async function AdminSubjectsPage() {
 
               <div className="border-t border-[#1e233d] bg-[#16192b]/30 p-3">
                 <details className="relative group">
-                  <summary className="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer list-none font-medium">
-                    ✏️ Edit Name
+                  <summary className="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer list-none font-medium inline-flex items-center gap-1">
+                    <IconEdit className="w-3 h-3" /> Edit Name
                   </summary>
                   <form action={updateSubject} className="flex gap-2 mt-2">
                     <input type="hidden" name="id" value={sub.id} />

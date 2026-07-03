@@ -13,7 +13,18 @@ import {
   IconBookOpen,
   IconGraduationCap,
   IconSettings,
-  IconUsers
+  IconUsers,
+  IconBuilding,
+  IconUserTie,
+  IconChatBubble,
+  IconEdit,
+  IconTrash,
+  IconPrint,
+  IconChart,
+  IconBolt,
+  IconUserAbsent,
+  IconClipboardCheck,
+  IconXCircle,
 } from '@/app/components/icons';
 import {
   getStudentReport,
@@ -338,21 +349,22 @@ export default function ReportsClient({ students, classes, teachers }) {
       {/* Tabs */}
       <div className="flex border-b border-[#1e233d] gap-2 overflow-x-auto pb-px">
         {[
-          { id: 'student', label: '🎓 Student Report' },
-          { id: 'class', label: '🏫 Class Attendance' },
-          { id: 'teacher', label: '👩‍🏫 Teacher Logs' },
-          { id: 'whatsapp', label: '💬 WhatsApp Logs' },
-          { id: 'warnings', label: '🚨 Issues & Warnings' },
+          { id: 'student', label: 'Student Report', icon: IconGraduationCap },
+          { id: 'class', label: 'Class Attendance', icon: IconBuilding },
+          { id: 'teacher', label: 'Teacher Logs', icon: IconUserTie },
+          { id: 'whatsapp', label: 'WhatsApp Logs', icon: IconChatBubble },
+          { id: 'warnings', label: 'Issues & Warnings', icon: IconAlertTriangle },
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap border-b-2 rounded-t-lg -mb-px cursor-pointer ${
+            className={`px-5 py-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap border-b-2 rounded-t-lg -mb-px cursor-pointer flex items-center gap-2 ${
               activeTab === tab.id
                 ? 'border-cyan-500 text-cyan-400 bg-[#0d0f1a]/40'
                 : 'border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/10'
             }`}
           >
+            <tab.icon className="w-4 h-4 flex-shrink-0" />
             {tab.label}
           </button>
         ))}
@@ -401,7 +413,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     onClick={handlePrint}
                     className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
                   >
-                    🖨️ Print Report
+                    <IconPrint className="w-3.5 h-3.5" /> Print Report
                   </button>
                 </div>
 
@@ -540,14 +552,14 @@ export default function ReportsClient({ students, classes, teachers }) {
                                   className="p-1 hover:bg-zinc-800 rounded text-cyan-400 cursor-pointer"
                                   title="Edit Marks"
                                 >
-                                  ✏️
+                                  <IconEdit className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteResult(er.id)}
                                   className="p-1 hover:bg-red-950/40 rounded text-red-400 cursor-pointer"
                                   title="Delete Marks"
                                 >
-                                  🗑️
+                                  <IconTrash className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </td>
@@ -580,13 +592,23 @@ export default function ReportsClient({ students, classes, teachers }) {
                             <td className="px-4 py-3 text-xs">{new Date(log.sentAt).toLocaleString('en-PK')}</td>
                             <td className="px-4 py-3 font-semibold">{log.parentPhone}</td>
                             <td className="px-4 py-3 text-xs uppercase font-bold tracking-wide">
-                              {log.messageType === 'ARRIVAL' ? '⚡ First Arrival' : '📊 Daily EOD Summary'}
+                              <span className="inline-flex items-center gap-1.5">
+                                {log.messageType === 'ARRIVAL' ? (
+                                  <><IconBolt className="w-3.5 h-3.5 text-amber-400" /> First Arrival</>
+                                ) : (
+                                  <><IconChart className="w-3.5 h-3.5 text-cyan-400" /> Daily EOD Summary</>
+                                )}
+                              </span>
                             </td>
                             <td className="px-4 py-3 text-right">
                               {log.success ? (
-                                <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-xs border border-emerald-500/20">Sent ✅</span>
+                                <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-xs border border-emerald-500/20">
+                                  <IconCheckCircle className="w-3 h-3" /> Sent
+                                </span>
                               ) : (
-                                <span className="text-red-400 bg-red-500/10 px-2 py-0.5 rounded text-xs border border-red-500/20" title={log.errorMessage}>Failed ❌</span>
+                                <span className="inline-flex items-center gap-1 text-red-400 bg-red-500/10 px-2 py-0.5 rounded text-xs border border-red-500/20" title={log.errorMessage}>
+                                  <IconXCircle className="w-3 h-3" /> Failed
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -775,13 +797,13 @@ export default function ReportsClient({ students, classes, teachers }) {
                                 })}
                                 className="p-1 hover:bg-zinc-800 rounded text-cyan-400 cursor-pointer"
                               >
-                                ✏️
+                                <IconEdit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteLecture(l.id)}
                                 className="p-1 hover:bg-red-950/40 rounded text-red-400 cursor-pointer"
                               >
-                                🗑️
+                                <IconTrash className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -838,13 +860,13 @@ export default function ReportsClient({ students, classes, teachers }) {
                                 })}
                                 className="p-1 hover:bg-zinc-800 rounded text-cyan-400 cursor-pointer"
                               >
-                                ✏️
+                                <IconEdit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteExam(ex.id)}
                                 className="p-1 hover:bg-red-950/40 rounded text-red-400 cursor-pointer"
                               >
-                                🗑️
+                                <IconTrash className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -914,13 +936,23 @@ export default function ReportsClient({ students, classes, teachers }) {
                         <td className="px-4 py-3 text-xs">{log.student.class.name}</td>
                         <td className="px-4 py-3 font-mono">{log.parentPhone}</td>
                         <td className="px-4 py-3 text-xs font-extrabold uppercase">
-                          {log.messageType === 'ARRIVAL' ? '⚡ First Arrival' : '📊 EOD Summary'}
+                          <span className="inline-flex items-center gap-1.5">
+                            {log.messageType === 'ARRIVAL' ? (
+                              <><IconBolt className="w-3.5 h-3.5 text-amber-400" /> First Arrival</>
+                            ) : (
+                              <><IconChart className="w-3.5 h-3.5 text-cyan-400" /> EOD Summary</>
+                            )}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-right">
                           {log.success ? (
-                            <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded text-xs border border-emerald-500/20">Sent ✅</span>
+                            <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded text-xs border border-emerald-500/20">
+                              <IconCheckCircle className="w-3 h-3" /> Sent
+                            </span>
                           ) : (
-                            <span className="text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded text-xs border border-red-500/20" title={log.errorMessage}>Failed ❌</span>
+                            <span className="inline-flex items-center gap-1 text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded text-xs border border-red-500/20" title={log.errorMessage}>
+                              <IconXCircle className="w-3 h-3" /> Failed
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -943,19 +975,20 @@ export default function ReportsClient({ students, classes, teachers }) {
             {/* Warnings sub navigation tabs */}
             <div className="flex border-b border-[#2b3052] gap-1 overflow-x-auto">
               {[
-                { id: 'absentees', label: '🚶 Daily Absentees' },
-                { id: 'low_attendance', label: '⚠️ Attendance Warnings (<75%)' },
-                { id: 'completeness', label: '✓ Teacher Check List' },
+                { id: 'absentees', label: 'Daily Absentees', icon: IconUserAbsent },
+                { id: 'low_attendance', label: 'Attendance Warnings (<75%)', icon: IconAlertTriangle },
+                { id: 'completeness', label: 'Teacher Check List', icon: IconClipboardCheck },
               ].map(sub => (
                 <button
                   key={sub.id}
                   onClick={() => setWarningsSubTab(sub.id)}
-                  className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-t-lg transition-colors cursor-pointer ${
+                  className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-t-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
                     warningsSubTab === sub.id
                       ? 'bg-[#16192b] text-cyan-400 border-b-2 border-cyan-400'
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
+                  <sub.icon className="w-3.5 h-3.5 flex-shrink-0" />
                   {sub.label}
                 </button>
               ))}
@@ -1027,9 +1060,9 @@ export default function ReportsClient({ students, classes, teachers }) {
                           <td className="px-4 py-3 text-right">
                             <button
                               onClick={() => handleUpdateAttendance(a.attendanceId, 'PRESENT')}
-                              className="px-2.5 py-1 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded cursor-pointer transition-colors"
+                              className="px-2.5 py-1 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded cursor-pointer transition-colors inline-flex items-center gap-1"
                             >
-                              Mark Present ✓
+                              <IconCheckCircle className="w-3 h-3" /> Mark Present
                             </button>
                           </td>
                         </tr>
@@ -1108,9 +1141,13 @@ export default function ReportsClient({ students, classes, teachers }) {
                           <td className="px-4 py-3 text-xs italic text-zinc-500 max-w-xs truncate" title={s.topic}>{s.topic}</td>
                           <td className="px-4 py-3 text-right">
                             {s.isMarked ? (
-                              <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-xs border border-emerald-500/20 font-bold">Marked ✓</span>
+                              <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-xs border border-emerald-500/20 font-bold">
+                                <IconCheckCircle className="w-3 h-3" /> Marked
+                              </span>
                             ) : (
-                              <span className="text-red-400 bg-red-500/10 px-2 py-0.5 rounded text-xs border border-red-500/20 font-bold">PENDING ✖</span>
+                              <span className="inline-flex items-center gap-1 text-red-400 bg-red-500/10 px-2 py-0.5 rounded text-xs border border-red-500/20 font-bold">
+                                <IconXCircle className="w-3 h-3" /> Pending
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -1130,7 +1167,10 @@ export default function ReportsClient({ students, classes, teachers }) {
           <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex justify-between items-center">
               <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                {editModal.type === 'marks' ? '✏️ Edit Student Marks' : editModal.type === 'lecture' ? '✏️ Edit Lecture Topic' : '✏️ Edit Exam Settings'}
+                <span className="inline-flex items-center gap-2">
+                  <IconEdit className="w-4 h-4 text-cyan-400" />
+                  {editModal.type === 'marks' ? 'Edit Student Marks' : editModal.type === 'lecture' ? 'Edit Lecture Topic' : 'Edit Exam Settings'}
+                </span>
               </h3>
               <button onClick={() => setEditModal(null)} className="text-zinc-500 hover:text-white text-lg font-black">&times;</button>
             </div>

@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { updateEnquiryStatus } from '@/app/actions/admin';
-import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers } from '@/app/components/icons';
+import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight } from '@/app/components/icons';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -102,7 +102,9 @@ export default async function AdminDashboard() {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-bold text-white">Recent Students</h2>
-            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300">View All →</Link>
+            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+              View All <IconChevronRight className="w-3 h-3" />
+            </Link>
           </div>
           <div className="space-y-2">
             {recentStudents.length === 0 ? (
@@ -123,7 +125,9 @@ export default async function AdminDashboard() {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-bold text-white">Recent Teachers</h2>
-            <Link href="/admin/teachers" className="text-xs text-cyan-400 hover:text-cyan-300">View All →</Link>
+            <Link href="/admin/teachers" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+              View All <IconChevronRight className="w-3 h-3" />
+            </Link>
           </div>
           <div className="space-y-2">
             {recentTeachers.length === 0 ? (

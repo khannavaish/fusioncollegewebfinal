@@ -109,7 +109,7 @@ export default async function DashboardLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#090b11] text-zinc-100 flex font-sans">
+    <div className="min-h-screen h-dvh bg-[#090b11] text-zinc-100 flex font-sans overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 border-r border-[#1e233d] bg-[#0d0f1a] hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-[#1e233d] gap-2">
@@ -241,7 +241,7 @@ export default async function DashboardLayout({ children }) {
       </aside>
 
       {/* Main pane */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         <header className="h-16 border-b border-[#1e233d] bg-[#0d0f1a]/50 backdrop-blur px-6 flex items-center justify-between md:justify-end">
           <div className="md:hidden flex items-center gap-2">
             <img
@@ -259,7 +259,7 @@ export default async function DashboardLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto overflow-x-hidden min-h-0 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

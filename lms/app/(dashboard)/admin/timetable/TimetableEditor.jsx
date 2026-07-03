@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef } from 'react';
 import { saveTimetableSlots } from '@/app/actions/timetable';
 import { createClass } from '@/app/actions/admin';
-import { IconCheckCircle, IconAlertTriangle, IconDownload, IconPlus, IconHelpCircle, IconDocumentText, IconSchool, IconSettings } from '@/app/components/icons';
+import { IconCheckCircle, IconAlertTriangle, IconDownload, IconPlus, IconHelpCircle, IconDocumentText, IconSchool, IconSettings, IconLoader } from '@/app/components/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 import { isBreakTimeSlot, BREAK_COLOR } from '@/utils/timetable';
@@ -253,12 +253,12 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             onClick={() => handleExport(exportKey)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
           >
-            {exporting === exportKey ? '⏳' : <IconDownload className="w-3.5 h-3.5" />} Export {sectionTitle} PNG
+            {exporting === exportKey ? <IconLoader className="w-3.5 h-3.5" /> : <IconDownload className="w-3.5 h-3.5" />} Export {sectionTitle} PNG
           </button>
         </div>
 
         {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
-        <div className="overflow-x-auto border border-[#1e233d] rounded-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        <div className="overflow-x-auto overflow-y-visible border border-[#1e233d] rounded-xl">
           <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
             <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
             <table className="w-full text-center border-collapse">
@@ -304,18 +304,16 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                       return (
                         <td
                           key={ts}
-                          draggable={!showBreak}
-                          onDragStart={e => !showBreak && handleDragStart(e, sectionCode, cls.display, ts)}
+                          draggable
+                          onDragStart={e => handleDragStart(e, sectionCode, cls.display, ts)}
                           onDragOver={e => e.preventDefault()}
-                          onDrop={e => !showBreak && handleDrop(e, sectionCode, cls.display, ts)}
-                          onClick={() => !showBreak && handleTileClick(sectionCode, cls.display, ts)}
-                          className={`p-2 border-r border-[#1e233d] last:border-r-0 transition-all group relative ${
-                            showBreak ? 'cursor-default' : 'cursor-grab'
-                          } ${isSelected ? 'ring-2 ring-inset ring-cyan-400' : ''}`}
+                          onDrop={e => handleDrop(e, sectionCode, cls.display, ts)}
+                          onClick={() => handleTileClick(sectionCode, cls.display, ts)}
+                          className={`p-2 border-r border-[#1e233d] last:border-r-0 cursor-grab transition-all group relative ${isSelected ? 'ring-2 ring-inset ring-cyan-400' : ''}`}
                         >
                           <motion.div
-                            whileHover={showBreak ? {} : { scale: 1.05, y: -2 }}
-                            whileTap={showBreak ? {} : { scale: 0.95 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 350, damping: 15 }}
                             className={`min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border bg-gradient-to-br transition-all ${color.border} ${color.bg}`}
                           >
@@ -330,15 +328,13 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                                 <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '—'}</span>
                               </>
                             )}
-                            {!showBreak && (
-                              <button
-                                type="button"
-                                onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
-                                className="absolute right-1.5 top-1.5 p-1 bg-[#16192b] border border-[#2b3052] rounded opacity-0 group-hover:opacity-100 transition-opacity hover:border-cyan-500 cursor-pointer"
-                              >
-                                <IconSettings className="w-3 h-3 text-cyan-400" />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
+                              className="absolute right-1.5 top-1.5 p-1 bg-[#16192b] border border-[#2b3052] rounded opacity-0 group-hover:opacity-100 transition-opacity hover:border-cyan-500 cursor-pointer"
+                            >
+                              <IconSettings className="w-3 h-3 text-cyan-400" />
+                            </button>
                           </motion.div>
                         </td>
                       );
@@ -364,22 +360,24 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                 onClick={() => handleExport('class', cls.raw)}
                 className="px-3 py-1.5 bg-[#16192b] border border-[#2b3052] hover:border-cyan-600 text-zinc-300 hover:text-white text-xs font-medium rounded-lg transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1"
               >
-                {exporting === 'class' + cls.raw ? '⏳' : <IconDocumentText className="w-3.5 h-3.5" />} {cls.display}
+                {exporting === 'class' + cls.raw ? <IconLoader className="w-3.5 h-3.5" /> : <IconDocumentText className="w-3.5 h-3.5" />} {cls.display}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Per-class hidden export containers */}
-        <div className="absolute -left-[9999px] top-0 space-y-4 w-[900px]">
-          {classesList.map(cls => renderClassCard(cls, sectionCode))}
+        {/* Per-class hidden export containers — fixed so off-screen refs don't widen the page */}
+        <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none" aria-hidden="true">
+          <div className="space-y-4 w-[900px]">
+            {classesList.map(cls => renderClassCard(cls, sectionCode))}
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       {/* Alert states */}
       {success && (
         <div className="flex items-center gap-2.5 px-4 py-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-sm text-emerald-400">

@@ -249,3 +249,107 @@ export function IconSchool({ className = 'w-4 h-4' }) {
     </svg>
   );
 }
+
+export function IconChevronLeft({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 4l-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function IconEdit({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12.5 3.5l4 4L7 17H3v-4L12.5 3.5z" />
+    </svg>
+  );
+}
+
+export function IconTrash({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 5h14" />
+      <path d="M8 5V3h4v2" />
+      <path d="M6 5l1 12h6l1-12" />
+    </svg>
+  );
+}
+
+export function IconPrint({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 7V3h10v4" />
+      <rect x="3" y="7" width="14" height="8" rx="1.5" />
+      <path d="M6 15h8v2H6z" />
+    </svg>
+  );
+}
+
+export function IconSave({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 3h9l3 3v11H4V3z" />
+      <path d="M7 3v5h6V3" />
+      <rect x="6" y="12" width="8" height="5" rx="0.5" />
+    </svg>
+  );
+}
+
+export function IconLoader({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={`${className} animate-spin`} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M10 2a8 8 0 108 8" opacity="0.25" />
+      <path d="M10 2a8 8 0 018 8" />
+    </svg>
+  );
+}
+
+export function IconXCircle({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="8" />
+      <path d="M7 7l6 6M13 7l-6 6" />
+    </svg>
+  );
+}
+
+export function IconChart({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 17V3" />
+      <path d="M3 17h14" />
+      <rect x="5" y="10" width="3" height="7" />
+      <rect x="10" y="6" width="3" height="11" />
+      <rect x="15" y="12" width="2" height="5" />
+    </svg>
+  );
+}
+
+export function IconBolt({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 2L4 11h5l-1 7 7-10h-5l1-6z" />
+    </svg>
+  );
+}
+
+export function IconClipboardCheck({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="4" width="12" height="14" rx="1.5" />
+      <path d="M7 4V3a1 1 0 011-1h4a1 1 0 011 1v1" />
+      <path d="M7 11l2 2 4-4" />
+    </svg>
+  );
+}
+
+export function IconUserAbsent({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="6" r="2.5" />
+      <path d="M2 17c0-2.8 2.7-5 6-5" />
+      <path d="M14 8l4 4M18 8l-4 4" />
+    </svg>
+  );
+}

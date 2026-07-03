@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { IconChevronLeft, IconChevronRight } from '@/app/components/icons';
 import DeleteClassForm from './DeleteClassForm';
 import { createClass, updateClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
 
@@ -38,7 +39,9 @@ export default async function AdminClassesPage() {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Classes</h1>
           <p className="text-zinc-400 text-sm mt-1">{classes.length} class{classes.length !== 1 ? 'es' : ''} total</p>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
+        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
       </div>
 
       {/* Create Class Form */}
@@ -97,7 +100,9 @@ export default async function AdminClassesPage() {
                       <div key={cs.id} className="flex items-center justify-between bg-[#16192b]/50 border border-[#1e233d] rounded-lg px-3 py-2">
                         <div>
                           <span className="text-xs font-semibold text-white">{cs.subject.name}</span>
-                          <span className="text-[10px] text-zinc-500 ml-2">→ {cs.teacher?.name || 'No teacher'}</span>
+                          <span className="text-[10px] text-zinc-500 ml-2 inline-flex items-center gap-0.5">
+                            <IconChevronRight className="w-2.5 h-2.5" /> {cs.teacher?.name || 'No teacher'}
+                          </span>
                         </div>
                         <form action={removeClassSubject}>
                           <input type="hidden" name="id" value={cs.id} />

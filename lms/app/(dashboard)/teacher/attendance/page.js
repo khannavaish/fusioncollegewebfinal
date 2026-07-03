@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { IconChevronRight, IconClipboard } from '@/app/components/icons';
 
 export default async function TeacherAttendanceIndexPage() {
   const supabase = await createClient();
@@ -57,7 +58,7 @@ export default async function TeacherAttendanceIndexPage() {
 
       <div className="bg-[#0d0f1a] border border-amber-500/20 rounded-xl p-4 text-sm">
         <div className="flex items-start gap-3">
-          <span className="text-lg">📋</span>
+          <IconClipboard className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-white">Two-step workflow</p>
             <p className="text-zinc-400 text-xs mt-1">

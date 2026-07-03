@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { motion } from 'framer-motion';
-import { IconDownload, IconStar, IconSparkles } from '@/app/components/icons';
+import { IconDownload, IconStar, IconSparkles, IconLoader } from '@/app/components/icons';
 import { isBreakTimeSlot, BREAK_COLOR } from '@/utils/timetable';
 
 const SUBJECT_COLORS = {
@@ -89,12 +89,12 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
             onClick={() => handleExport(exportKey, sectionRef, `Fusion_${sectionTitle.replace(/\s+/g,'_')}_Timetable.png`)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
           >
-            {exporting === exportKey ? '⏳' : <IconDownload className="w-3.5 h-3.5" />} Export PNG
+            {exporting === exportKey ? <IconLoader className="w-3.5 h-3.5" /> : <IconDownload className="w-3.5 h-3.5" />} Export PNG
           </button>
         </div>
 
         {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
-        <div className="overflow-x-auto border border-[#1e233d] rounded-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        <div className="overflow-x-auto overflow-y-visible border border-[#1e233d] rounded-xl">
           <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
             <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
             <table className="w-full text-center border-collapse">

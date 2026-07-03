@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { IconChevronLeft } from '@/app/components/icons';
 import StudentCreateForm from './StudentCreateForm';
 import { updateStudent, deleteStudent, transferStudent, updateUserPassword } from '@/app/actions/admin';
 
@@ -36,7 +37,9 @@ export default async function AdminStudentsPage() {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Students</h1>
           <p className="text-zinc-400 text-sm mt-1">{students.length} student{students.length !== 1 ? 's' : ''} enrolled</p>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
+        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
       </div>
 
       {/* Client enrollment form (shows credential modal on success) */}
