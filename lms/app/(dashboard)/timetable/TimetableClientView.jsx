@@ -68,7 +68,7 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
     <div className="flex items-center gap-4 pb-4 mb-4 border-b border-[#1e233d]">
       <img src="/logo.png" alt="Fusion College" className="h-14 w-auto object-contain" />
       <div>
-        <div className="text-xl font-black text-white">Fusion College</div>
+        <div className="text-xl font-black text-white">Fusion College Narowal</div>
         <div className="text-sm text-cyan-400 font-semibold mt-0.5">{subtitle}</div>
         <div className="text-xs text-zinc-500 mt-0.5">{new Date().toLocaleDateString('en-PK', { year:'numeric', month:'long', day:'numeric' })}</div>
       </div>

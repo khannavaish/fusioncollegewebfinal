@@ -82,7 +82,7 @@ export async function sendTestWhatsApp(formData) {
   const testNumber = formData.get('testNumber')?.toString().trim();
   if (!testNumber) return { error: 'Enter a phone number.' };
 
-  const result = await sendWhatsAppMessage(testNumber, 'Test message from Fusion College LMS Portal. WhatsApp notifications are working correctly.');
+  const result = await sendWhatsAppMessage(testNumber, 'Test message from Fusion College Narowal LMS Portal. WhatsApp notifications are working correctly.');
   if (result.skipped) return { error: 'WhatsApp is not configured or disabled. Save settings first.' };
   if (result.error) return { error: result.error };
   return { success: true };
@@ -103,7 +103,7 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const message = `*FUSION COLLEGE — DAILY REPORT* 🏫
+    const message = `*FUSION COLLEGE NAROWAL — DAILY REPORT* 🏫
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
@@ -114,7 +114,7 @@ Your child *${student.name}* (Roll No: ${student.rollNumber}) has arrived safely
 آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) آج مورخہ ${today} کو بحفاظت کالج پہنچ چکا ہے۔
 ----------------------------------------
 Regards,
-Fusion College Administration`;
+Fusion College Narowal Administration`;
 
     for (const ps of student.parents) {
       if (ps.parent?.phone) {
@@ -216,7 +216,7 @@ export async function sendEndOfDaySummary(formData) {
         summaryLinesUr.push(`${sign} *${e.subject}*: ${statusUrdu}\n   موضوع: ${e.topic}`);
       });
 
-      const message = `*FUSION COLLEGE — END-OF-DAY ACADEMIC REPORT* 🏫
+      const message = `*FUSION COLLEGE NAROWAL — END-OF-DAY ACADEMIC REPORT* 🏫
 ----------------------------------------
 *Student:* ${data.student.name} (${data.student.rollNumber})
 *Date:* ${formattedDate}
@@ -238,7 +238,7 @@ ${summaryLinesEn.join('\n\n')}
 ${summaryLinesUr.join('\n\n')}
 ----------------------------------------
 JazakAllah Khair,
-Fusion College Administration`;
+Fusion College Narowal Administration`;
 
       for (const ps of student.parents) {
         if (ps.parent?.phone) {
