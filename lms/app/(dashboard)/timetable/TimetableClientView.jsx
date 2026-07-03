@@ -122,20 +122,13 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                         {cls.display} {isStudentCls && <IconStar className="w-3.5 h-3.5 text-indigo-400" />}
                       </td>
                       {timeSlots.map(ts => {
-                        const slot    = getSlot(sectionCode, cls.display, ts);
+                        const slot      = getSlot(sectionCode, cls.display, ts);
                         const isTeacher = shouldHighlightSlot(slot);
-                        const color   = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
-
-                        if (isBreakSlot(ts)) {
-                          return (
-                            <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
-                              <div className="min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border border-amber-600/40 bg-gradient-to-br from-amber-950/40 to-orange-950/30">
-                                <span className="text-xl leading-none">☕</span>
-                                <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
-                              </div>
-                            </td>
-                          );
-                        }
+                        // Show amber break style only when break slot AND no subject assigned
+                        const showBreak = isBreakSlot(ts) && !slot?.subject;
+                        const color     = showBreak
+                          ? { bg: 'from-amber-950/40 to-orange-950/30', border: 'border-amber-600/40', text: 'text-amber-400' }
+                          : (SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR);
 
                         return (
                           <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
@@ -146,12 +139,21 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                                 isTeacher ? 'border-cyan-500 from-cyan-950/50 to-cyan-900/30 shadow shadow-cyan-900/30' : `${color.border} ${color.bg}`
                               }`}
                             >
-                              <span className={`text-[15px] font-extrabold leading-tight ${isTeacher ? 'text-cyan-300' : color.text}`}>
-                                {slot?.subject || '—'}
-                              </span>
-                              <span className="text-[11px] text-zinc-400 mt-1 leading-tight">
-                                {slot?.teacher || '—'}
-                              </span>
+                              {showBreak ? (
+                                <>
+                                  <span className="text-xl leading-none">☕</span>
+                                  <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className={`text-[15px] font-extrabold leading-tight ${isTeacher ? 'text-cyan-300' : color.text}`}>
+                                    {slot?.subject || '—'}
+                                  </span>
+                                  <span className="text-[11px] text-zinc-400 mt-1 leading-tight">
+                                    {slot?.teacher || '—'}
+                                  </span>
+                                </>
+                              )}
                             </motion.div>
                           </td>
                         );

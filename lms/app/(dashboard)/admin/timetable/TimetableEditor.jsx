@@ -306,21 +306,14 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                       {cls.display}
                     </td>
                     {timeSlots.map(ts => {
-                      const isBreak  = isBreakSlot(ts);
-                      const slot     = getSlot(sectionCode, cls.display, ts);
+                      const isBreak    = isBreakSlot(ts);
+                      const slot       = getSlot(sectionCode, cls.display, ts);
                       const isSelected = selectedSlotKey === getSlotKey(sectionCode, cls.display, ts);
-                      const color    = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
-
-                      if (isBreak) {
-                        return (
-                          <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
-                            <div className="min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border border-amber-600/40 bg-gradient-to-br from-amber-950/40 to-orange-950/30">
-                              <span className="text-xl leading-none">☕</span>
-                              <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
-                            </div>
-                          </td>
-                        );
-                      }
+                      // Use amber styling for empty break slots, otherwise subject colour
+                      const showBreak  = isBreak && !slot?.subject;
+                      const color      = showBreak
+                        ? { bg: 'from-amber-950/40 to-orange-950/30', border: 'border-amber-600/40', text: 'text-amber-400' }
+                        : (SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR);
 
                       return (
                         <td
@@ -338,8 +331,17 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                             transition={{ type: 'spring', stiffness: 350, damping: 15 }}
                             className={`min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border bg-gradient-to-br transition-all ${color.border} ${color.bg}`}
                           >
-                            <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>{slot?.subject || '—'}</span>
-                            <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '—'}</span>
+                            {showBreak ? (
+                              <>
+                                <span className="text-xl leading-none">☕</span>
+                                <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>{slot?.subject || '—'}</span>
+                                <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '—'}</span>
+                              </>
+                            )}
                             <button
                               type="button"
                               onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
