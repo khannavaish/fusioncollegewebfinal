@@ -22,13 +22,19 @@ export default async function AdminTimetablePage() {
     redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
   }
 
-  // Fetch current slots configuration
-  let slots = [];
+  // Fetch current slots, classes, and time slots configuration
+  let slots = [], dbClasses = [], config = null;
   try {
     slots = await prisma.timetableSlot.findMany();
+    dbClasses = await prisma.class.findMany({ orderBy: { name: 'asc' } });
+    config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
   } catch (err) {
-    console.error('Error fetching timetable slots:', err);
+    console.error('Error fetching timetable configuration:', err);
   }
+
+  const initialTimeSlots = (config?.slots && Array.isArray(config.slots)) 
+    ? config.slots 
+    : ['7:30-8:10', '8:10-8:50', '8:50-9:30', '9:50-10:30', '10:30-11:10', '11:10-11:50'];
 
   return (
     <div className="space-y-8 font-sans">
@@ -42,7 +48,11 @@ export default async function AdminTimetablePage() {
         </Link>
       </div>
 
-      <TimetableEditor initialSlots={slots} />
+      <TimetableEditor 
+        initialSlots={slots} 
+        dbClasses={dbClasses} 
+        initialTimeSlots={initialTimeSlots} 
+      />
     </div>
   );
 }

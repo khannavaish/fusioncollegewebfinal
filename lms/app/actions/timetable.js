@@ -16,7 +16,7 @@ async function verifyAdmin() {
   return user;
 }
 
-export async function saveTimetableSlots(slots) {
+export async function saveTimetableSlots(slots, timeSlots) {
   try {
     await verifyAdmin();
 
@@ -41,6 +41,15 @@ export async function saveTimetableSlots(slots) {
       if (cleanSlots.length > 0) {
         await tx.timetableSlot.createMany({
           data: cleanSlots,
+        });
+      }
+
+      // 3. Save columns config
+      if (Array.isArray(timeSlots)) {
+        await tx.timetableConfig.upsert({
+          where: { id: 'default' },
+          update: { slots: timeSlots },
+          create: { id: 'default', slots: timeSlots },
         });
       }
     });

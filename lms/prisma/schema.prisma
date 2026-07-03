@@ -218,3 +218,8 @@ model TimetableSlot {
   subject   String // e.g. "Physics"
   teacher   String // e.g. "Sir Asif"
 }
+
+model TimetableConfig {
+  id    String @id @default("default")
+  slots Json
+}
