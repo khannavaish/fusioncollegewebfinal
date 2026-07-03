@@ -56,6 +56,7 @@ const defaultSeed = [
 ];
 
 import TimetableClientView from './TimetableClientView';
+import { resolveTimeSlots } from '@/utils/timetable';
 
 export default async function UnifiedTimetablePage() {
   const supabase = await createClient();
@@ -90,9 +91,7 @@ export default async function UnifiedTimetablePage() {
   const studentClassName = dbUser.student?.class?.name || '';
   const teacherName = dbUser.teacher?.name || '';
 
-  const initialTimeSlots = (config?.slots && Array.isArray(config.slots)) 
-    ? config.slots 
-    : ['7:30-8:10', '8:10-8:50', '8:50-9:30', '9:30-9:50', '9:50-10:30', '10:30-11:10', '11:10-11:50'];
+  const initialTimeSlots = resolveTimeSlots(config?.slots);
 
   return (
     <div className="space-y-8 font-sans">

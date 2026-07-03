@@ -6,6 +6,7 @@ import { createClass } from '@/app/actions/admin';
 import { IconCheckCircle, IconAlertTriangle, IconDownload, IconPlus, IconHelpCircle, IconDocumentText, IconSchool, IconSettings } from '@/app/components/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
+import { isBreakTimeSlot, BREAK_COLOR } from '@/utils/timetable';
 
 const SUBJECT_COLORS = {
   Physics:   { bg: 'from-orange-950/60 to-red-950/60',   border: 'border-orange-600/40',   text: 'text-orange-300',   badge: 'bg-orange-500/20' },
@@ -220,21 +221,15 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
           <tbody className="divide-y divide-[#1e233d]">
             {timeSlots.map(ts => {
               const slot = getSlot(sectionCode, cls.display, ts);
-              const color = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
-              const isBreak = !slot?.subject;
-              if (isBreak) {
-                return (
-                  <tr key={ts} className="bg-gradient-to-r from-amber-950/30 to-orange-950/20">
-                    <td className="px-4 py-3 text-sm font-bold text-amber-400 border-r border-[#1e233d] text-left">{ts}</td>
-                    <td colSpan={2} className="px-4 py-3 text-sm font-bold text-amber-400 text-center">☕ BREAK</td>
-                  </tr>
-                );
-              }
+              const showBreak = isBreakTimeSlot(ts) && !slot?.subject?.trim();
+              const color = showBreak ? BREAK_COLOR : (SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR);
               return (
                 <tr key={ts} className={`bg-gradient-to-r ${color.bg}`}>
                   <td className="px-4 py-3 text-sm font-bold text-zinc-300 border-r border-[#1e233d] text-left">{ts}</td>
-                  <td className={`px-4 py-3 text-base font-extrabold border-r border-[#1e233d] ${color.text}`}>{slot?.subject || '—'}</td>
-                  <td className="px-4 py-3 text-sm text-zinc-300">{slot?.teacher || '—'}</td>
+                  <td className={`px-4 py-3 text-base font-extrabold border-r border-[#1e233d] ${color.text}`}>
+                    {showBreak ? 'Break' : (slot?.subject || '—')}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-zinc-300">{showBreak ? '—' : (slot?.teacher || '—')}</td>
                 </tr>
               );
             })}
@@ -247,10 +242,6 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
   // ─── full section renderer (grid view + export container) ─────────────────
   const renderSection = (sectionTitle, sectionCode, classesList, sectionRef, exportKey) => {
     if (classesList.length === 0) return null;
-
-    // A time slot is a "break" if no class has any subject assigned to it
-    const isBreakSlot = (ts) =>
-      classesList.every(cls => !getSlot(sectionCode, cls.display, ts)?.subject);
 
     return (
       <div className="space-y-4">
@@ -275,24 +266,21 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
                   <th className="px-5 py-4 text-left w-36 border-r border-[#1e233d]">Class</th>
                   {timeSlots.map(ts => {
-                    const isBreak = isBreakSlot(ts);
+                    const isBreak = isBreakTimeSlot(ts);
                     return (
                       <th key={ts} className={`px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0 relative group ${
-                        isBreak ? 'text-amber-400 bg-amber-950/20' : ''
+                        isBreak ? 'text-zinc-400 bg-zinc-900/40' : ''
                       }`}>
                         <div className="flex items-center justify-center gap-1.5">
-                          {isBreak && <span>☕</span>}
                           <span>{ts}</span>
-                          {!isBreak && (
-                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                              <button type="button" onClick={() => editTimeColumn(ts)} className="p-0.5 hover:bg-[#2b3052] rounded text-cyan-400 cursor-pointer" title="Edit">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                              </button>
-                              <button type="button" onClick={() => deleteTimeColumn(ts)} className="p-0.5 hover:bg-red-950 rounded text-red-400 cursor-pointer" title="Delete">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                              </button>
-                            </div>
-                          )}
+                          <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                            <button type="button" onClick={() => editTimeColumn(ts)} className="p-0.5 hover:bg-[#2b3052] rounded text-cyan-400 cursor-pointer" title="Edit">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                            <button type="button" onClick={() => deleteTimeColumn(ts)} className="p-0.5 hover:bg-red-950 rounded text-red-400 cursor-pointer" title="Delete">
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                          </div>
                         </div>
                       </th>
                     );
@@ -306,35 +294,35 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                       {cls.display}
                     </td>
                     {timeSlots.map(ts => {
-                      const isBreak    = isBreakSlot(ts);
                       const slot       = getSlot(sectionCode, cls.display, ts);
                       const isSelected = selectedSlotKey === getSlotKey(sectionCode, cls.display, ts);
-                      // Use amber styling for empty break slots, otherwise subject colour
-                      const showBreak  = isBreak && !slot?.subject;
+                      const showBreak  = isBreakTimeSlot(ts) && !slot?.subject?.trim();
                       const color      = showBreak
-                        ? { bg: 'from-amber-950/40 to-orange-950/30', border: 'border-amber-600/40', text: 'text-amber-400' }
+                        ? BREAK_COLOR
                         : (SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR);
 
                       return (
                         <td
                           key={ts}
-                          draggable
-                          onDragStart={e => handleDragStart(e, sectionCode, cls.display, ts)}
+                          draggable={!showBreak}
+                          onDragStart={e => !showBreak && handleDragStart(e, sectionCode, cls.display, ts)}
                           onDragOver={e => e.preventDefault()}
-                          onDrop={e => handleDrop(e, sectionCode, cls.display, ts)}
-                          onClick={() => handleTileClick(sectionCode, cls.display, ts)}
-                          className={`p-2 border-r border-[#1e233d] last:border-r-0 cursor-grab transition-all group relative ${isSelected ? 'ring-2 ring-inset ring-cyan-400' : ''}`}
+                          onDrop={e => !showBreak && handleDrop(e, sectionCode, cls.display, ts)}
+                          onClick={() => !showBreak && handleTileClick(sectionCode, cls.display, ts)}
+                          className={`p-2 border-r border-[#1e233d] last:border-r-0 transition-all group relative ${
+                            showBreak ? 'cursor-default' : 'cursor-grab'
+                          } ${isSelected ? 'ring-2 ring-inset ring-cyan-400' : ''}`}
                         >
                           <motion.div
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={showBreak ? {} : { scale: 1.05, y: -2 }}
+                            whileTap={showBreak ? {} : { scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 350, damping: 15 }}
                             className={`min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border bg-gradient-to-br transition-all ${color.border} ${color.bg}`}
                           >
                             {showBreak ? (
                               <>
-                                <span className="text-xl leading-none">☕</span>
-                                <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                                <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>Break</span>
+                                <span className="text-[11px] text-zinc-500 mt-1 select-none leading-tight">—</span>
                               </>
                             ) : (
                               <>
@@ -342,13 +330,15 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                                 <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '—'}</span>
                               </>
                             )}
-                            <button
-                              type="button"
-                              onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
-                              className="absolute right-1.5 top-1.5 p-1 bg-[#16192b] border border-[#2b3052] rounded opacity-0 group-hover:opacity-100 transition-opacity hover:border-cyan-500 cursor-pointer"
-                            >
-                              <IconSettings className="w-3 h-3 text-cyan-400" />
-                            </button>
+                            {!showBreak && (
+                              <button
+                                type="button"
+                                onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
+                                className="absolute right-1.5 top-1.5 p-1 bg-[#16192b] border border-[#2b3052] rounded opacity-0 group-hover:opacity-100 transition-opacity hover:border-cyan-500 cursor-pointer"
+                              >
+                                <IconSettings className="w-3 h-3 text-cyan-400" />
+                              </button>
+                            )}
                           </motion.div>
                         </td>
                       );

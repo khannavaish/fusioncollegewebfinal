@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { motion } from 'framer-motion';
 import { IconDownload, IconStar, IconSparkles } from '@/app/components/icons';
+import { isBreakTimeSlot, BREAK_COLOR } from '@/utils/timetable';
 
 const SUBJECT_COLORS = {
   Physics:   { bg: 'from-orange-950/60 to-red-950/60',   border: 'border-orange-600/40',   text: 'text-orange-300' },
@@ -79,10 +80,6 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
   const renderSection = (sectionTitle, sectionCode, classesList, sectionRef, exportKey) => {
     if (classesList.length === 0) return null;
 
-    // A time slot is a "break" if no class has any subject assigned to it
-    const isBreakSlot = (ts) =>
-      classesList.every(cls => !getSlot(sectionCode, cls.display, ts)?.subject);
-
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-[#1e233d] pb-3">
@@ -106,9 +103,9 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                   <th className="px-5 py-4 text-left w-36 border-r border-[#1e233d]">Class</th>
                   {timeSlots.map(ts => (
                     <th key={ts} className={`px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0 ${
-                      isBreakSlot(ts) ? 'text-amber-400 bg-amber-950/20' : ''
+                      isBreakTimeSlot(ts) ? 'text-zinc-400 bg-zinc-900/40' : ''
                     }`}>
-                      {isBreakSlot(ts) ? <span className="flex items-center justify-center gap-1">☕ <span>{ts}</span></span> : ts}
+                      {ts}
                     </th>
                   ))}
                 </tr>
@@ -124,10 +121,9 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                       {timeSlots.map(ts => {
                         const slot      = getSlot(sectionCode, cls.display, ts);
                         const isTeacher = shouldHighlightSlot(slot);
-                        // Show amber break style only when break slot AND no subject assigned
-                        const showBreak = isBreakSlot(ts) && !slot?.subject;
+                        const showBreak = isBreakTimeSlot(ts) && !slot?.subject?.trim();
                         const color     = showBreak
-                          ? { bg: 'from-amber-950/40 to-orange-950/30', border: 'border-amber-600/40', text: 'text-amber-400' }
+                          ? BREAK_COLOR
                           : (SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR);
 
                         return (
@@ -141,8 +137,8 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                             >
                               {showBreak ? (
                                 <>
-                                  <span className="text-xl leading-none">☕</span>
-                                  <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                                  <span className={`text-[15px] font-extrabold leading-tight ${color.text}`}>Break</span>
+                                  <span className="text-[11px] text-zinc-500 mt-1 leading-tight">—</span>
                                 </>
                               ) : (
                                 <>
