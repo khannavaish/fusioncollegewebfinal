@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
+import {
+  IconHome, IconGraduationCap, IconUserTie, IconFamily,
+  IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers,
+} from '@/app/components/icons';
 
 export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
@@ -117,57 +121,68 @@ export default async function DashboardLayout({ children }) {
           <span className="font-bold tracking-tight text-white">FUSION LMS</span>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <div className="text-zinc-500 text-xs font-semibold px-2 uppercase tracking-wider mb-2">Navigation</div>
-          <a href={`/${role.toLowerCase()}`} className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-            🏠 Dashboard
+        <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+          <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest mb-2">Navigation</p>
+          <a href={`/${role.toLowerCase()}`} className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+            <IconHome className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+            Dashboard
           </a>
 
           {role === 'ADMIN' && (
             <>
-              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Management</div>
-              <a href="/admin/students" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                🎓 Students
+              <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">People</p>
+              <a href="/admin/students" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconGraduationCap className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+                Students
               </a>
-              <a href="/admin/teachers" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                👨‍🏫 Teachers
+              <a href="/admin/teachers" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconUserTie className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Teachers
               </a>
-              <a href="/admin/parents" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                👨‍👩‍👧 Parents
+              <a href="/admin/parents" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconUsers className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-colors" />
+                Parents
               </a>
-              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Academic</div>
-              <a href="/admin/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                🏫 Classes
+              <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Academic</p>
+              <a href="/admin/classes" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                Classes
               </a>
-              <a href="/admin/subjects" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                📚 Subjects
+              <a href="/admin/subjects" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBookOpen className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                Subjects
               </a>
             </>
           )}
 
           {role === 'TEACHER' && (
             <>
-              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Teaching</div>
-              <a href="/teacher/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                🏫 My Classes
+              <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Teaching</p>
+              <a href="/teacher/classes" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                My Classes
               </a>
-              <a href="/teacher/attendance" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                📋 Attendance
+              <a href="/teacher/attendance" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Attendance
               </a>
             </>
           )}
 
           {role === 'STUDENT' && (
             <>
-              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Learning</div>
-              <a href="/student/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                📚 My Subjects
+              <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Learning</p>
+              <a href="/student/classes" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBookOpen className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                My Subjects
               </a>
-              <a href="/student/attendance" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                📋 Attendance
+              <a href="/student/attendance" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Attendance
               </a>
-              <a href="/student/results" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
-                🏆 Results
+              <a href="/student/results" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                Results
               </a>
             </>
           )}

@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { createParent, updateParent, deleteParent } from '@/app/actions/admin';
+import { IconUsers } from '@/app/components/icons';
 
 export default async function AdminParentsPage() {
   const supabase = await createClient();
@@ -85,8 +86,8 @@ export default async function AdminParentsPage() {
             <div key={p.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-5">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-violet-900/50 border border-violet-500/30 rounded-full flex items-center justify-center text-base flex-shrink-0">
-                    👨‍👩‍👧
+                  <div className="w-10 h-10 bg-violet-900/50 border border-violet-500/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <IconUsers className="w-5 h-5 text-violet-400" />
                   </div>
                   <div>
                     <div className="font-bold text-sm text-white">{p.name}</div>

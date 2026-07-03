@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { updateEnquiryStatus } from '@/app/actions/admin';
+import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers } from '@/app/components/icons';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -77,17 +78,20 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick Nav */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: 'Manage Students', href: '/admin/students', icon: '🎓' },
-          { label: 'Manage Teachers', href: '/admin/teachers', icon: '👨‍🏫' },
-          { label: 'Manage Classes', href: '/admin/classes', icon: '🏫' },
-          { label: 'Manage Subjects', href: '/admin/subjects', icon: '📚' },
-          { label: 'Manage Parents', href: '/admin/parents', icon: '👨‍👩‍👧' },
-        ].map((item) => (
-          <Link key={item.href} href={item.href}
-            className="flex items-center gap-3 px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-[#16192b] hover:border-[#2b3052] transition-all">
-            <span>{item.icon}</span> {item.label}
+          { label: 'Students', href: '/admin/students', Icon: IconGraduationCap, color: 'text-indigo-400', bg: 'bg-indigo-950/30 border-indigo-500/20' },
+          { label: 'Teachers', href: '/admin/teachers', Icon: IconUserTie, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
+          { label: 'Classes', href: '/admin/classes', Icon: IconBuilding, color: 'text-blue-400', bg: 'bg-blue-950/30 border-blue-500/20' },
+          { label: 'Subjects', href: '/admin/subjects', Icon: IconBookOpen, color: 'text-emerald-400', bg: 'bg-emerald-950/30 border-emerald-500/20' },
+          { label: 'Parents', href: '/admin/parents', Icon: IconUsers, color: 'text-violet-400', bg: 'bg-violet-950/30 border-violet-500/20' },
+        ].map(({ label, href, Icon, color, bg }) => (
+          <Link key={href} href={href}
+            className="flex items-center gap-3 px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-[#13162b] hover:border-[#2b3052] transition-all group">
+            <span className={`w-7 h-7 rounded-lg ${bg} border flex items-center justify-center flex-shrink-0`}>
+              <Icon className={`w-4 h-4 ${color}`} />
+            </span>
+            <span>Manage {label}</span>
           </Link>
         ))}
       </div>

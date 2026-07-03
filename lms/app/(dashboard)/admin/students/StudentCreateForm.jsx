@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react';
 import { createStudent } from '@/app/actions/admin';
+import { IconCheckCircle, IconAlertTriangle, IconIdCard, IconMail, IconKey } from '@/app/components/icons';
 
 const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors";
 
@@ -28,7 +29,9 @@ export default function StudentCreateForm({ classes }) {
       >
         <div className="p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500/40 flex items-center justify-center text-lg">✅</div>
+            <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500/40 flex items-center justify-center">
+              <IconCheckCircle className="w-5 h-5 text-emerald-400" />
+            </div>
             <div>
               <h2 className="text-base font-bold text-white">Student Enrolled!</h2>
               <p className="text-[11px] text-zinc-400">Share these login credentials with the student</p>
@@ -42,25 +45,32 @@ export default function StudentCreateForm({ classes }) {
             </div>
             <div className="border-t border-[#1e233d]" />
             <div className="flex justify-between items-center">
-              <span className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">Roll Number</span>
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
+                <IconIdCard className="w-3.5 h-3.5" /> Roll Number
+              </span>
               <span className="text-sm font-mono font-bold text-cyan-400">{creds?.rollNumber}</span>
             </div>
             <div className="border-t border-[#1e233d]" />
             <div className="flex justify-between items-center">
-              <span className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">Login Email</span>
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
+                <IconMail className="w-3.5 h-3.5" /> Login Email
+              </span>
               <span className="text-xs font-mono text-zinc-300">{creds?.email}</span>
             </div>
             <div className="border-t border-[#1e233d]" />
             <div className="flex justify-between items-center">
-              <span className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">Password</span>
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
+                <IconKey className="w-3.5 h-3.5" /> Password
+              </span>
               <span className="text-sm font-mono font-bold text-emerald-400 bg-emerald-950/30 px-3 py-1 rounded-lg border border-emerald-500/20 tracking-widest">
                 {creds?.password}
               </span>
             </div>
           </div>
 
-          <p className="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-500/20 rounded-lg px-3 py-2 mb-4">
-            ⚠ Save these credentials now — the password cannot be recovered later.
+          <p className="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-500/20 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+            <IconAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+            Save these credentials now — the password cannot be recovered later.
           </p>
 
           <button
