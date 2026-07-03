@@ -148,11 +148,18 @@ export default async function TeacherDashboard() {
       })
       .filter(Boolean);
 
-    const teacherSlots = timetableSlots.filter((slot) => classSubjects.some((cs) => (
-      sameText(cs.subject.name, slot.subject) &&
-      (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className)) &&
-      sameText(teacher?.name, slot.teacher)
-    )));
+    const teacherSlots = timetableSlots.filter((slot) => {
+      const teacherName = normalizeText(teacher?.name || '');
+      const slotTeacher = normalizeText(slot.teacher || '');
+      
+      const teacherMatch = sameText(teacherName, slotTeacher);
+      
+      return classSubjects.some((cs) => (
+        sameText(cs.subject.name, slot.subject) &&
+        (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className)) &&
+        teacherMatch
+      ));
+    });
 
     if (teacherSlots.length > 0) {
       const now = new Date();
