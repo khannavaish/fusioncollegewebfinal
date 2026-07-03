@@ -117,11 +117,60 @@ export default async function DashboardLayout({ children }) {
           <span className="font-bold tracking-tight text-white">FUSION LMS</span>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1">
-          <div className="text-zinc-500 text-xs font-semibold px-2 uppercase tracking-wider mb-2">Portal Access</div>
-          <a href={`/${role.toLowerCase()}`} className="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-[#1e233d] text-white">
-            Dashboard
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <div className="text-zinc-500 text-xs font-semibold px-2 uppercase tracking-wider mb-2">Navigation</div>
+          <a href={`/${role.toLowerCase()}`} className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+            🏠 Dashboard
           </a>
+
+          {role === 'ADMIN' && (
+            <>
+              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Management</div>
+              <a href="/admin/students" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                🎓 Students
+              </a>
+              <a href="/admin/teachers" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                👨‍🏫 Teachers
+              </a>
+              <a href="/admin/parents" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                👨‍👩‍👧 Parents
+              </a>
+              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Academic</div>
+              <a href="/admin/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                🏫 Classes
+              </a>
+              <a href="/admin/subjects" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                📚 Subjects
+              </a>
+            </>
+          )}
+
+          {role === 'TEACHER' && (
+            <>
+              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Teaching</div>
+              <a href="/teacher/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                🏫 My Classes
+              </a>
+              <a href="/teacher/attendance" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                📋 Attendance
+              </a>
+            </>
+          )}
+
+          {role === 'STUDENT' && (
+            <>
+              <div className="text-zinc-600 text-[10px] font-semibold px-2 uppercase tracking-wider mt-4 mb-1">Learning</div>
+              <a href="/student/classes" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                📚 My Subjects
+              </a>
+              <a href="/student/attendance" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                📋 Attendance
+              </a>
+              <a href="/student/results" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-300 hover:text-white transition-colors">
+                🏆 Results
+              </a>
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-[#1e233d] flex flex-col gap-2">

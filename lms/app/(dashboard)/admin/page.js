@@ -2,240 +2,183 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { updateEnquiryStatus } from '@/app/actions/admin';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
-  // Verify user has ADMIN role
   let dbUser = null;
   try {
-    dbUser = await prisma.user.findUnique({
-      where: { authId: user.id },
-      select: { role: true },
-    });
-  } catch (err) {
-    console.error('Error fetching user role:', err);
-  }
+    dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } });
+  } catch {}
 
   if (!dbUser || dbUser.role !== 'ADMIN') {
-    // If user doesn't have ADMIN role, redirect to their actual dashboard
-    if (dbUser) {
-      redirect(`/${dbUser.role.toLowerCase()}`);
-    } else {
-      redirect('/login');
-    }
+    redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
   }
 
-  // Fetch admin profile
-  let admin = null;
-  let enquiries = [];
-  let userCount = 0;
-  let teacherCount = 0;
-  let studentCount = 0;
-  let classCount = 0;
-  let subjectCount = 0;
-  let recentStudents = [];
-  let recentTeachers = [];
+  let admin = null, studentCount = 0, teacherCount = 0, classCount = 0, subjectCount = 0, userCount = 0;
+  let recentStudents = [], recentTeachers = [], enquiries = [];
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    const full = await prisma.user.findUnique({
       where: { authId: user.id },
-      include: {
-        admin: true,
-      },
+      include: { admin: true },
     });
-    admin = dbUser?.admin;
-
-    // Fetch stats from DB
+    admin = full?.admin;
     studentCount = await prisma.student.count();
     teacherCount = await prisma.teacher.count();
-    userCount = await prisma.user.count();
     classCount = await prisma.class.count();
     subjectCount = await prisma.subject.count();
-
-    // Fetch recent students
-    recentStudents = await prisma.student.findMany({
-      include: {
-        user: true,
-        class: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    });
-
-    // Fetch recent teachers
-    recentTeachers = await prisma.teacher.findMany({
-      include: {
-        user: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    });
-
-    // Fetch contact enquiries from DB
-    enquiries = await prisma.contactEnquiry.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    });
-  } catch (err) {
-    console.error('Error fetching admin data:', err);
-  }
+    userCount = await prisma.user.count();
+    recentStudents = await prisma.student.findMany({ include: { class: true }, orderBy: { createdAt: 'desc' }, take: 5 });
+    recentTeachers = await prisma.teacher.findMany({ include: { user: true }, orderBy: { createdAt: 'desc' }, take: 5 });
+    enquiries = await prisma.contactEnquiry.findMany({ orderBy: { createdAt: 'desc' }, take: 10 });
+  } catch {}
 
   const adminName = admin?.name || user.email;
+  const statusColors = {
+    UNREAD: 'bg-amber-950/50 text-amber-400 border-amber-500/30',
+    REVIEWED: 'bg-blue-950/50 text-blue-400 border-blue-500/30',
+    ARCHIVED: 'bg-zinc-800/50 text-zinc-500 border-zinc-600/30',
+  };
 
   return (
     <div className="space-y-8 font-sans">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">System Admin</h1>
           <p className="text-zinc-400 text-sm mt-1">Welcome back, {adminName}</p>
         </div>
-      </div>
-
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Students</div>
-          <div className="text-3xl font-black text-cyan-400 mt-2">{studentCount}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Enrolled</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Teachers</div>
-          <div className="text-3xl font-black text-white mt-2">{teacherCount}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Faculty</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Classes</div>
-          <div className="text-3xl font-black text-white mt-2">{classCount}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Active</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Subjects</div>
-          <div className="text-3xl font-black text-white mt-2">{subjectCount}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Available</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Total Users</div>
-          <div className="text-3xl font-black text-white mt-2">{userCount}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Registered</p>
+        <div className="flex gap-3 flex-wrap">
+          <Link href="/admin/teachers" className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Teacher</Link>
+          <Link href="/admin/students" className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Student</Link>
+          <Link href="/admin/classes" className="px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Class</Link>
         </div>
       </div>
 
-      {/* Management Sections */}
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[
+          { label: 'Students', value: studentCount, color: 'text-cyan-400', href: '/admin/students' },
+          { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
+          { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
+          { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
+          { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
+        ].map((stat) => (
+          <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>
+            <div className={`text-3xl font-black mt-2 ${stat.color}`}>{stat.value}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick Nav */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'Manage Students', href: '/admin/students', icon: '🎓' },
+          { label: 'Manage Teachers', href: '/admin/teachers', icon: '👨‍🏫' },
+          { label: 'Manage Classes', href: '/admin/classes', icon: '🏫' },
+          { label: 'Manage Subjects', href: '/admin/subjects', icon: '📚' },
+          { label: 'Manage Parents', href: '/admin/parents', icon: '👨‍👩‍👧' },
+        ].map((item) => (
+          <Link key={item.href} href={item.href}
+            className="flex items-center gap-3 px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-[#16192b] hover:border-[#2b3052] transition-all">
+            <span>{item.icon}</span> {item.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Recent Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Students Management */}
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-white tracking-tight">Recent Students</h2>
-            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
-              View All →
-            </Link>
+        {/* Recent Students */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base font-bold text-white">Recent Students</h2>
+            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300">View All →</Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {recentStudents.length === 0 ? (
-              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-8 text-center text-zinc-500 text-sm">
-                No students yet. Create users in Supabase with STUDENT role.
-              </div>
-            ) : (
-              recentStudents.map((student) => (
-                <div key={student.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex justify-between items-center">
-                  <div>
-                    <div className="font-semibold text-sm text-white">{student.name}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5">{student.rollNumber}</div>
-                    <div className="text-[10px] text-zinc-500">{student.class?.name || 'No class'}</div>
-                  </div>
-                  <div className="text-[10px] text-zinc-400">
-                    {new Date(student.createdAt).toLocaleDateString()}
-                  </div>
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">No students yet</div>
+            ) : recentStudents.map((s) => (
+              <div key={s.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
+                <div>
+                  <div className="font-semibold text-sm text-white">{s.name}</div>
+                  <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name || 'No class'}</div>
                 </div>
-              ))
-            )}
+                <div className="text-[10px] text-zinc-500">{new Date(s.createdAt).toLocaleDateString()}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Teachers Management */}
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-white tracking-tight">Recent Teachers</h2>
-            <Link href="/admin/teachers" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
-              View All →
-            </Link>
+        {/* Recent Teachers */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base font-bold text-white">Recent Teachers</h2>
+            <Link href="/admin/teachers" className="text-xs text-cyan-400 hover:text-cyan-300">View All →</Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {recentTeachers.length === 0 ? (
-              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-8 text-center text-zinc-500 text-sm">
-                No teachers yet. Create users in Supabase with TEACHER role.
-              </div>
-            ) : (
-              recentTeachers.map((teacher) => (
-                <div key={teacher.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex justify-between items-center">
-                  <div>
-                    <div className="font-semibold text-sm text-white">{teacher.name}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5">{teacher.qualification || 'No qualification'}</div>
-                  </div>
-                  <div className="text-[10px] text-zinc-400">
-                    {new Date(teacher.createdAt).toLocaleDateString()}
-                  </div>
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">No teachers yet</div>
+            ) : recentTeachers.map((t) => (
+              <div key={t.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
+                <div>
+                  <div className="font-semibold text-sm text-white">{t.name}</div>
+                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} · {t.user?.email}</div>
                 </div>
-              ))
-            )}
+                <div className="text-[10px] text-zinc-500">{new Date(t.createdAt).toLocaleDateString()}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="space-y-6">
-        <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Link href="/admin/students" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Manage Students
-          </Link>
-          <Link href="/admin/teachers" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Manage Teachers
-          </Link>
-          <Link href="/admin/classes" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Manage Classes
-          </Link>
-          <Link href="/admin/subjects" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Manage Subjects
-          </Link>
-        </div>
-      </div>
-
-      {/* Recent Enquiries */}
-      <div className="space-y-6">
-        <h2 className="text-lg font-bold text-white tracking-tight">Recent Enquiries</h2>
-        <div className="space-y-4">
+      {/* Enquiries */}
+      <div>
+        <h2 className="text-base font-bold text-white mb-4">Contact Enquiries</h2>
+        <div className="space-y-3">
           {enquiries.length === 0 ? (
-            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-8 text-center text-zinc-500 text-sm">
-              No enquiries yet.
-            </div>
-          ) : (
-            enquiries.map((enquiry) => (
-              <div key={enquiry.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 space-y-3">
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <div className="font-semibold text-sm text-white">{enquiry.name}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5">{enquiry.email}</div>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${enquiry.status === 'UNREAD' ? 'bg-amber-950/50 text-amber-400 border border-amber-500/20' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/20'}`}>
-                    {enquiry.status}
+            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-8 text-center text-zinc-500 text-sm">No enquiries yet.</div>
+          ) : enquiries.map((enq) => (
+            <div key={enq.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5">
+              <div className="flex justify-between items-start gap-3 flex-wrap">
+                <div>
+                  <div className="font-semibold text-sm text-white">{enq.name}</div>
+                  <div className="text-[10px] text-zinc-400">{enq.email} · {enq.phone}</div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[enq.status] || statusColors.UNREAD}`}>
+                    {enq.status}
                   </span>
-                </div>
-                <div className="text-xs text-zinc-400 border-t border-[#1e233d] pt-2">
-                  {enquiry.message}
-                </div>
-                <div className="text-[10px] text-zinc-500">
-                  {new Date(enquiry.createdAt).toLocaleString()}
+                  {/* Status actions */}
+                  {enq.status !== 'REVIEWED' && (
+                    <form action={updateEnquiryStatus}>
+                      <input type="hidden" name="id" value={enq.id} />
+                      <input type="hidden" name="status" value="REVIEWED" />
+                      <button type="submit" className="text-[10px] px-2 py-0.5 rounded bg-blue-950/50 border border-blue-500/30 text-blue-400 hover:bg-blue-900/40 transition-colors cursor-pointer">
+                        Mark Reviewed
+                      </button>
+                    </form>
+                  )}
+                  {enq.status !== 'ARCHIVED' && (
+                    <form action={updateEnquiryStatus}>
+                      <input type="hidden" name="id" value={enq.id} />
+                      <input type="hidden" name="status" value="ARCHIVED" />
+                      <button type="submit" className="text-[10px] px-2 py-0.5 rounded bg-zinc-800/50 border border-zinc-600/30 text-zinc-400 hover:bg-zinc-700/40 transition-colors cursor-pointer">
+                        Archive
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
-            ))
-          )}
+              <div className="text-xs text-zinc-400 border-t border-[#1e233d] pt-2 mt-3">{enq.message}</div>
+              <div className="text-[10px] text-zinc-600 mt-1">{new Date(enq.createdAt).toLocaleString()}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -2,107 +2,87 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { createSubject, updateSubject, deleteSubject } from '@/app/actions/admin';
 
 export default async function AdminSubjectsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Verify user has ADMIN role
+  if (!user) redirect('/login');
   let dbUser = null;
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { authId: user.id },
-      select: { role: true },
-    });
-  } catch (err) {
-    console.error('Error fetching user role:', err);
-  }
+  try { dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } }); } catch {}
+  if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
-  if (!dbUser || dbUser.role !== 'ADMIN') {
-    if (dbUser) {
-      redirect(`/${dbUser.role.toLowerCase()}`);
-    } else {
-      redirect('/login');
-    }
-  }
-
-  // Fetch all subjects
   let subjects = [];
   try {
     subjects = await prisma.subject.findMany({
+      include: { _count: { select: { classSubjects: true } } },
       orderBy: { name: 'asc' },
     });
-  } catch (err) {
-    console.error('Error fetching subjects:', err);
-  }
+  } catch {}
+
+  const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
 
   return (
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Subjects</h1>
-          <p className="text-zinc-400 text-sm mt-1">View and manage all available subjects</p>
+          <p className="text-zinc-400 text-sm mt-1">{subjects.length} subject{subjects.length !== 1 ? 's' : ''} total</p>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
-          &larr; Back to Dashboard
-        </Link>
+        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
       </div>
 
-      {/* Subjects Table */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-        {subjects.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500 text-sm">
-            No subjects yet. Use the API to create subjects.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#1e233d] text-xs font-bold uppercase tracking-wider text-zinc-400 bg-[#16192b]/50">
-                  <th className="p-4">Subject Name</th>
-                  <th className="p-4">Code</th>
-                  <th className="p-4">Created</th>
-                  <th className="p-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1e233d] text-sm text-zinc-300">
-                {subjects.map((subject) => (
-                  <tr key={subject.id} className="hover:bg-[#16192b]/20 transition-colors">
-                    <td className="p-4 font-semibold text-white">{subject.name}</td>
-                    <td className="p-4">{subject.code || 'N/A'}</td>
-                    <td className="p-4">{new Date(subject.createdAt).toLocaleDateString()}</td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button className="text-xs px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 hover:bg-cyan-950/20 transition-colors cursor-pointer">
-                          Edit
-                        </button>
-                        <button className="text-xs px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 hover:bg-red-950/20 transition-colors cursor-pointer">
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* Add Subject */}
+      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
+        <h2 className="text-sm font-bold text-white mb-4">Add New Subject</h2>
+        <form action={createSubject} className="flex gap-3">
+          <input name="name" placeholder="Subject name (e.g. Physics, Mathematics, Urdu)" className={`${inputCls} flex-1`} required />
+          <button type="submit" className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap">
+            Add Subject
+          </button>
+        </form>
       </div>
 
-      {/* Instructions */}
-      <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-        <h3 className="text-sm font-bold text-white mb-2">How to Add New Subjects</h3>
-        <ol className="text-xs text-zinc-400 space-y-1 list-decimal list-inside">
-          <li>Use the API: POST /api/subjects with subject name and optional code</li>
-          <li>Example: {`{"name": "Biology", "code": "BIO-101"}`}</li>
-          <li>Assign subjects to classes using the class-subjects API</li>
-          <li>Assign teachers to subjects using the class-subjects API</li>
-        </ol>
-      </div>
+      {/* Subjects Grid */}
+      {subjects.length === 0 ? (
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+          No subjects yet. Add your first subject above.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {subjects.map((sub) => (
+            <div key={sub.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
+              <div className="p-5">
+                <div className="font-bold text-white text-base">{sub.name}</div>
+                <div className="text-xs text-zinc-500 mt-1">{sub._count.classSubjects} class assignment{sub._count.classSubjects !== 1 ? 's' : ''}</div>
+              </div>
+
+              <div className="border-t border-[#1e233d] bg-[#16192b]/30 p-3">
+                <details className="relative group">
+                  <summary className="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer list-none font-medium">
+                    ✏️ Edit Name
+                  </summary>
+                  <form action={updateSubject} className="flex gap-2 mt-2">
+                    <input type="hidden" name="id" value={sub.id} />
+                    <input name="name" defaultValue={sub.name} className={`${inputCls} flex-1 text-xs py-1`} required />
+                    <button type="submit" className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-lg transition-colors cursor-pointer">Save</button>
+                  </form>
+                </details>
+              </div>
+
+              <div className="border-t border-[#1e233d] p-3">
+                <form action={deleteSubject}>
+                  <input type="hidden" name="id" value={sub.id} />
+                  <button type="submit" className="w-full text-xs text-red-400 hover:text-red-300 transition-colors py-1 cursor-pointer">
+                    Delete Subject
+                  </button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

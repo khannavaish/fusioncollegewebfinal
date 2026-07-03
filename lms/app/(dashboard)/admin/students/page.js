@@ -2,95 +2,127 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { createStudent, updateStudent, deleteStudent } from '@/app/actions/admin';
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Verify user has ADMIN role
+  if (!user) redirect('/login');
   let dbUser = null;
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { authId: user.id },
-      select: { role: true },
-    });
-  } catch (err) {
-    console.error('Error fetching user role:', err);
-  }
+  try { dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } }); } catch {}
+  if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
-  if (!dbUser || dbUser.role !== 'ADMIN') {
-    if (dbUser) {
-      redirect(`/${dbUser.role.toLowerCase()}`);
-    } else {
-      redirect('/login');
-    }
-  }
-
-  // Fetch all students with their class info
-  let students = [];
+  let students = [], classes = [];
   try {
     students = await prisma.student.findMany({
-      include: {
-        user: true,
-        class: true,
-      },
-      orderBy: { createdAt: 'desc' },
+      include: { class: true, user: true },
+      orderBy: { name: 'asc' },
     });
-  } catch (err) {
-    console.error('Error fetching students:', err);
-  }
+    classes = await prisma.class.findMany({ orderBy: { name: 'asc' } });
+  } catch {}
+
+  const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
+  const statusColors = { ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30', INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30' };
 
   return (
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Students</h1>
-          <p className="text-zinc-400 text-sm mt-1">View and manage all enrolled students</p>
+          <p className="text-zinc-400 text-sm mt-1">{students.length} student{students.length !== 1 ? 's' : ''} enrolled</p>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
-          &larr; Back to Dashboard
-        </Link>
+        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
+      </div>
+
+      {/* Enroll Student Form */}
+      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
+        <h2 className="text-sm font-bold text-white mb-4">Enroll New Student</h2>
+        {classes.length === 0 ? (
+          <p className="text-sm text-amber-400">Please <Link href="/admin/classes" className="underline">create at least one class</Link> before enrolling students.</p>
+        ) : (
+          <form action={createStudent}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+              <input name="name" placeholder="Full Name *" className={inputCls} required />
+              <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
+              <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
+              <input name="rollNumber" placeholder="Roll Number *" className={inputCls} required />
+              <input name="fatherName" placeholder="Father&apos;s Name *" className={inputCls} required />
+              <select name="classId" className={inputCls} required>
+                <option value="">Select Class *</option>
+                {classes.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.academicYr})</option>)}
+              </select>
+            </div>
+            <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+              Enroll Student
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Students Table */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-        {students.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500 text-sm">
-            No students yet. Create users in Supabase with STUDENT role.
-          </div>
-        ) : (
+      {students.length === 0 ? (
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+          No students enrolled yet. Enroll your first student above.
+        </div>
+      ) : (
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-[#1e233d] text-xs font-bold uppercase tracking-wider text-zinc-400 bg-[#16192b]/50">
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Roll Number</th>
-                  <th className="p-4">Email</th>
-                  <th className="p-4">Class</th>
-                  <th className="p-4">Created</th>
-                  <th className="p-4">Actions</th>
+                <tr className="border-b border-[#1e233d] bg-[#16192b]/50">
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Roll No</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Class</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Father&apos;s Name</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1e233d] text-sm text-zinc-300">
-                {students.map((student) => (
-                  <tr key={student.id} className="hover:bg-[#16192b]/20 transition-colors">
-                    <td className="p-4 font-semibold text-white">{student.name}</td>
-                    <td className="p-4">{student.rollNumber}</td>
-                    <td className="p-4">{student.user?.email || 'N/A'}</td>
-                    <td className="p-4">{student.class?.name || 'Not assigned'}</td>
-                    <td className="p-4">{new Date(student.createdAt).toLocaleDateString()}</td>
-                    <td className="p-4">
+              <tbody>
+                {students.map((s, i) => (
+                  <tr key={s.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
+                    <td className="px-5 py-4 font-semibold text-sm text-white">{s.name}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-400">{s.rollNumber}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-400">{s.class?.name || '—'}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-400">{s.fatherName}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-400">{s.user?.email}</td>
+                    <td className="px-5 py-4">
+                      <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[s.user?.status] || statusColors.ACTIVE}`}>
+                        {s.user?.status || 'ACTIVE'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
                       <div className="flex gap-2">
-                        <button className="text-xs px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 hover:bg-cyan-950/20 transition-colors cursor-pointer">
-                          Edit
-                        </button>
-                        <button className="text-xs px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 hover:bg-red-950/20 transition-colors cursor-pointer">
-                          Delete
-                        </button>
+                        <details className="relative">
+                          <summary className="px-2 py-1 bg-[#1e233d] rounded text-cyan-400 text-[10px] hover:bg-cyan-950/30 cursor-pointer list-none">Edit</summary>
+                          <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-72 shadow-2xl">
+                            <h3 className="text-xs font-bold text-white mb-3">Edit Student</h3>
+                            <form action={updateStudent} className="space-y-2">
+                              <input type="hidden" name="id" value={s.id} />
+                              <input name="name" defaultValue={s.name} className={`${inputCls} text-xs`} required />
+                              <input name="rollNumber" defaultValue={s.rollNumber} className={`${inputCls} text-xs`} required />
+                              <input name="fatherName" defaultValue={s.fatherName} className={`${inputCls} text-xs`} required />
+                              <select name="classId" defaultValue={s.classId} className={`${inputCls} text-xs`} required>
+                                {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                              </select>
+                              <select name="status" defaultValue={s.user?.status || 'ACTIVE'} className={`${inputCls} text-xs`}>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                              </select>
+                              <button type="submit" className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                                Save Changes
+                              </button>
+                            </form>
+                          </div>
+                        </details>
+                        <form action={deleteStudent}>
+                          <input type="hidden" name="id" value={s.id} />
+                          <button type="submit" className="px-2 py-1 bg-[#1e233d] rounded text-red-400 text-[10px] hover:bg-red-950/30 transition-colors cursor-pointer">
+                            Delete
+                          </button>
+                        </form>
                       </div>
                     </td>
                   </tr>
@@ -98,19 +130,8 @@ export default async function AdminStudentsPage() {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
-
-      {/* Instructions */}
-      <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-        <h3 className="text-sm font-bold text-white mb-2">How to Add New Students</h3>
-        <ol className="text-xs text-zinc-400 space-y-1 list-decimal list-inside">
-          <li>Create a user in Supabase Dashboard Authentication section</li>
-          <li>Set user metadata role to STUDENT</li>
-          <li>User logs in - their student profile is created automatically</li>
-          <li>Use the API to update their class assignment and roll number</li>
-        </ol>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
