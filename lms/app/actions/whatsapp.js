@@ -33,6 +33,9 @@ async function sendWhatsAppMessage(to, message) {
         body: JSON.stringify({ to: formattedPhone, message }),
       });
       const data = await res.json();
+      if (!res.ok || data.error) {
+        return { error: data.error || 'Failed to send message.' };
+      }
       return { success: true, data };
     } catch (e) {
       console.error('[WhatsApp] Self-hosted gateway send error:', e);
