@@ -266,8 +266,15 @@ ${summaryLinesUr.join('\n\n')}
 JazakAllah Khair,
 Fusion College Narowal Administration`;
 
+      // Helper to delay executions (anti-spam block measure)
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
       for (const ps of student.parents) {
         if (ps.parent?.phone) {
+          // Wait 5-8 seconds randomly before sending next message
+          const randomDelay = Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
+          await delay(randomDelay);
+
           const result = await sendWhatsAppMessage(ps.parent.phone, message);
           if (!result.skipped) sent++;
         }
