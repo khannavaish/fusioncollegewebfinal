@@ -152,13 +152,32 @@ export default async function TeacherDashboard() {
       const teacherName = normalizeText(teacher?.name || '');
       const slotTeacher = normalizeText(slot.teacher || '');
       
-      const teacherMatch = sameText(teacherName, slotTeacher);
+      const teacherNameNoSir = teacherName.replace(/^sir\s+/, '');
+      const slotTeacherNoSir = slotTeacher.replace(/^sir\s+/, '');
       
-      return classSubjects.some((cs) => (
+      const teacherMatch = sameText(teacherName, slotTeacher) || 
+                            sameText(teacherNameNoSir, slotTeacherNoSir) ||
+                            sameText(teacherName, slotTeacherNoSir) ||
+                            sameText(teacherNameNoSir, slotTeacher);
+      
+      const subjectMatch = classSubjects.some((cs) => (
         sameText(cs.subject.name, slot.subject) &&
-        (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className)) &&
-        teacherMatch
+        (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className))
       ));
+      
+      if (subjectMatch && !teacherMatch) {
+        console.log('Subject match but no teacher match:', {
+          teacherName,
+          slotTeacher,
+          teacherNameNoSir,
+          slotTeacherNoSir,
+          subject: slot.subject,
+          className: slot.className,
+          section: slot.section
+        });
+      }
+      
+      return subjectMatch && teacherMatch;
     });
 
     if (teacherSlots.length > 0) {
