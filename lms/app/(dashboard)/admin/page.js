@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { updateEnquiryStatus } from '@/app/actions/admin';
-import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight, IconChatBubble } from '@/app/components/icons';
+import { updateEnquiryStatus, resetSchoolData } from '@/app/actions/admin';
+import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight, IconChatBubble, IconTrash } from '@/app/components/icons';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -61,6 +61,42 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
+      <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-red-400">Danger Zone</div>
+            <h2 className="mt-1 text-base font-bold text-white">Reset Teachers and Students</h2>
+            <p className="mt-1 max-w-3xl text-sm text-zinc-400">
+              Removes all teacher, student, and parent accounts linked to them, plus class assignments, lectures, attendance, submissions, exams, and related logs. Admin data, classes, subjects, timetable, and enquiries stay in place.
+            </p>
+          </div>
+          <details className="relative">
+            <summary className="list-none rounded-lg border border-red-500/30 bg-red-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-500 cursor-pointer">
+              Reset Data
+            </summary>
+            <div className="absolute right-0 top-12 z-20 w-80 rounded-xl border border-red-500/20 bg-[#0d0f1a] p-4 shadow-2xl shadow-black/40">
+              <form action={resetSchoolData} className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Type RESET to confirm</label>
+                  <input
+                    name="confirmText"
+                    placeholder="RESET"
+                    className="w-full rounded-lg border border-[#1e233d] bg-[#0a0c14] px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-red-500 focus:outline-none"
+                    required
+                  />
+                </div>
+                <p className="text-[10px] leading-4 text-zinc-500">
+                  This clears the academic roster and its linked records. It does not remove the admin account or timetable setup.
+                </p>
+                <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-500">
+                  <IconTrash className="h-4 w-4" /> Permanently Reset
+                </button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
@@ -114,7 +150,7 @@ export default async function AdminDashboard() {
               <div key={s.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{s.name}</div>
-                  <div className="text-[10px] text-zinc-500">{s.rollNumber} Â· {s.class?.name || 'No class'}</div>
+                  <div className="text-[10px] text-zinc-500">{s.rollNumber} Ã‚Â· {s.class?.name || 'No class'}</div>
                 </div>
                 <div className="text-[10px] text-zinc-500">{new Date(s.createdAt).toLocaleDateString()}</div>
               </div>
@@ -137,7 +173,7 @@ export default async function AdminDashboard() {
               <div key={t.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{t.name}</div>
-                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} Â· {t.user?.email}</div>
+                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} Ã‚Â· {t.user?.email}</div>
                 </div>
                 <div className="text-[10px] text-zinc-500">{new Date(t.createdAt).toLocaleDateString()}</div>
               </div>
@@ -157,7 +193,7 @@ export default async function AdminDashboard() {
               <div className="flex justify-between items-start gap-3 flex-wrap">
                 <div>
                   <div className="font-semibold text-sm text-white">{enq.name}</div>
-                  <div className="text-[10px] text-zinc-400">{enq.email} Â· {enq.phone}</div>
+                  <div className="text-[10px] text-zinc-400">{enq.email} Ã‚Â· {enq.phone}</div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[enq.status] || statusColors.UNREAD}`}>

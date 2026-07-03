@@ -3,18 +3,60 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
+import { resolveTimeSlots } from '@/utils/timetable';
+
+function normalizeText(value = '') {
+  return value.toString().trim().replace(/\s+/g, ' ').toLowerCase();
+}
 
 function splitTimetableClassName(name = '') {
-  const trimmed = name.trim();
+  const trimmed = name.toString().trim();
   const upper = trimmed.toUpperCase();
-  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '') };
-  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '') };
-  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '') };
-  return { section: 'OTHER', className: trimmed };
+
+  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '').trim() };
+  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '').trim() };
+  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '').trim() };
+
+  return { section: null, className: trimmed };
 }
 
 function sameText(a = '', b = '') {
-  return a.trim().toLowerCase() === b.trim().toLowerCase();
+  return normalizeText(a) === normalizeText(b);
+}
+
+function classDisplayNameFromSlot(slot) {
+  if (!slot?.className) return '';
+  return normalizeText(slot.section) === 'other' ? slot.className : `${slot.section} ${slot.className}`.trim();
+}
+
+function slotMatchesClass(slot, classInfo) {
+  const slotClassName = normalizeText(slot.className);
+  const slotSection = normalizeText(slot.section);
+  const className = normalizeText(classInfo.className);
+  const sectionMatch = !classInfo.section || slotSection === normalizeText(classInfo.section);
+  const classMatch = slotClassName === className || slotClassName.includes(className) || className.includes(slotClassName);
+  return sectionMatch && classMatch;
+}
+
+function sortSlotsByTime(slots, timeSlots) {
+  const rankByTime = new Map(timeSlots.map((slot, index) => [normalizeText(slot), index]));
+  return [...slots].sort((a, b) => {
+    const ai = rankByTime.has(normalizeText(a.timeSlot)) ? rankByTime.get(normalizeText(a.timeSlot)) : Number.MAX_SAFE_INTEGER;
+    const bi = rankByTime.has(normalizeText(b.timeSlot)) ? rankByTime.get(normalizeText(b.timeSlot)) : Number.MAX_SAFE_INTEGER;
+    return ai - bi;
+  });
+}
+
+async function getFirstScheduledSlot(classSubject) {
+  const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
+  const timeSlots = resolveTimeSlots(config?.slots);
+  const timetableSlots = await prisma.timetableSlot.findMany();
+  const classInfo = splitTimetableClassName(classSubject.class.name);
+
+  const classMatches = timetableSlots.filter((slot) => slotMatchesClass(slot, classInfo));
+  const ordered = sortSlotsByTime(classMatches, timeSlots);
+
+  return ordered[0] || null;
 }
 
 async function isFirstLectureOfClass(classSubjectId, dateStr) {
@@ -29,35 +71,17 @@ async function isFirstLectureOfClass(classSubjectId, dateStr) {
     });
     if (!classSubject) return false;
 
-    const { section, className } = splitTimetableClassName(classSubject.class.name);
-    const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
-    const timeSlots = Array.isArray(config?.slots) ? config.slots : [];
+    const firstSlot = await getFirstScheduledSlot(classSubject);
+    if (firstSlot) {
+      return (
+        sameText(classSubject.class.name, classDisplayNameFromSlot(firstSlot)) ||
+        sameText(classSubject.class.name, firstSlot.className)
+      ) && sameText(classSubject.subject.name, firstSlot.subject);
+    }
 
     const targetDate = new Date(dateStr);
     const startOfDay = new Date(targetDate); startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
-
-    const dbSlots = await prisma.timetableSlot.findMany({
-      where: { section, className },
-    });
-
-    if (dbSlots.length > 0 && timeSlots.length > 0) {
-      let firstSlot = null;
-      for (const ts of timeSlots) {
-        const slot = dbSlots.find(s => s.timeSlot === ts && s.subject?.trim() && s.teacher?.trim());
-        if (slot) {
-          firstSlot = slot;
-          break;
-        }
-      }
-
-      if (!firstSlot) return false;
-
-      return (
-        sameText(classSubject.subject.name, firstSlot.subject) &&
-        sameText(classSubject.teacher.name, firstSlot.teacher)
-      );
-    }
 
     const priorLectures = await prisma.lecture.findFirst({
       where: {
@@ -84,7 +108,6 @@ async function verifyTeacher() {
   return dbUser.teacher;
 }
 
-// â”€â”€â”€ STEP 1: Mark Attendance Only (start of class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function markAttendanceOnly(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -131,7 +154,7 @@ export async function markAttendanceOnly(formData) {
       const newLecture = await prisma.lecture.create({
         data: {
           date: targetDate,
-          topic: 'Pending â€” lecture notes to be added after class.',
+          topic: 'Pending Ã¢â‚¬â€ lecture notes to be added after class.',
           pictureUrl: '',
           classSubjectId,
         },
@@ -197,7 +220,7 @@ export async function markAttendanceOnly(formData) {
   }
 }
 
-// â”€â”€â”€ STEP 2: Save Lecture Notes (post-class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ STEP 2: Save Lecture Notes (post-class) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 export async function saveLectureNotes(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -227,7 +250,7 @@ export async function saveLectureNotes(formData) {
   }
 }
 
-// â”€â”€â”€ LEGACY: Combined (kept for backward compat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ LEGACY: Combined (kept for backward compat) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 export async function submitAttendanceAndLecture(formData) {
   return markAttendanceOnly(formData);
 }

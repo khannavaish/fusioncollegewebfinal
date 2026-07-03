@@ -1,7 +1,50 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import { resolveTimeSlots } from '@/utils/timetable';
+
+function normalizeText(value = '') {
+  return value.toString().trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function splitTimetableClassName(name = '') {
+  const trimmed = name.toString().trim();
+  const upper = trimmed.toUpperCase();
+
+  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '').trim() };
+  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '').trim() };
+  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '').trim() };
+
+  return { section: null, className: trimmed };
+}
+
+function getScheduledTimeSlots(className, subjectName, teacherName, timetableSlots, timeSlots) {
+  const classInfo = splitTimetableClassName(className);
+  const normalizedClassName = normalizeText(classInfo.className);
+  const normalizedSubject = normalizeText(subjectName);
+  const normalizedTeacher = normalizeText(teacherName || '');
+  const rankByTime = new Map(timeSlots.map((slot, index) => [normalizeText(slot), index]));
+
+  const matches = timetableSlots.filter((slot) => {
+    const slotClassName = normalizeText(slot.className);
+    const slotSection = normalizeText(slot.section);
+    const sectionMatch = !classInfo.section || slotSection === normalizeText(classInfo.section);
+    const classMatch = slotClassName === normalizedClassName || slotClassName.includes(normalizedClassName) || normalizedClassName.includes(slotClassName);
+    const subjectMatch = normalizeText(slot.subject) === normalizedSubject;
+    const teacherMatch = !normalizedTeacher || normalizeText(slot.teacher) === normalizedTeacher;
+    return sectionMatch && classMatch && subjectMatch && teacherMatch;
+  });
+
+  return [...matches]
+    .sort((a, b) => {
+      const ai = rankByTime.has(normalizeText(a.timeSlot)) ? rankByTime.get(normalizeText(a.timeSlot)) : Number.MAX_SAFE_INTEGER;
+      const bi = rankByTime.has(normalizeText(b.timeSlot)) ? rankByTime.get(normalizeText(b.timeSlot)) : Number.MAX_SAFE_INTEGER;
+      return ai - bi;
+    })
+    .map((slot) => slot.timeSlot)
+    .filter(Boolean);
+}
 
 export default async function TeacherClassesPage() {
   const supabase = await createClient();
@@ -11,7 +54,6 @@ export default async function TeacherClassesPage() {
     redirect('/login');
   }
 
-  // Verify user has TEACHER role
   let dbUser = null;
   try {
     dbUser = await prisma.user.findUnique({
@@ -30,20 +72,25 @@ export default async function TeacherClassesPage() {
     }
   }
 
-  // Fetch teacher's assigned classes
   let teacher = null;
   let classSubjects = [];
+  let timetableSlots = [];
+  let timetableTimeSlots = [];
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    const fullUser = await prisma.user.findUnique({
       where: { authId: user.id },
       include: {
         teacher: true,
       },
     });
-    teacher = dbUser?.teacher;
+    teacher = fullUser?.teacher;
 
     if (teacher) {
+      const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
+      timetableSlots = await prisma.timetableSlot.findMany();
+      timetableTimeSlots = resolveTimeSlots(config?.slots);
+
       classSubjects = await prisma.classSubject.findMany({
         where: { teacherId: teacher.id },
         include: {
@@ -59,6 +106,17 @@ export default async function TeacherClassesPage() {
           subject: true,
         },
       });
+
+      classSubjects = classSubjects.map((cs) => ({
+        ...cs,
+        scheduledTimeSlots: getScheduledTimeSlots(
+          cs.class.name,
+          cs.subject.name,
+          teacher?.name,
+          timetableSlots,
+          timetableTimeSlots,
+        ),
+      }));
     }
   } catch (err) {
     console.error('Error fetching teacher classes:', err);
@@ -88,6 +146,9 @@ export default async function TeacherClassesPage() {
                 <div>
                   <h3 className="text-xl font-bold text-white">{cs.class.name}</h3>
                   <p className="text-sm text-cyan-400 mt-1">{cs.subject.name}</p>
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    Time Slot: {cs.scheduledTimeSlots?.length ? cs.scheduledTimeSlots.join(', ') : 'Not scheduled yet'}
+                  </p>
                   <p className="text-xs text-zinc-500 mt-1">Session: {cs.class.academicYr}</p>
                 </div>
                 <div className="text-right">
@@ -96,7 +157,6 @@ export default async function TeacherClassesPage() {
                 </div>
               </div>
 
-              {/* Students in this class */}
               <div className="mt-4">
                 <h4 className="text-sm font-semibold text-white mb-3">Enrolled Students</h4>
                 <div className="overflow-x-auto">
@@ -121,7 +181,6 @@ export default async function TeacherClassesPage() {
                 </div>
               </div>
 
-              {/* Quick Actions */}
               <div className="mt-4 flex gap-2">
                 <Link href={`/teacher/classes/${cs.id}/attendance`} className="text-xs px-3 py-2 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 hover:bg-cyan-950/20 transition-colors text-center">
                   Take Attendance

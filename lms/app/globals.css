@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
   --background: #ffffff;
@@ -19,6 +19,10 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -27,7 +31,7 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2dd4bf #0d0f1a;
+  scrollbar-color: #14b8a6 #0d0f1a;
 }
 
 *::-webkit-scrollbar {
@@ -37,15 +41,18 @@ body {
 
 *::-webkit-scrollbar-track {
   background: #0d0f1a;
-  border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #22d3ee, #6366f1);
+  background: linear-gradient(180deg, #22d3ee, #14b8a6);
   border: 2px solid #0d0f1a;
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #67e8f9, #818cf8);
+  background: linear-gradient(180deg, #67e8f9, #2dd4bf);
+}
+
+*::-webkit-scrollbar-corner {
+  background: #0d0f1a;
 }
