@@ -103,7 +103,18 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const message = `Assalamu Alaikum,\n\nThis is a notification from Fusion College.\n\nYour child *${student.name}* (Roll No: ${student.rollNumber}) has arrived at college today, ${today}.\n\nRegards,\nFusion College Administration`;
+    const message = `*FUSION COLLEGE — DAILY REPORT* 🏫
+----------------------------------------
+*English:*
+Assalamu Alaikum,
+Your child *${student.name}* (Roll No: ${student.rollNumber}) has arrived safely at the college today, ${today}.
+
+*اردو:*
+السلام علیکم،
+آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) آج مورخہ ${today} کو بحفاظت کالج پہنچ چکا ہے۔
+----------------------------------------
+Regards,
+Fusion College Administration`;
 
     for (const ps of student.parents) {
       if (ps.parent?.phone) {
@@ -170,7 +181,7 @@ export async function sendEndOfDaySummary(formData) {
         studentMap[att.studentId].entries.push({
           subject: lec.classSubject.subject.name,
           status: att.status,
-          topic: lec.topic && lec.topic !== 'Pending' ? lec.topic : null,
+          topic: lec.topic && !lec.topic.startsWith('Pending') ? lec.topic : 'No topic logged.',
         });
       }
     }
@@ -190,13 +201,44 @@ export async function sendEndOfDaySummary(formData) {
       const presentCount = data.entries.filter(e => e.status === 'PRESENT' || e.status === 'LATE').length;
       const absentCount = data.entries.filter(e => e.status === 'ABSENT').length;
 
-      let summaryLines = data.entries.map(e => {
-        const statusEmoji = e.status === 'PRESENT' ? 'P' : e.status === 'ABSENT' ? 'A' : e.status === 'LATE' ? 'L' : 'LE';
-        const topicLine = e.topic ? `\n   Topic: ${e.topic}` : '';
-        return `- ${e.subject}: *${statusEmoji}*${topicLine}`;
-      }).join('\n');
+      let summaryLinesEn = [];
+      let summaryLinesUr = [];
 
-      const message = `Assalamu Alaikum,\n\nEnd-of-Day Report — *Fusion College*\nDate: ${formattedDate}\nStudent: *${data.student.name}* (${data.student.rollNumber})\n\n*Attendance Summary:*\nClasses Present: ${presentCount}/${totalClasses}\nClasses Absent: ${absentCount}/${totalClasses}\n\n*Subject-wise Detail:*\n${summaryLines}\n\nJazakAllah Khair,\nFusion College Administration`;
+      data.entries.forEach(e => {
+        const isPresent = e.status === 'PRESENT' || e.status === 'LATE';
+        const sign = isPresent ? '✅' : '❌';
+        
+        // English line
+        summaryLinesEn.push(`${sign} *${e.subject}*: ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
+        
+        // Urdu line
+        const statusUrdu = isPresent ? 'حاضر (حاضری ریکارڈ کی گئی)' : 'غیر حاضر';
+        summaryLinesUr.push(`${sign} *${e.subject}*: ${statusUrdu}\n   موضوع: ${e.topic}`);
+      });
+
+      const message = `*FUSION COLLEGE — END-OF-DAY ACADEMIC REPORT* 🏫
+----------------------------------------
+*Student:* ${data.student.name} (${data.student.rollNumber})
+*Date:* ${formattedDate}
+
+*English:*
+Assalamu Alaikum,
+Here is the daily performance and attendance summary of your child:
+
+📊 *Summary:* Present in ${presentCount}/${totalClasses} lectures.
+📖 *Subject Details & Topics Taught:*
+${summaryLinesEn.join('\n\n')}
+
+*اردو:*
+السلام علیکم،
+آپ کے بچے کی روزانہ کی تعلیمی اور حاضری کی رپورٹ درج ذیل ہے:
+
+📊 *خلاصہ:* حاضری ${presentCount}/${totalClasses} لیکچرز۔
+📖 *مضامین کی تفصیلات اور پڑھایا گیا موضوع:*
+${summaryLinesUr.join('\n\n')}
+----------------------------------------
+JazakAllah Khair,
+Fusion College Administration`;
 
       for (const ps of student.parents) {
         if (ps.parent?.phone) {
