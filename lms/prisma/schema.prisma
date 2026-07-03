@@ -55,6 +55,7 @@ model Student {
   class       Class           @relation(fields: [classId], references: [id])
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   submissions Submission[]
+  whatsAppLogs WhatsAppLog[]
 }
 
 model Parent {
@@ -236,3 +237,15 @@ enum AttendanceStatus {
   LEAVE
   LATE
 }
+
+model WhatsAppLog {
+  id          String   @id @default(uuid())
+  studentId   String
+  parentPhone String
+  messageType String   // "ARRIVAL" or "EOD_SUMMARY"
+  sentAt      DateTime @default(now())
+  success     Boolean  @default(true)
+  errorMessage String?  // Stores failure reason if success is false
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+

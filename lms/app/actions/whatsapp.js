@@ -144,7 +144,18 @@ Fusion College Narowal Administration`;
 
     for (const ps of student.parents) {
       if (ps.parent?.phone) {
-        await sendWhatsAppMessage(ps.parent.phone, message);
+        const result = await sendWhatsAppMessage(ps.parent.phone, message);
+        
+        // Log to DB
+        await prisma.whatsAppLog.create({
+          data: {
+            studentId: student.id,
+            parentPhone: ps.parent.phone,
+            messageType: 'ARRIVAL',
+            success: !!result.success,
+            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+          }
+        });
       }
     }
   } catch (e) {
@@ -284,7 +295,22 @@ Fusion College Narowal Administration`;
           await delay(randomDelay);
 
           const result = await sendWhatsAppMessage(ps.parent.phone, message);
-          if (!result.skipped) sent++;
+          if (!result.skipped) {
+            if (result.success) sent++;
+          } else {
+            skipped++;
+          }
+
+          // Log to DB
+          await prisma.whatsAppLog.create({
+            data: {
+              studentId: student.id,
+              parentPhone: ps.parent.phone,
+              messageType: 'EOD_SUMMARY',
+              success: !!result.success,
+              errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+            }
+          });
         }
       }
     }

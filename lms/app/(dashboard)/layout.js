@@ -160,6 +160,10 @@ export default async function DashboardLayout({ children }) {
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 WhatsApp Alerts
               </a>
+              <a href="/admin/reports" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                Reports Center
+              </a>
             </>
           )}
 
@@ -177,6 +181,10 @@ export default async function DashboardLayout({ children }) {
               <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
                 Timetable
+              </a>
+              <a href="/teacher/reports" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Reports & Marks
               </a>
             </>
           )}
