@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { updateEnquiryStatus } from '@/app/actions/admin';
-import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight } from '@/app/components/icons';
+import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight, IconChatBubble } from '@/app/components/icons';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -78,12 +78,13 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick Nav */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {[
           { label: 'Students', href: '/admin/students', Icon: IconGraduationCap, color: 'text-indigo-400', bg: 'bg-indigo-950/30 border-indigo-500/20' },
           { label: 'Teachers', href: '/admin/teachers', Icon: IconUserTie, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
           { label: 'Classes', href: '/admin/classes', Icon: IconBuilding, color: 'text-blue-400', bg: 'bg-blue-950/30 border-blue-500/20' },
           { label: 'Subjects', href: '/admin/subjects', Icon: IconBookOpen, color: 'text-emerald-400', bg: 'bg-emerald-950/30 border-emerald-500/20' },
+          { label: 'Announcements', href: '/admin/announcements', Icon: IconChatBubble, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
           { label: 'Parents', href: '/admin/parents', Icon: IconUsers, color: 'text-violet-400', bg: 'bg-violet-950/30 border-violet-500/20' },
         ].map(({ label, href, Icon, color, bg }) => (
           <Link key={href} href={href}
@@ -113,7 +114,7 @@ export default async function AdminDashboard() {
               <div key={s.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{s.name}</div>
-                  <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name || 'No class'}</div>
+                  <div className="text-[10px] text-zinc-500">{s.rollNumber} Â· {s.class?.name || 'No class'}</div>
                 </div>
                 <div className="text-[10px] text-zinc-500">{new Date(s.createdAt).toLocaleDateString()}</div>
               </div>
@@ -136,7 +137,7 @@ export default async function AdminDashboard() {
               <div key={t.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{t.name}</div>
-                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} · {t.user?.email}</div>
+                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} Â· {t.user?.email}</div>
                 </div>
                 <div className="text-[10px] text-zinc-500">{new Date(t.createdAt).toLocaleDateString()}</div>
               </div>
@@ -156,7 +157,7 @@ export default async function AdminDashboard() {
               <div className="flex justify-between items-start gap-3 flex-wrap">
                 <div>
                   <div className="font-semibold text-sm text-white">{enq.name}</div>
-                  <div className="text-[10px] text-zinc-400">{enq.email} · {enq.phone}</div>
+                  <div className="text-[10px] text-zinc-400">{enq.email} Â· {enq.phone}</div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[enq.status] || statusColors.UNREAD}`}>
@@ -192,3 +193,6 @@ export default async function AdminDashboard() {
     </div>
   );
 }
+
+
+

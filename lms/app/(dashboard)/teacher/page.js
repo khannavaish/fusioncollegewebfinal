@@ -54,21 +54,25 @@ export default async function TeacherDashboard() {
     classSubjects = teacher?.subjects || [];
   } catch {}
 
-  // ─── Timetable-based class status ─────────────────────────────────────────
+  // â”€â”€â”€ Timetable-based class status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let classStatusCard = null;
   try {
-    const timetableConfig = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
-    const timeSlots = timetableConfig?.slots ? JSON.parse(JSON.stringify(timetableConfig.slots)).timeSlots || [] : [];
-    const timetableSlots = timetableConfig?.slots ? JSON.parse(JSON.stringify(timetableConfig.slots)).slots || [] : [];
+    const timetableSlots = await prisma.timetableSlot.findMany();
 
-    if (teacher && timeSlots.length > 0) {
+    if (teacher && timetableSlots.length > 0) {
       const now = new Date();
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-      // Find all time slots that match this teacher in timetable
-      const teacherSlots = timetableSlots.filter(s =>
-        s.teacher && s.teacher.toLowerCase().includes(teacher.name.toLowerCase())
-      );
+      const teacherName = teacher.name.toLowerCase().trim();
+      const assignedKeys = new Set(classSubjects.map(cs => `${cs.class.name}|${cs.subject.name}`.toLowerCase()));
+
+      const teacherSlots = timetableSlots.filter(s => {
+        if (!s.teacher || !s.subject || !s.className) return false;
+        const displayClass = s.section === 'OTHER' ? s.className : `${s.section} ${s.className}`;
+        const assignedMatch = assignedKeys.has(`${displayClass}|${s.subject}`.toLowerCase());
+        const nameMatch = s.teacher.toLowerCase().trim() === teacherName || s.teacher.toLowerCase().includes(teacherName);
+        return assignedMatch || nameMatch;
+      });
 
       // Sort by time
       const parsedSlots = teacherSlots
@@ -85,7 +89,7 @@ export default async function TeacherDashboard() {
         classStatusCard = {
           type: 'active',
           label: 'Class In Progress',
-          detail: `${currentClass.subject} — ${currentClass.className}`,
+          detail: `${currentClass.subject} â€” ${currentClass.className}`,
           time: currentClass.timeSlot,
           color: 'emerald',
         };
@@ -94,7 +98,7 @@ export default async function TeacherDashboard() {
         classStatusCard = {
           type: 'next',
           label: minsUntil <= 10 ? 'Next Class Starting Soon' : 'Next Class',
-          detail: `${nextClass.subject} — ${nextClass.className}`,
+          detail: `${nextClass.subject} â€” ${nextClass.className}`,
           time: nextClass.timeSlot,
           color: minsUntil <= 10 ? 'amber' : 'cyan',
         };
@@ -223,3 +227,4 @@ export default async function TeacherDashboard() {
     </div>
   );
 }
+

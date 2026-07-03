@@ -4,88 +4,74 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 
+function splitTimetableClassName(name = '') {
+  const trimmed = name.trim();
+  const upper = trimmed.toUpperCase();
+  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '') };
+  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '') };
+  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '') };
+  return { section: 'OTHER', className: trimmed };
+}
+
+function sameText(a = '', b = '') {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
 async function isFirstLectureOfClass(classSubjectId, dateStr) {
   try {
     const classSubject = await prisma.classSubject.findUnique({
       where: { id: classSubjectId },
       include: {
         class: true,
-        subject: true
-      }
+        subject: true,
+        teacher: true,
+      },
     });
     if (!classSubject) return false;
 
-    // Split class name to get section and className, e.g. "BOYS - Medical" -> ["BOYS", "Medical"]
-    const parts = classSubject.class.name.split(' - ');
-    const section = parts[0] || 'BOYS';
-    const className = parts.slice(1).join(' - ') || '';
-
-    // Get ordered timeSlots
+    const { section, className } = splitTimetableClassName(classSubject.class.name);
     const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
-    
-    // Target day boundaries
+    const timeSlots = Array.isArray(config?.slots) ? config.slots : [];
+
     const targetDate = new Date(dateStr);
     const startOfDay = new Date(targetDate); startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay   = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
 
-    if (!config || !Array.isArray(config.slots) || config.slots.length === 0) {
-      // Fallback: Check if this is the first lecture created today for this class
-      const priorLectures = await prisma.lecture.findFirst({
-        where: {
-          classSubject: { classId: classSubject.classId },
-          date: { gte: startOfDay, lte: endOfDay },
-        }
-      });
-      return !priorLectures;
-    }
-
-    const timeSlots = config.slots;
-
-    // Find all scheduled slots for this class
     const dbSlots = await prisma.timetableSlot.findMany({
-      where: { section, className }
+      where: { section, className },
     });
 
-    if (dbSlots.length === 0) {
-      // Fallback: Check if first lecture today
-      const priorLectures = await prisma.lecture.findFirst({
-        where: {
-          classSubject: { classId: classSubject.classId },
-          date: { gte: startOfDay, lte: endOfDay },
+    if (dbSlots.length > 0 && timeSlots.length > 0) {
+      let firstSlot = null;
+      for (const ts of timeSlots) {
+        const slot = dbSlots.find(s => s.timeSlot === ts && s.subject?.trim() && s.teacher?.trim());
+        if (slot) {
+          firstSlot = slot;
+          break;
         }
-      });
-      return !priorLectures;
-    }
-
-    // Find the first scheduled slot matching the timeSlots order
-    let firstScheduledSubject = null;
-    for (const ts of timeSlots) {
-      const slot = dbSlots.find(s => s.timeSlot === ts && s.subject);
-      if (slot) {
-        firstScheduledSubject = slot.subject;
-        break;
       }
+
+      if (!firstSlot) return false;
+
+      return (
+        sameText(classSubject.subject.name, firstSlot.subject) &&
+        sameText(classSubject.teacher.name, firstSlot.teacher)
+      );
     }
 
-    if (!firstScheduledSubject) {
-      // Fallback if no subjects found in timetable for this class
-      const priorLectures = await prisma.lecture.findFirst({
-        where: {
-          classSubject: { classId: classSubject.classId },
-          date: { gte: startOfDay, lte: endOfDay },
-        }
-      });
-      return !priorLectures;
-    }
-
-    // Compare subject names case-insensitively
-    return classSubject.subject.name.trim().toLowerCase() === firstScheduledSubject.trim().toLowerCase();
+    const priorLectures = await prisma.lecture.findFirst({
+      where: {
+        classSubject: { classId: classSubject.classId },
+        date: { gte: startOfDay, lte: endOfDay },
+        classSubjectId: { not: classSubjectId },
+      },
+    });
+    return !priorLectures;
   } catch (e) {
     console.error('Error in isFirstLectureOfClass:', e);
     return false;
   }
 }
-
 async function verifyTeacher() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -98,7 +84,7 @@ async function verifyTeacher() {
   return dbUser.teacher;
 }
 
-// ─── STEP 1: Mark Attendance Only (start of class) ───────────────────────────
+// â”€â”€â”€ STEP 1: Mark Attendance Only (start of class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function markAttendanceOnly(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -145,7 +131,7 @@ export async function markAttendanceOnly(formData) {
       const newLecture = await prisma.lecture.create({
         data: {
           date: targetDate,
-          topic: 'Pending — lecture notes to be added after class.',
+          topic: 'Pending â€” lecture notes to be added after class.',
           pictureUrl: '',
           classSubjectId,
         },
@@ -183,7 +169,16 @@ export async function markAttendanceOnly(formData) {
           },
         });
 
-        if (!priorAttendance) {
+        const alreadySentToday = await prisma.whatsAppLog.findFirst({
+          where: {
+            studentId: sid,
+            messageType: 'ARRIVAL',
+            sentAt: { gte: startOfDay, lte: endOfDay },
+            success: true,
+          },
+        });
+
+        if (!priorAttendance && !alreadySentToday) {
           try {
             const { sendArrivalWhatsApp } = await import('@/app/actions/whatsapp');
             await sendArrivalWhatsApp(sid);
@@ -202,7 +197,7 @@ export async function markAttendanceOnly(formData) {
   }
 }
 
-// ─── STEP 2: Save Lecture Notes (post-class) ──────────────────────────────────
+// â”€â”€â”€ STEP 2: Save Lecture Notes (post-class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function saveLectureNotes(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -232,7 +227,9 @@ export async function saveLectureNotes(formData) {
   }
 }
 
-// ─── LEGACY: Combined (kept for backward compat) ──────────────────────────────
+// â”€â”€â”€ LEGACY: Combined (kept for backward compat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function submitAttendanceAndLecture(formData) {
   return markAttendanceOnly(formData);
 }
+
+

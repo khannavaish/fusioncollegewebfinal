@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import TimetableEditor from './TimetableEditor';
+import AdminTimetableShell from './AdminTimetableShell';
 import { resolveTimeSlots } from '@/utils/timetable';
 
 export default async function AdminTimetablePage() {
@@ -39,19 +39,19 @@ export default async function AdminTimetablePage() {
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">College Timetable Editor</h1>
-          <p className="text-zinc-400 text-sm mt-1">Manage master timetable scheduling for Boys & Girls sections</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">College Timetable</h1>
+          <p className="text-zinc-400 text-sm mt-1">Review the live timetable, then open edit mode when changes are needed</p>
         </div>
         <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">
           &larr; Back to Dashboard
         </Link>
       </div>
 
-      <TimetableEditor 
-        initialSlots={slots} 
+      <AdminTimetableShell initialSlots={slots} 
         dbClasses={dbClasses} 
         initialTimeSlots={initialTimeSlots} 
       />
     </div>
   );
 }
+

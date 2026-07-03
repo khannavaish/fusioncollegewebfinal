@@ -13,16 +13,18 @@ async function verifyAdmin() {
   return user;
 }
 
-// ─── Send via Custom / UltraMsg ────────────────────────────────────────────────
-async function sendWhatsAppMessage(to, message) {
+// â”€â”€â”€ Send via Custom / UltraMsg â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export async function sendWhatsAppMessage(to, message) {
   const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
   if (!config || !config.isEnabled) {
     console.log('[WhatsApp] Not configured or disabled. Message not sent.');
     return { skipped: true };
   }
 
-  const phone = to.replace(/[^0-9]/g, '');
-  const formattedPhone = phone.startsWith('92') ? phone : `92${phone.replace(/^0/, '')}`;
+  const rawTarget = to.toString().trim();
+  const isWhatsAppJid = rawTarget.endsWith('@g.us') || rawTarget.endsWith('@s.whatsapp.net');
+  const phone = rawTarget.replace(/[^0-9]/g, '');
+  const formattedPhone = isWhatsAppJid ? rawTarget : (phone.startsWith('92') ? phone : `92${phone.replace(/^0/, '')}`);
 
   if (config.provider === 'CUSTOM') {
     const url = `${config.gatewayUrl.replace(/\/$/, '')}/send`;
@@ -70,7 +72,7 @@ async function sendWhatsAppMessage(to, message) {
   }
 }
 
-// ─── Get / Save WhatsApp Config ───────────────────────────────────────────────
+// â”€â”€â”€ Get / Save WhatsApp Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function getWhatsAppConfig() {
   try {
     const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
@@ -102,7 +104,7 @@ export async function saveWhatsAppConfig(formData) {
   }
 }
 
-// ─── Test Message ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Test Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendTestWhatsApp(formData) {
   await verifyAdmin();
   const testNumber = formData.get('testNumber')?.toString().trim();
@@ -114,7 +116,7 @@ export async function sendTestWhatsApp(formData) {
   return { success: true };
 }
 
-// ─── Send First-Arrival Message (called after first attendance of day) ────────
+// â”€â”€â”€ Send First-Arrival Message (called after first attendance of day) â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendArrivalWhatsApp(studentId) {
   try {
     const student = await prisma.student.findUnique({
@@ -129,15 +131,15 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const message = `*FUSION COLLEGE NAROWAL — DAILY REPORT* 🏫
+    const message = `*FUSION COLLEGE NAROWAL â€” DAILY REPORT* ðŸ«
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
 Your child *${student.name}* (Roll No: ${student.rollNumber}) has arrived safely at the college today, ${today}.
 
-*اردو:*
-السلام علیکم،
-آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) آج مورخہ ${today} کو بحفاظت کالج پہنچ چکا ہے۔
+*Ø§Ø±Ø¯Ùˆ:*
+Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÛŒÚ©Ù…ØŒ
+Ø¢Ù¾ Ú©Ø§ Ø¨Ú†Û *${student.name}* (Ø±ÙˆÙ„ Ù†Ù…Ø¨Ø±: ${student.rollNumber}) Ø¢Ø¬ Ù…ÙˆØ±Ø®Û ${today} Ú©Ùˆ Ø¨Ø­ÙØ§Ø¸Øª Ú©Ø§Ù„Ø¬ Ù¾ÛÙ†Ú† Ú†Ú©Ø§ ÛÛ’Û”
 ----------------------------------------
 Regards,
 Fusion College Narowal Administration`;
@@ -163,7 +165,7 @@ Fusion College Narowal Administration`;
   }
 }
 
-// ─── Send End-of-Day Summary to All Parents ───────────────────────────────────
+// â”€â”€â”€ Send End-of-Day Summary to All Parents â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendEndOfDaySummary(formData) {
   await verifyAdmin();
   const dateStr = formData.get('date')?.toString() || new Date().toISOString().split('T')[0];
@@ -251,17 +253,17 @@ export async function sendEndOfDaySummary(formData) {
 
       data.entries.forEach(e => {
         const isPresent = e.status === 'PRESENT' || e.status === 'LATE';
-        const sign = isPresent ? '✅' : '❌';
+        const sign = isPresent ? 'âœ…' : 'âŒ';
         
         // English line
         summaryLinesEn.push(`${sign} *${e.subject}* (by ${e.teacher}): ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
         
         // Urdu line
-        const statusUrdu = isPresent ? 'حاضر (حاضری ریکارڈ کی گئی)' : 'غیر حاضر';
-        summaryLinesUr.push(`${sign} *${e.subject}* (بذریعہ ${e.teacher}): ${statusUrdu}\n   موضوع: ${e.topic}`);
+        const statusUrdu = isPresent ? 'Ø­Ø§Ø¶Ø± (Ø­Ø§Ø¶Ø±ÛŒ Ø±ÛŒÚ©Ø§Ø±Úˆ Ú©ÛŒ Ú¯Ø¦ÛŒ)' : 'ØºÛŒØ± Ø­Ø§Ø¶Ø±';
+        summaryLinesUr.push(`${sign} *${e.subject}* (Ø¨Ø°Ø±ÛŒØ¹Û ${e.teacher}): ${statusUrdu}\n   Ù…ÙˆØ¶ÙˆØ¹: ${e.topic}`);
       });
 
-      const message = `*FUSION COLLEGE NAROWAL — END-OF-DAY ACADEMIC REPORT* 🏫
+      const message = `*FUSION COLLEGE NAROWAL â€” END-OF-DAY ACADEMIC REPORT* ðŸ«
 ----------------------------------------
 *Student:* ${data.student.name} (${data.student.rollNumber})
 *Date:* ${formattedDate}
@@ -270,16 +272,16 @@ export async function sendEndOfDaySummary(formData) {
 Assalamu Alaikum,
 Here is the daily performance and attendance summary of your child:
 
-📊 *Summary:* Present in ${presentCount}/${totalClasses} lectures.
-📖 *Subject Details & Topics Taught:*
+ðŸ“Š *Summary:* Present in ${presentCount}/${totalClasses} lectures.
+ðŸ“– *Subject Details & Topics Taught:*
 ${summaryLinesEn.join('\n\n')}
 
-*اردو:*
-السلام علیکم،
-آپ کے بچے کی روزانہ کی تعلیمی اور حاضری کی رپورٹ درج ذیل ہے:
+*Ø§Ø±Ø¯Ùˆ:*
+Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÛŒÚ©Ù…ØŒ
+Ø¢Ù¾ Ú©Û’ Ø¨Ú†Û’ Ú©ÛŒ Ø±ÙˆØ²Ø§Ù†Û Ú©ÛŒ ØªØ¹Ù„ÛŒÙ…ÛŒ Ø§ÙˆØ± Ø­Ø§Ø¶Ø±ÛŒ Ú©ÛŒ Ø±Ù¾ÙˆØ±Ù¹ Ø¯Ø±Ø¬ Ø°ÛŒÙ„ ÛÛ’:
 
-📊 *خلاصہ:* حاضری ${presentCount}/${totalClasses} لیکچرز۔
-📖 *مضامین کی تفصیلات اور پڑھایا گیا موضوع:*
+ðŸ“Š *Ø®Ù„Ø§ØµÛ:* Ø­Ø§Ø¶Ø±ÛŒ ${presentCount}/${totalClasses} Ù„ÛŒÚ©Ú†Ø±Ø²Û”
+ðŸ“– *Ù…Ø¶Ø§Ù…ÛŒÙ† Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø§ÙˆØ± Ù¾Ú‘Ú¾Ø§ÛŒØ§ Ú¯ÛŒØ§ Ù…ÙˆØ¶ÙˆØ¹:*
 ${summaryLinesUr.join('\n\n')}
 ----------------------------------------
 JazakAllah Khair,
@@ -322,3 +324,4 @@ Fusion College Narowal Administration`;
     return { error: e.message || 'Failed to send summaries.' };
   }
 }
+
