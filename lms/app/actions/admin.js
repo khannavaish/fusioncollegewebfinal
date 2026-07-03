@@ -87,12 +87,56 @@ export async function deleteClass(formData) {
   const id = formData.get('id')?.toString();
   if (!id) return { error: 'Class ID required.' };
   try {
-    await prisma.class.delete({ where: { id } });
+    // 1. Get all students of this class to delete their Auth accounts
+    const students = await prisma.student.findMany({
+      where: { classId: id },
+      include: { user: true }
+    });
+
+    const admin = adminClient();
+
+    // 2. Perform deletion inside a Prisma transaction
+    await prisma.$transaction(async (tx) => {
+      if (students.length > 0) {
+        const studentUserIds = students.map(s => s.userId);
+        // Delete parent links for these students
+        await tx.parentStudent.deleteMany({
+          where: { studentId: { in: studentUserIds } }
+        });
+        // Delete users (which cascade deletes Student rows)
+        await tx.user.deleteMany({
+          where: { id: { in: studentUserIds } }
+        });
+      }
+
+      // Delete ClassSubject associations (which cascade deletes materials, assignments, etc.)
+      await tx.classSubject.deleteMany({
+        where: { classId: id }
+      });
+
+      // Delete the class itself
+      await tx.class.delete({
+        where: { id }
+      });
+    });
+
+    // 3. Delete from Supabase Auth
+    for (const student of students) {
+      if (student.user?.authId) {
+        try {
+          await admin.auth.admin.deleteUser(student.user.authId);
+        } catch (authErr) {
+          console.error(`Auth deletion failed for student auth ID ${student.user.authId}:`, authErr);
+        }
+      }
+    }
+
     revalidatePath('/admin/classes');
+    revalidatePath('/admin/students');
     return { success: true };
   } catch (e) {
     console.error('Failed to delete class:', e);
-    return { error: 'Failed to delete class. Remove all students from it first.' };
+    return { error: `Failed to delete class: ${e.message || e}` };
   }
 }
 
@@ -244,13 +288,23 @@ export async function deleteTeacher(formData) {
     const teacher = await prisma.teacher.findUnique({ where: { id }, include: { user: true } });
     if (!teacher) return { error: 'Teacher not found.' };
     const authId = teacher.user.authId;
-    await prisma.user.delete({ where: { id: teacher.userId } });
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete all class subject mappings for this teacher
+      await tx.classSubject.deleteMany({
+        where: { teacherId: id }
+      });
+      // 2. Delete the user (which deletes the Teacher profile due to cascade)
+      await tx.user.delete({ where: { id: teacher.userId } });
+    });
+
     const admin = adminClient();
     await admin.auth.admin.deleteUser(authId);
     revalidatePath('/admin/teachers');
     return { success: true };
-  } catch {
-    return { error: 'Failed to delete teacher.' };
+  } catch (e) {
+    console.error('Failed to delete teacher:', e);
+    return { error: 'Failed to delete teacher. Make sure all of their logs are removed.' };
   }
 }
 
