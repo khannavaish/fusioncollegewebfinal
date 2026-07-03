@@ -156,6 +156,7 @@ Fusion College Narowal Administration`;
 export async function sendEndOfDaySummary(formData) {
   await verifyAdmin();
   const dateStr = formData.get('date')?.toString() || new Date().toISOString().split('T')[0];
+  const classId = formData.get('classId')?.toString();
 
   try {
     const targetDate = new Date(dateStr);
@@ -164,15 +165,21 @@ export async function sendEndOfDaySummary(formData) {
     const endOfDay = new Date(targetDate);
     endOfDay.setHours(23, 59, 59, 999);
 
+    const whereClause = {
+      date: { gte: startOfDay, lte: endOfDay },
+    };
+    if (classId && classId !== 'ALL') {
+      whereClause.classSubject = { classId: classId };
+    }
+
     // Get all lectures for this day
     const lectures = await prisma.lecture.findMany({
-      where: {
-        date: { gte: startOfDay, lte: endOfDay },
-      },
+      where: whereClause,
       include: {
         classSubject: {
           include: {
             subject: true,
+            teacher: true,
             class: {
               include: {
                 students: {
@@ -206,6 +213,7 @@ export async function sendEndOfDaySummary(formData) {
         }
         studentMap[att.studentId].entries.push({
           subject: lec.classSubject.subject.name,
+          teacher: lec.classSubject.teacher.name,
           status: att.status,
           topic: lec.topic && !lec.topic.startsWith('Pending') ? lec.topic : 'No topic logged.',
         });
@@ -235,11 +243,11 @@ export async function sendEndOfDaySummary(formData) {
         const sign = isPresent ? '✅' : '❌';
         
         // English line
-        summaryLinesEn.push(`${sign} *${e.subject}*: ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
+        summaryLinesEn.push(`${sign} *${e.subject}* (by ${e.teacher}): ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
         
         // Urdu line
         const statusUrdu = isPresent ? 'حاضر (حاضری ریکارڈ کی گئی)' : 'غیر حاضر';
-        summaryLinesUr.push(`${sign} *${e.subject}*: ${statusUrdu}\n   موضوع: ${e.topic}`);
+        summaryLinesUr.push(`${sign} *${e.subject}* (بذریعہ ${e.teacher}): ${statusUrdu}\n   موضوع: ${e.topic}`);
       });
 
       const message = `*FUSION COLLEGE NAROWAL — END-OF-DAY ACADEMIC REPORT* 🏫

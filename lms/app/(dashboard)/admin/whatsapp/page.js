@@ -21,10 +21,12 @@ export default async function WhatsAppSettingsPage() {
   if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
   let config = null;
+  let classes = [];
   try {
     config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
+    classes = await prisma.class.findMany({ orderBy: { name: 'asc' } });
   } catch {}
-
+ 
   return (
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
@@ -49,7 +51,7 @@ export default async function WhatsAppSettingsPage() {
           </Link>
         </div>
       </div>
-      <WhatsAppSettingsClient config={config} />
+      <WhatsAppSettingsClient config={config} classes={classes} />
     </div>
   );
 }

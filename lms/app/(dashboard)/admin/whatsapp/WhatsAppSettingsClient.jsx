@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary } from '@/app/actions/whatsapp';
 import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
 
-export default function WhatsAppSettingsClient({ config }) {
+export default function WhatsAppSettingsClient({ config, classes = [] }) {
   const [provider, setProvider]         = useState(config?.provider || 'ULTRAMSG');
   const [gatewayUrl, setGatewayUrl]     = useState(config?.gatewayUrl || 'http://localhost:3001');
   const [senderNumber, setSenderNumber] = useState(config?.senderNumber || '');
@@ -13,6 +13,7 @@ export default function WhatsAppSettingsClient({ config }) {
   const [isEnabled, setIsEnabled]       = useState(config?.isEnabled || false);
   const [testNumber, setTestNumber]     = useState('');
   const [eodDate, setEodDate]           = useState(new Date().toISOString().split('T')[0]);
+  const [selectedClass, setSelectedClass] = useState('ALL');
 
   const [saveMsg, setSaveMsg]   = useState(null);
   const [testMsg, setTestMsg]   = useState(null);
@@ -51,10 +52,12 @@ export default function WhatsAppSettingsClient({ config }) {
   const handleEod = (e) => {
     e.preventDefault();
     setEodMsg(null);
-    if (!confirm('Send end-of-day attendance summary to ALL parents? This will send WhatsApp messages.')) return;
+    const label = selectedClass === 'ALL' ? 'ALL parents' : 'parents of the selected class';
+    if (!confirm(`Send end-of-day attendance summary to ${label}? This will send WhatsApp messages.`)) return;
     startEod(async () => {
       const fd = new FormData();
       fd.append('date', eodDate);
+      fd.append('classId', selectedClass);
       const res = await sendEndOfDaySummary(fd);
       if (res?.error) setEodMsg({ type: 'error', text: res.error });
       else setEodMsg({ type: 'success', text: `Sent to parents of ${res.sent} students. ${res.skipped} skipped.` });
@@ -197,11 +200,21 @@ export default function WhatsAppSettingsClient({ config }) {
         </div>
         <form onSubmit={handleEod} className="p-6 space-y-4">
           {eodMsg && <AlertMsg msg={eodMsg} />}
-          <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
+              <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}
+                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 min-w-[200px] cursor-pointer">
+                <option value="ALL">All Classes</option>
+                {classes.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Report Date</label>
               <input type="date" value={eodDate} onChange={e => setEodDate(e.target.value)}
-                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500" />
+                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 cursor-pointer" />
             </div>
             <button type="submit" disabled={isEod}
               className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">

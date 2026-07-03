@@ -4,6 +4,88 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 
+async function isFirstLectureOfClass(classSubjectId, dateStr) {
+  try {
+    const classSubject = await prisma.classSubject.findUnique({
+      where: { id: classSubjectId },
+      include: {
+        class: true,
+        subject: true
+      }
+    });
+    if (!classSubject) return false;
+
+    // Split class name to get section and className, e.g. "BOYS - Medical" -> ["BOYS", "Medical"]
+    const parts = classSubject.class.name.split(' - ');
+    const section = parts[0] || 'BOYS';
+    const className = parts.slice(1).join(' - ') || '';
+
+    // Get ordered timeSlots
+    const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
+    
+    // Target day boundaries
+    const targetDate = new Date(dateStr);
+    const startOfDay = new Date(targetDate); startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay   = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
+
+    if (!config || !Array.isArray(config.slots) || config.slots.length === 0) {
+      // Fallback: Check if this is the first lecture created today for this class
+      const priorLectures = await prisma.lecture.findFirst({
+        where: {
+          classSubject: { classId: classSubject.classId },
+          date: { gte: startOfDay, lte: endOfDay },
+        }
+      });
+      return !priorLectures;
+    }
+
+    const timeSlots = config.slots;
+
+    // Find all scheduled slots for this class
+    const dbSlots = await prisma.timetableSlot.findMany({
+      where: { section, className }
+    });
+
+    if (dbSlots.length === 0) {
+      // Fallback: Check if first lecture today
+      const priorLectures = await prisma.lecture.findFirst({
+        where: {
+          classSubject: { classId: classSubject.classId },
+          date: { gte: startOfDay, lte: endOfDay },
+        }
+      });
+      return !priorLectures;
+    }
+
+    // Find the first scheduled slot matching the timeSlots order
+    let firstScheduledSubject = null;
+    for (const ts of timeSlots) {
+      const slot = dbSlots.find(s => s.timeSlot === ts && s.subject);
+      if (slot) {
+        firstScheduledSubject = slot.subject;
+        break;
+      }
+    }
+
+    if (!firstScheduledSubject) {
+      // Fallback if no subjects found in timetable for this class
+      const priorLectures = await prisma.lecture.findFirst({
+        where: {
+          classSubject: { classId: classSubject.classId },
+          date: { gte: startOfDay, lte: endOfDay },
+        }
+      });
+      return !priorLectures;
+    }
+
+    // Compare subject names case-insensitively
+    return classSubject.subject.name.trim().toLowerCase() === firstScheduledSubject.trim().toLowerCase();
+  } catch (e) {
+    console.error('Error in isFirstLectureOfClass:', e);
+    return false;
+  }
+}
+
 async function verifyTeacher() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -83,29 +165,31 @@ export async function markAttendanceOnly(formData) {
       });
     }
 
-    // Check if this is the FIRST lecture marked today for each PRESENT student
-    // and trigger WhatsApp arrival message if enabled
-    const presentStudentIds = studentIds.filter(sid => attendanceMap[sid] === 'PRESENT' || attendanceMap[sid] === 'LATE');
-    for (const sid of presentStudentIds) {
-      // Check if any OTHER lecture today already exists for this student (meaning they already got the arrival message)
-      const priorAttendance = await prisma.attendance.findFirst({
-        where: {
-          studentId: sid,
-          status: { in: ['PRESENT', 'LATE'] },
-          lecture: {
-            date: { gte: startOfDay, lte: endOfDay },
-            id: { not: lectureId },
-          },
-        },
-      });
+    // Check if this is the FIRST lecture of the class for today (from timetable or first created today)
+    const isFirstLec = await isFirstLectureOfClass(classSubjectId, dateStr);
 
-      if (!priorAttendance) {
-        // First class today for this student — send WhatsApp arrival
-        try {
-          const { sendArrivalWhatsApp } = await import('@/app/actions/whatsapp');
-          await sendArrivalWhatsApp(sid);
-        } catch (e) {
-          console.error('WhatsApp arrival error:', e);
+    if (isFirstLec) {
+      const presentStudentIds = studentIds.filter(sid => attendanceMap[sid] === 'PRESENT' || attendanceMap[sid] === 'LATE');
+      for (const sid of presentStudentIds) {
+        // Double check they haven't somehow gotten an arrival message today already
+        const priorAttendance = await prisma.attendance.findFirst({
+          where: {
+            studentId: sid,
+            status: { in: ['PRESENT', 'LATE'] },
+            lecture: {
+              date: { gte: startOfDay, lte: endOfDay },
+              id: { not: lectureId },
+            },
+          },
+        });
+
+        if (!priorAttendance) {
+          try {
+            const { sendArrivalWhatsApp } = await import('@/app/actions/whatsapp');
+            await sendArrivalWhatsApp(sid);
+          } catch (e) {
+            console.error('WhatsApp arrival error:', e);
+          }
         }
       }
     }
