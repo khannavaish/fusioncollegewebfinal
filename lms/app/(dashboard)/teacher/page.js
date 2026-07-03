@@ -132,6 +132,8 @@ export default async function TeacherDashboard() {
           (cs) => sameText(cs.class.name, displayClass) && sameText(cs.subject.name, head.subject),
         ) || classSubjects.find(
           (cs) => sameText(cs.class.name, head.className) && sameText(cs.subject.name, head.subject),
+        ) || classSubjects.find(
+          (cs) => sameText(cs.class.name, head.className.replace(/\./g, '').replace(/\s/g, '')) && sameText(cs.subject.name, head.subject),
         );
 
         if (!matchedClassSubject || matchedClassSubject.teacherId !== teacher?.id) return null;
