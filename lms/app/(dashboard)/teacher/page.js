@@ -127,6 +127,18 @@ export default async function TeacherDashboard() {
         const head = sortSlotsByTime(slots, timetableTimeSlots)[0];
         if (!head) return null;
 
+        const teacherName = normalizeText(teacher?.name || '');
+        const slotTeacher = normalizeText(head.teacher || '');
+        const teacherNameNoSir = teacherName.replace(/^sir\s+/, '');
+        const slotTeacherNoSir = slotTeacher.replace(/^sir\s+/, '');
+        
+        const teacherMatch = sameText(teacherName, slotTeacher) || 
+                              sameText(teacherNameNoSir, slotTeacherNoSir) ||
+                              sameText(teacherName, slotTeacherNoSir) ||
+                              sameText(teacherNameNoSir, slotTeacher);
+
+        if (!teacherMatch) return null;
+
         const displayClass = classDisplayNameFromSlot(head);
         const matchedClassSubject = classSubjects.find(
           (cs) => sameText(cs.class.name, displayClass) && sameText(cs.subject.name, head.subject),
@@ -164,18 +176,6 @@ export default async function TeacherDashboard() {
         sameText(cs.subject.name, slot.subject) &&
         (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className))
       ));
-      
-      if (subjectMatch && !teacherMatch) {
-        console.log('Subject match but no teacher match:', {
-          teacherName,
-          slotTeacher,
-          teacherNameNoSir,
-          slotTeacherNoSir,
-          subject: slot.subject,
-          className: slot.className,
-          section: slot.section
-        });
-      }
       
       return subjectMatch && teacherMatch;
     });
