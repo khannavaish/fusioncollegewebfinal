@@ -5,12 +5,11 @@ import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import prisma from '@/utils/db';
 
-// ─── Auth helper ────────────────────────────────────────────────────────────
+// ─── Auth helper ─────────────────────────────────────────────────────────────
 async function verifyAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
-
   const dbUser = await prisma.user.findUnique({
     where: { authId: user.id },
     select: { role: true },
@@ -27,7 +26,31 @@ function adminClient() {
   );
 }
 
-// ─── CLASSES ─────────────────────────────────────────────────────────────────
+// ─── Password + Credential helpers ───────────────────────────────────────────
+function generatePassword(length = 10) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let pw = '';
+  for (let i = 0; i < length; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pw;
+}
+
+function classPrefix(className) {
+  // Extract letters & numbers, uppercase, take first 4
+  const clean = className.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return clean.slice(0, 4) || 'STU';
+}
+
+async function generateRollNumber(classId) {
+  const cls = await prisma.class.findUnique({ where: { id: classId }, select: { name: true } });
+  const prefix = classPrefix(cls?.name || 'STU');
+  const count = await prisma.student.count({ where: { classId } });
+  const next = count + 1;
+  return `${prefix}-${String(next).padStart(3, '0')}`;
+}
+
+// ─── CLASSES ──────────────────────────────────────────────────────────────────
 export async function createClass(formData) {
   await verifyAdmin();
   const name = formData.get('name')?.toString().trim();
@@ -115,7 +138,7 @@ export async function deleteSubject(formData) {
   }
 }
 
-// ─── CLASS-SUBJECTS ──────────────────────────────────────────────────────────
+// ─── CLASS-SUBJECTS ───────────────────────────────────────────────────────────
 export async function assignTeacherToSubject(formData) {
   await verifyAdmin();
   const classId = formData.get('classId')?.toString();
@@ -149,16 +172,16 @@ export async function removeClassSubject(formData) {
 }
 
 // ─── TEACHERS ─────────────────────────────────────────────────────────────────
-export async function createTeacher(formData) {
+export async function createTeacher(_prev, formData) {
   await verifyAdmin();
   const email = formData.get('email')?.toString().trim();
-  const password = formData.get('password')?.toString();
   const name = formData.get('name')?.toString().trim();
   const phone = formData.get('phone')?.toString().trim() || null;
   const qualification = formData.get('qualification')?.toString().trim() || null;
 
-  if (!email || !password || !name) return { error: 'Email, password, and name are required.' };
-  if (password.length < 6) return { error: 'Password must be at least 6 characters.' };
+  if (!email || !name) return { error: 'Email and name are required.' };
+
+  const password = generatePassword(10);
 
   const admin = adminClient();
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -167,7 +190,7 @@ export async function createTeacher(formData) {
     email_confirm: true,
     user_metadata: { role: 'TEACHER' },
   });
-  if (authError) return { error: authError.message };
+  if (authError) return { error: `Auth error: ${authError.message}` };
 
   const authId = authData.user.id;
   try {
@@ -184,10 +207,10 @@ export async function createTeacher(formData) {
       },
     });
     revalidatePath('/admin/teachers');
-    return { success: true };
-  } catch {
+    return { success: true, credentials: { email, password, name } };
+  } catch (e) {
     await admin.auth.admin.deleteUser(authId);
-    return { error: 'Failed to create teacher profile.' };
+    return { error: `DB error: ${e.message}` };
   }
 }
 
@@ -203,9 +226,7 @@ export async function updateTeacher(formData) {
     const teacher = await prisma.teacher.findUnique({ where: { id }, include: { user: true } });
     if (!teacher) return { error: 'Teacher not found.' };
     await prisma.teacher.update({ where: { id }, data: { name, phone, qualification } });
-    if (status) {
-      await prisma.user.update({ where: { id: teacher.userId }, data: { status } });
-    }
+    if (status) await prisma.user.update({ where: { id: teacher.userId }, data: { status } });
     revalidatePath('/admin/teachers');
     return { success: true };
   } catch {
@@ -232,18 +253,18 @@ export async function deleteTeacher(formData) {
 }
 
 // ─── STUDENTS ─────────────────────────────────────────────────────────────────
-export async function createStudent(formData) {
+export async function createStudent(_prev, formData) {
   await verifyAdmin();
-  const email = formData.get('email')?.toString().trim();
-  const password = formData.get('password')?.toString();
   const name = formData.get('name')?.toString().trim();
-  const rollNumber = formData.get('rollNumber')?.toString().trim();
   const fatherName = formData.get('fatherName')?.toString().trim();
   const classId = formData.get('classId')?.toString();
 
-  if (!email || !password || !name || !rollNumber || !fatherName || !classId)
-    return { error: 'All fields are required.' };
-  if (password.length < 6) return { error: 'Password must be at least 6 characters.' };
+  if (!name || !fatherName || !classId) return { error: 'Name, father\'s name and class are required.' };
+
+  // Auto-generate roll number + credentials
+  const rollNumber = await generateRollNumber(classId);
+  const email = `${rollNumber.toLowerCase().replace('-', '')}@fusionlms.edu`;
+  const password = generatePassword(8);
 
   const admin = adminClient();
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -252,7 +273,7 @@ export async function createStudent(formData) {
     email_confirm: true,
     user_metadata: { role: 'STUDENT' },
   });
-  if (authError) return { error: authError.message };
+  if (authError) return { error: `Auth error: ${authError.message}` };
 
   const authId = authData.user.id;
   try {
@@ -269,11 +290,20 @@ export async function createStudent(formData) {
       },
     });
     revalidatePath('/admin/students');
-    return { success: true };
+    return {
+      success: true,
+      credentials: {
+        name,
+        rollNumber,
+        loginId: rollNumber,
+        email,
+        password,
+      },
+    };
   } catch (e) {
     await admin.auth.admin.deleteUser(authId);
-    if (e.code === 'P2002') return { error: 'Roll number already exists.' };
-    return { error: 'Failed to create student profile.' };
+    if (e.code === 'P2002') return { error: 'Roll number conflict. Please try again.' };
+    return { error: `DB error: ${e.message}` };
   }
 }
 
@@ -281,22 +311,18 @@ export async function updateStudent(formData) {
   await verifyAdmin();
   const id = formData.get('id')?.toString();
   const name = formData.get('name')?.toString().trim();
-  const rollNumber = formData.get('rollNumber')?.toString().trim();
   const fatherName = formData.get('fatherName')?.toString().trim();
   const classId = formData.get('classId')?.toString();
   const status = formData.get('status')?.toString();
-  if (!id || !name || !rollNumber || !fatherName || !classId) return { error: 'All fields are required.' };
+  if (!id || !name || !fatherName || !classId) return { error: 'All fields are required.' };
   try {
     const student = await prisma.student.findUnique({ where: { id } });
     if (!student) return { error: 'Student not found.' };
-    await prisma.student.update({ where: { id }, data: { name, rollNumber, fatherName, classId } });
-    if (status) {
-      await prisma.user.update({ where: { id: student.userId }, data: { status } });
-    }
+    await prisma.student.update({ where: { id }, data: { name, fatherName, classId } });
+    if (status) await prisma.user.update({ where: { id: student.userId }, data: { status } });
     revalidatePath('/admin/students');
     return { success: true };
-  } catch (e) {
-    if (e.code === 'P2002') return { error: 'Roll number already exists.' };
+  } catch {
     return { error: 'Failed to update student.' };
   }
 }

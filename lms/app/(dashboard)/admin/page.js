@@ -33,8 +33,8 @@ export default async function AdminDashboard() {
     classCount = await prisma.class.count();
     subjectCount = await prisma.subject.count();
     userCount = await prisma.user.count();
-    recentStudents = await prisma.student.findMany({ include: { class: true }, orderBy: { createdAt: 'desc' }, take: 5 });
-    recentTeachers = await prisma.teacher.findMany({ include: { user: true }, orderBy: { createdAt: 'desc' }, take: 5 });
+    recentStudents = await prisma.student.findMany({ include: { class: true }, orderBy: { name: 'asc' }, take: 5 });
+    recentTeachers = await prisma.teacher.findMany({ include: { user: true }, orderBy: { name: 'asc' }, take: 5 });
     enquiries = await prisma.contactEnquiry.findMany({ orderBy: { createdAt: 'desc' }, take: 10 });
   } catch {}
 

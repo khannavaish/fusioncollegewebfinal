@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { createStudent, updateStudent, deleteStudent } from '@/app/actions/admin';
+import StudentCreateForm from './StudentCreateForm';
+import { updateStudent, deleteStudent } from '@/app/actions/admin';
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
@@ -23,7 +24,10 @@ export default async function AdminStudentsPage() {
   } catch {}
 
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
-  const statusColors = { ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30', INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30' };
+  const statusColors = {
+    ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30',
+    INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30',
+  };
 
   return (
     <div className="space-y-8 font-sans">
@@ -35,30 +39,8 @@ export default async function AdminStudentsPage() {
         <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
       </div>
 
-      {/* Enroll Student Form */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
-        <h2 className="text-sm font-bold text-white mb-4">Enroll New Student</h2>
-        {classes.length === 0 ? (
-          <p className="text-sm text-amber-400">Please <Link href="/admin/classes" className="underline">create at least one class</Link> before enrolling students.</p>
-        ) : (
-          <form action={createStudent}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-              <input name="name" placeholder="Full Name *" className={inputCls} required />
-              <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
-              <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
-              <input name="rollNumber" placeholder="Roll Number *" className={inputCls} required />
-              <input name="fatherName" placeholder="Father&apos;s Name *" className={inputCls} required />
-              <select name="classId" className={inputCls} required>
-                <option value="">Select Class *</option>
-                {classes.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.academicYr})</option>)}
-              </select>
-            </div>
-            <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-              Enroll Student
-            </button>
-          </form>
-        )}
-      </div>
+      {/* Client enrollment form (shows credential modal on success) */}
+      <StudentCreateForm classes={classes} />
 
       {/* Students Table */}
       {students.length === 0 ? (
@@ -71,11 +53,12 @@ export default async function AdminStudentsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/50">
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">#</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Roll No</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Class</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Father&apos;s Name</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Login Email</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -83,11 +66,16 @@ export default async function AdminStudentsPage() {
               <tbody>
                 {students.map((s, i) => (
                   <tr key={s.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
+                    <td className="px-5 py-4 text-xs text-zinc-600">{i + 1}</td>
                     <td className="px-5 py-4 font-semibold text-sm text-white">{s.name}</td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{s.rollNumber}</td>
+                    <td className="px-5 py-4">
+                      <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/20 px-2 py-0.5 rounded border border-cyan-500/20">
+                        {s.rollNumber}
+                      </span>
+                    </td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{s.class?.name || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{s.fatherName}</td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{s.user?.email}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-500 font-mono">{s.user?.email}</td>
                     <td className="px-5 py-4">
                       <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[s.user?.status] || statusColors.ACTIVE}`}>
                         {s.user?.status || 'ACTIVE'}
@@ -97,12 +85,11 @@ export default async function AdminStudentsPage() {
                       <div className="flex gap-2">
                         <details className="relative">
                           <summary className="px-2 py-1 bg-[#1e233d] rounded text-cyan-400 text-[10px] hover:bg-cyan-950/30 cursor-pointer list-none">Edit</summary>
-                          <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-72 shadow-2xl">
+                          <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-68 shadow-2xl">
                             <h3 className="text-xs font-bold text-white mb-3">Edit Student</h3>
                             <form action={updateStudent} className="space-y-2">
                               <input type="hidden" name="id" value={s.id} />
                               <input name="name" defaultValue={s.name} className={`${inputCls} text-xs`} required />
-                              <input name="rollNumber" defaultValue={s.rollNumber} className={`${inputCls} text-xs`} required />
                               <input name="fatherName" defaultValue={s.fatherName} className={`${inputCls} text-xs`} required />
                               <select name="classId" defaultValue={s.classId} className={`${inputCls} text-xs`} required>
                                 {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}

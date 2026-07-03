@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { createTeacher, updateTeacher, deleteTeacher } from '@/app/actions/admin';
+import TeacherCreateForm from './TeacherCreateForm';
+import { updateTeacher, deleteTeacher } from '@/app/actions/admin';
 
 export default async function AdminTeachersPage() {
   const supabase = await createClient();
@@ -25,7 +26,10 @@ export default async function AdminTeachersPage() {
   } catch {}
 
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
-  const statusColors = { ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30', INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30' };
+  const statusColors = {
+    ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30',
+    INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30',
+  };
 
   return (
     <div className="space-y-8 font-sans">
@@ -37,27 +41,13 @@ export default async function AdminTeachersPage() {
         <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">← Back to Dashboard</Link>
       </div>
 
-      {/* Add Teacher Form */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
-        <h2 className="text-sm font-bold text-white mb-4">Register New Teacher</h2>
-        <form action={createTeacher}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-            <input name="name" placeholder="Full Name *" className={inputCls} required />
-            <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
-            <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
-            <input name="phone" placeholder="Phone Number" className={inputCls} />
-            <input name="qualification" placeholder="Qualification (e.g. M.Sc Physics)" className={inputCls} />
-          </div>
-          <button type="submit" className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-            Register Teacher
-          </button>
-        </form>
-      </div>
+      {/* Client registration form (shows credential modal on success) */}
+      <TeacherCreateForm />
 
       {/* Teachers Table */}
       {teachers.length === 0 ? (
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-          No teachers yet. Add your first teacher above.
+          No teachers yet. Register your first teacher above.
         </div>
       ) : (
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
@@ -65,6 +55,7 @@ export default async function AdminTeachersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/50">
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">#</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Qualification</th>
@@ -77,10 +68,9 @@ export default async function AdminTeachersPage() {
               <tbody>
                 {teachers.map((t, i) => (
                   <tr key={t.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-sm text-white">{t.name}</div>
-                    </td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{t.user?.email}</td>
+                    <td className="px-5 py-4 text-xs text-zinc-600">{i + 1}</td>
+                    <td className="px-5 py-4 font-semibold text-sm text-white">{t.name}</td>
+                    <td className="px-5 py-4 text-xs font-mono text-zinc-400">{t.user?.email}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t._count.subjects} assigned</td>
