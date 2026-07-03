@@ -166,9 +166,13 @@ npm run db:seed
 ### Runtime Errors
 
 **Error: "Database connection failed"**
-- Verify `DATABASE_URL` and `DIRECT_URL` are correct
-- Check Supabase project is active
-- Ensure connection pooling is enabled (use ?pgbouncer=true)
+- Verify `DATABASE_URL` and `DIRECT_URL` are correct.
+- If you see `FATAL: (ENOIDENTIFIER) no tenant identifier provided` or `FATAL: (ENOTFOUND) tenant/user postgres.[ref] not found` when using the regional pooler host `aws-0-[region].pooler.supabase.com`, switch to the instance-level connections:
+  - **DATABASE_URL (Pooled, Port 6543):** `postgresql://postgres:[password]@db.[ref].supabase.co:6543/postgres?pgbouncer=true&sslmode=require`
+  - **DIRECT_URL (Port 5432):** `postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres`
+  *(Note: Ensure you use `.co` and not `.com` for the Supabase instance hostname)*
+- Check Supabase project is active.
+- Ensure connection pooling is enabled (use ?pgbouncer=true).
 
 **Error: "Supabase auth error"**
 - Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`

@@ -1,90 +1,68 @@
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-enum UserRole {
-  ADMIN
-  TEACHER
-  STUDENT
-  PARENT
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  PENDING
-}
-
-enum AttendanceStatus {
-  PRESENT
-  ABSENT
-  LEAVE
-  LATE
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
   id        String     @id @default(uuid())
-  authId    String     @unique // Maps to Supabase auth.users.id
+  authId    String     @unique
   email     String     @unique
   role      UserRole   @default(STUDENT)
   status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-
-  // Profiles
   admin     Admin?
-  teacher   Teacher?
-  student   Student?
   parent    Parent?
+  student   Student?
+  teacher   Teacher?
 }
 
 model Admin {
   id     String @id @default(uuid())
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   name   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Teacher {
   id            String         @id @default(uuid())
   userId        String         @unique
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   name          String
   phone         String?
   qualification String?
   subjects      ClassSubject[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Student {
   id          String          @id @default(uuid())
   userId      String          @unique
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   rollNumber  String          @unique
   fatherName  String
   classId     String
-  class       Class           @relation(fields: [classId], references: [id])
-  parents     ParentStudent[]
-  submissions Submission[]
   attendance  Attendance[]
   examResults ExamResult[]
+  parents     ParentStudent[]
+  class       Class           @relation(fields: [classId], references: [id])
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions Submission[]
 }
 
 model Parent {
   id       String          @id @default(uuid())
   userId   String          @unique
-  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name     String
   phone    String
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   children ParentStudent[]
 }
 
-// Join table for Parent-Student relationship (M:N)
 model ParentStudent {
   parentId  String
   studentId String
@@ -96,19 +74,18 @@ model ParentStudent {
 
 model Class {
   id         String         @id @default(uuid())
-  name       String         @unique // e.g., "F.Sc Pre-Medical Part I"
-  academicYr String         // e.g., "2026-2027"
-  students   Student[]
+  name       String         @unique
+  academicYr String
   subjects   ClassSubject[]
+  students   Student[]
 }
 
 model Subject {
   id            String         @id @default(uuid())
-  name          String         @unique // e.g., "Biology"
+  name          String         @unique
   classSubjects ClassSubject[]
 }
 
-// Intersecting Class, Subject, and Assigned Teacher
 model ClassSubject {
   id        String     @id @default(uuid())
   classId   String
@@ -117,9 +94,9 @@ model ClassSubject {
   class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   teacher   Teacher    @relation(fields: [teacherId], references: [id])
-  materials Material[]
   exams     Exam[]
   lectures  Lecture[]
+  materials Material[]
 
   @@unique([classId, subjectId])
 }
@@ -130,8 +107,8 @@ model Material {
   description    String?
   fileUrl        String
   classSubjectId String
-  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
 }
 
 model Assignment {
@@ -140,8 +117,8 @@ model Assignment {
   description String
   deadline    DateTime
   fileUrl     String?
-  submissions Submission[]
   createdAt   DateTime     @default(now())
+  submissions Submission[]
 }
 
 model Submission {
@@ -151,7 +128,7 @@ model Submission {
   fileUrl      String
   grade        String?
   remarks      String?
-  status       String     @default("SUBMITTED") // SUBMITTED, GRADED, LATE
+  status       String     @default("SUBMITTED")
   submittedAt  DateTime   @default(now())
   assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -164,8 +141,8 @@ model Lecture {
   date           DateTime     @default(now())
   topic          String
   classSubjectId String
-  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
   attendance     Attendance[]
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
 }
 
 model Attendance {
@@ -181,7 +158,7 @@ model Attendance {
 
 model Exam {
   id             String       @id @default(uuid())
-  title          String       // e.g. "Monthly Test Oct"
+  title          String
   date           DateTime
   totalMarks     Int
   classSubjectId String
@@ -207,6 +184,26 @@ model ContactEnquiry {
   email     String?
   phone     String
   message   String
-  status    String   @default("UNREAD") // UNREAD, REVIEWED, ARCHIVED
+  status    String   @default("UNREAD")
   createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  LATE
 }
