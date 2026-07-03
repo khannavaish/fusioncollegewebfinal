@@ -152,6 +152,10 @@ export default async function DashboardLayout({ children }) {
                 <IconBookOpen className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 Subjects
               </a>
+              <a href="/admin/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Edit Timetable
+              </a>
             </>
           )}
 
@@ -166,13 +170,17 @@ export default async function DashboardLayout({ children }) {
                 <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Attendance
               </a>
+              <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                Timetable
+              </a>
             </>
           )}
 
           {role === 'STUDENT' && (
             <>
               <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Learning</p>
-              <a href="/student/classes" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+              <a href="/student/courses" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconBookOpen className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 My Subjects
               </a>
@@ -183,6 +191,20 @@ export default async function DashboardLayout({ children }) {
               <a href="/student/results" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
                 Results
+              </a>
+              <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                Timetable
+              </a>
+            </>
+          )}
+
+          {role === 'PARENT' && (
+            <>
+              <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Family</p>
+              <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                Timetable
               </a>
             </>
           )}

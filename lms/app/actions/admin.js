@@ -258,8 +258,12 @@ export async function createStudent(_prev, formData) {
   const name = formData.get('name')?.toString().trim();
   const fatherName = formData.get('fatherName')?.toString().trim();
   const classId = formData.get('classId')?.toString();
+  const guardianName = formData.get('guardianName')?.toString().trim();
+  const guardianPhone = formData.get('guardianPhone')?.toString().trim();
 
-  if (!name || !fatherName || !classId) return { error: 'Name, father\'s name and class are required.' };
+  if (!name || !fatherName || !classId || !guardianName || !guardianPhone) {
+    return { error: 'Name, father\'s name, class, guardian name, and guardian phone are required.' };
+  }
 
   // Auto-generate roll number + credentials
   const rollNumber = await generateRollNumber(classId);
@@ -276,20 +280,83 @@ export async function createStudent(_prev, formData) {
   if (authError) return { error: `Auth error: ${authError.message}` };
 
   const authId = authData.user.id;
+  let parentAuthId = null;
+  let parentEmail = '';
+  let parentPassword = '';
+  let isExistingParent = false;
+  let parentDbId = '';
+
   try {
-    await prisma.user.create({
-      data: {
-        id: authId,
-        authId,
-        email,
-        role: 'STUDENT',
-        status: 'ACTIVE',
-        student: {
-          create: { id: authId, name, rollNumber, fatherName, classId },
-        },
-      },
+    const existingParent = await prisma.parent.findFirst({
+      where: { phone: guardianPhone },
     });
+
+    if (existingParent) {
+      isExistingParent = true;
+      parentDbId = existingParent.id;
+    } else {
+      parentEmail = `parent_${rollNumber.toLowerCase().replace('-', '')}@fusionlms.edu`;
+      parentPassword = generatePassword(8);
+
+      const { data: parentAuthData, error: parentAuthError } = await admin.auth.admin.createUser({
+        email: parentEmail,
+        password: parentPassword,
+        email_confirm: true,
+        user_metadata: { role: 'PARENT' },
+      });
+
+      if (parentAuthError) {
+        await admin.auth.admin.deleteUser(authId);
+        return { error: `Parent Auth error: ${parentAuthError.message}` };
+      }
+
+      parentAuthId = parentAuthData.user.id;
+      parentDbId = parentAuthId;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Create student
+      await tx.user.create({
+        data: {
+          id: authId,
+          authId,
+          email,
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          student: {
+            create: { id: authId, name, rollNumber, fatherName, classId },
+          },
+        },
+      });
+
+      // 2. If new parent, create parent
+      if (!isExistingParent) {
+        await tx.user.create({
+          data: {
+            id: parentAuthId,
+            authId: parentAuthId,
+            email: parentEmail,
+            role: 'PARENT',
+            status: 'ACTIVE',
+            parent: {
+              create: { id: parentAuthId, name: guardianName, phone: guardianPhone },
+            },
+          },
+        });
+      }
+
+      // 3. Link them
+      await tx.parentStudent.create({
+        data: {
+          parentId: parentDbId,
+          studentId: authId,
+        },
+      });
+    });
+
     revalidatePath('/admin/students');
+    revalidatePath('/admin/parents');
+
     return {
       success: true,
       credentials: {
@@ -298,10 +365,20 @@ export async function createStudent(_prev, formData) {
         loginId: rollNumber,
         email,
         password,
+        parent: {
+          name: guardianName,
+          phone: guardianPhone,
+          email: isExistingParent ? '' : parentEmail,
+          password: isExistingParent ? '' : parentPassword,
+          isExisting: isExistingParent,
+        },
       },
     };
   } catch (e) {
     await admin.auth.admin.deleteUser(authId);
+    if (parentAuthId) {
+      await admin.auth.admin.deleteUser(parentAuthId);
+    }
     if (e.code === 'P2002') return { error: 'Roll number conflict. Please try again.' };
     return { error: `DB error: ${e.message}` };
   }
@@ -342,6 +419,23 @@ export async function deleteStudent(formData) {
     return { success: true };
   } catch {
     return { error: 'Failed to delete student.' };
+  }
+}
+
+export async function transferStudent(formData) {
+  await verifyAdmin();
+  const studentId = formData.get('studentId')?.toString();
+  const classId = formData.get('classId')?.toString();
+  if (!studentId || !classId) return { error: 'Student and Class are required.' };
+  try {
+    await prisma.student.update({
+      where: { id: studentId },
+      data: { classId },
+    });
+    revalidatePath('/admin/students');
+    return { success: true };
+  } catch (e) {
+    return { error: `Failed to transfer student: ${e.message}` };
   }
 }
 

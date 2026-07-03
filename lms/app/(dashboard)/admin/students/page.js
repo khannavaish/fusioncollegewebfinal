@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import StudentCreateForm from './StudentCreateForm';
-import { updateStudent, deleteStudent } from '@/app/actions/admin';
+import { updateStudent, deleteStudent, transferStudent } from '@/app/actions/admin';
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
@@ -100,6 +100,21 @@ export default async function AdminStudentsPage() {
                               </select>
                               <button type="submit" className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
                                 Save Changes
+                              </button>
+                            </form>
+                          </div>
+                        </details>
+                        <details className="relative">
+                          <summary className="px-2 py-1 bg-[#1e233d] rounded text-indigo-400 text-[10px] hover:bg-indigo-950/30 cursor-pointer list-none">Transfer</summary>
+                          <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-60 shadow-2xl">
+                            <h3 className="text-xs font-bold text-white mb-3">Transfer Student</h3>
+                            <form action={transferStudent} className="space-y-2">
+                              <input type="hidden" name="studentId" value={s.id} />
+                              <select name="classId" defaultValue={s.classId} className={`${inputCls} text-xs`} required>
+                                {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                              </select>
+                              <button type="submit" className="w-full py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                                Transfer Class
                               </button>
                             </form>
                           </div>

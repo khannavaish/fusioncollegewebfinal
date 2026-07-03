@@ -102,8 +102,8 @@ export default async function StudentCoursesPage() {
               </div>
 
               <div className="mt-4 pt-4 border-t border-[#1e233d]">
-                <Link href={`/student/courses/${course.id}/materials`} className="block text-xs px-3 py-2 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 hover:bg-cyan-950/20 transition-colors text-center">
-                  View Materials
+                <Link href={`/student/courses/${course.id}`} className="block text-xs px-3 py-2 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 hover:bg-cyan-950/20 transition-colors text-center">
+                  View Course
                 </Link>
               </div>
             </div>

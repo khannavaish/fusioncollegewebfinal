@@ -47,13 +47,16 @@ export default async function TeacherClassesPage() {
       classSubjects = await prisma.classSubject.findMany({
         where: { teacherId: teacher.id },
         include: {
-          class: true,
-          subject: true,
-          students: {
+          class: {
             include: {
-              student: true,
+              students: {
+                include: {
+                  user: true,
+                },
+              },
             },
           },
+          subject: true,
         },
       });
     }
@@ -88,7 +91,7 @@ export default async function TeacherClassesPage() {
                   <p className="text-xs text-zinc-500 mt-1">Session: {cs.class.academicYr}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-white">{cs.students.length}</div>
+                  <div className="text-2xl font-black text-white">{cs.class.students.length}</div>
                   <div className="text-xs text-zinc-400">Students</div>
                 </div>
               </div>
@@ -106,11 +109,11 @@ export default async function TeacherClassesPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1e233d] text-sm text-zinc-300">
-                      {cs.students.map((enrollment) => (
-                        <tr key={enrollment.studentId} className="hover:bg-[#16192b]/20 transition-colors">
-                          <td className="p-3 font-semibold text-white">{enrollment.student.name}</td>
-                          <td className="p-3">{enrollment.student.rollNumber}</td>
-                          <td className="p-3">{enrollment.student.user?.email || 'N/A'}</td>
+                      {cs.class.students.map((student) => (
+                        <tr key={student.id} className="hover:bg-[#16192b]/20 transition-colors">
+                          <td className="p-3 font-semibold text-white">{student.name}</td>
+                          <td className="p-3">{student.rollNumber}</td>
+                          <td className="p-3">{student.user?.email || 'N/A'}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -140,6 +140,7 @@ model Lecture {
   id             String       @id @default(uuid())
   date           DateTime     @default(now())
   topic          String
+  pictureUrl     String       @default("")
   classSubjectId String
   attendance     Attendance[]
   classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
@@ -206,4 +207,13 @@ enum AttendanceStatus {
   ABSENT
   LEAVE
   LATE
+}
+
+model TimetableSlot {
+  id        String @id @default(uuid())
+  section   String // "BOYS" or "GIRLS"
+  className String // e.g. "Medical", "I.C.S I", "I.C.S II"
+  timeSlot  String // e.g. "7:30-8:10", "8:10-8:50"
+  subject   String // e.g. "Physics"
+  teacher   String // e.g. "Sir Asif"
 }
