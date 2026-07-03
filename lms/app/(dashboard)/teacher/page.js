@@ -150,7 +150,8 @@ export default async function TeacherDashboard() {
 
     const teacherSlots = timetableSlots.filter((slot) => classSubjects.some((cs) => (
       sameText(cs.subject.name, slot.subject) &&
-      (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className))
+      (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className)) &&
+      sameText(teacher?.name, slot.teacher)
     )));
 
     if (teacherSlots.length > 0) {
