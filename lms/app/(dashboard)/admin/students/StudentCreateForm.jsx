@@ -170,6 +170,11 @@ export default function StudentCreateForm({ classes }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input name="cnic" placeholder="B-Form / CNIC Number (Optional)" className={inputCls} />
+              <input name="fatherCnic" placeholder="Father's CNIC (Optional)" className={inputCls} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-2 relative">
                 <input
                   name="guardianName"

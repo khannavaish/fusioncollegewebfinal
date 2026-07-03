@@ -47,6 +47,8 @@ model Student {
   rollNumber  String          @unique
   fatherName  String
   classId     String
+  cnic        String?
+  fatherCnic  String?
   attendance  Attendance[]
   examResults ExamResult[]
   parents     ParentStudent[]

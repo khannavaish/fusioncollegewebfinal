@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef } from 'react';
 import { saveTimetableSlots } from '@/app/actions/timetable';
 import { createClass } from '@/app/actions/admin';
-import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
+import { IconCheckCircle, IconAlertTriangle, IconDownload, IconPlus, IconHelpCircle, IconDocumentText, IconSchool, IconSettings } from '@/app/components/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 
@@ -248,14 +248,14 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             onClick={() => handleExport(exportKey)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
           >
-            {exporting === exportKey ? '⏳' : '📸'} Export {sectionTitle} PNG
+            {exporting === exportKey ? '⏳' : <IconDownload className="w-3.5 h-3.5" />} Export {sectionTitle} PNG
           </button>
         </div>
 
-        {/* Export-captured container */}
-        <div ref={sectionRef} className="bg-[#070810] p-4 rounded-xl">
-          <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
-          <div className="overflow-x-auto border border-[#1e233d] rounded-xl">
+        {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
+        <div className="overflow-x-auto border border-[#1e233d] rounded-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+          <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
+            <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
@@ -310,7 +310,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                               onClick={e => openEditModal(e, sectionCode, cls.display, ts)}
                               className="absolute right-1.5 top-1.5 p-1 bg-[#16192b] border border-[#2b3052] rounded opacity-0 group-hover:opacity-100 transition-opacity hover:border-cyan-500 cursor-pointer"
                             >
-                              <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
+                              <IconSettings className="w-3 h-3 text-cyan-400" />
                             </button>
                           </motion.div>
                         </td>
@@ -325,7 +325,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
 
         {/* Per-class export cards (hidden visually but captured for export) */}
         <div className="space-y-3">
-          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Export Individual Class:</h4>
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+            <IconDocumentText className="w-3.5 h-3.5" /> Export Individual Class:
+          </h4>
           <div className="flex flex-wrap gap-2">
             {classesList.map(cls => (
               <button
@@ -333,9 +335,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                 type="button"
                 disabled={exporting === 'class' + cls.raw}
                 onClick={() => handleExport('class', cls.raw)}
-                className="px-3 py-1.5 bg-[#16192b] border border-[#2b3052] hover:border-cyan-600 text-zinc-300 hover:text-white text-xs font-medium rounded-lg transition-all cursor-pointer disabled:opacity-50"
+                className="px-3 py-1.5 bg-[#16192b] border border-[#2b3052] hover:border-cyan-600 text-zinc-300 hover:text-white text-xs font-medium rounded-lg transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1"
               >
-                {exporting === 'class' + cls.raw ? '⏳' : '📄'} {cls.display}
+                {exporting === 'class' + cls.raw ? '⏳' : <IconDocumentText className="w-3.5 h-3.5" />} {cls.display}
               </button>
             ))}
           </div>
@@ -368,16 +370,18 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
       {/* Controls bar */}
       <div className="flex flex-wrap justify-between items-start gap-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5">
         <div className="text-sm text-zinc-400 max-w-sm">
-          🎮 <span className="font-bold text-white">Editor Mode:</span>
-          <ul className="list-disc pl-4 mt-1.5 space-y-1 text-xs">
+          <div className="flex items-center gap-1.5 font-bold text-white mb-1.5">
+            <IconHelpCircle className="w-4 h-4 text-cyan-400" /> Editor Mode Rules:
+          </div>
+          <ul className="list-disc pl-4 space-y-1 text-xs">
             <li>Click two tiles sequentially to swap them.</li>
             <li>Drag & drop to reschedule.</li>
             <li>Hover column headers to edit or remove time slots.</li>
           </ul>
         </div>
         <div className="flex flex-wrap gap-2.5">
-          <button onClick={addTimeColumn} className="px-4 py-2 border border-cyan-800 hover:border-cyan-500 bg-cyan-950/20 text-cyan-400 text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-            ➕ Add Time Column
+          <button onClick={addTimeColumn} className="px-4 py-2 border border-cyan-800 hover:border-cyan-500 bg-cyan-950/20 text-cyan-400 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1">
+            <IconPlus className="w-3.5 h-3.5" /> Add Time Column
           </button>
           <button onClick={handleSave} disabled={isPending} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
             {isPending ? 'Publishing...' : 'Save & Publish Live'}
@@ -387,7 +391,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
 
       {/* Inline class row creator */}
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5">
-        <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">➕ Add New Class Row</h4>
+        <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <IconSchool className="w-3.5 h-3.5 text-cyan-400" /> Add New Class Row
+        </h4>
         <form onSubmit={handleCreateClass} className="flex flex-wrap items-center gap-3">
           <select value={newClassSection} onChange={e => setNewClassSection(e.target.value)}
             className="bg-[#06080f] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
@@ -400,8 +406,8 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             className="flex-1 min-w-[200px] bg-[#06080f] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600"
             required />
           <button type="submit" disabled={isPending}
-            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-            {isPending ? 'Creating...' : 'Add Class'}
+            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1">
+            <IconPlus className="w-3.5 h-3.5" /> Add Class
           </button>
         </form>
       </div>

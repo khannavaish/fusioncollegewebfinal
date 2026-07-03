@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { motion } from 'framer-motion';
+import { IconDownload, IconStar, IconSparkles } from '@/app/components/icons';
 
 const SUBJECT_COLORS = {
   Physics:   { bg: 'from-orange-950/60 to-red-950/60',   border: 'border-orange-600/40',   text: 'text-orange-300' },
@@ -84,15 +85,16 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
           <button
             disabled={exporting === exportKey}
             onClick={() => handleExport(exportKey, sectionRef, `Fusion_${sectionTitle.replace(/\s+/g,'_')}_Timetable.png`)}
-            className="px-3 py-1.5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
           >
-            {exporting === exportKey ? '⏳' : '📸'} Export PNG
+            {exporting === exportKey ? '⏳' : <IconDownload className="w-3.5 h-3.5" />} Export PNG
           </button>
         </div>
 
-        <div ref={sectionRef} className="bg-[#070810] p-4 rounded-xl">
-          <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
-          <div className="overflow-x-auto border border-[#1e233d] rounded-xl">
+        {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
+        <div className="overflow-x-auto border border-[#1e233d] rounded-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+          <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
+            <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
@@ -107,8 +109,8 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                   const isStudentCls = shouldHighlightClass(cls.raw);
                   return (
                     <tr key={cls.id} className={`transition-colors ${isStudentCls ? 'bg-indigo-950/20' : 'hover:bg-[#16192b]/10'}`}>
-                      <td className={`px-5 py-4 text-sm font-extrabold text-left border-r border-[#1e233d] ${isStudentCls ? 'text-indigo-400' : 'text-white'}`}>
-                        {cls.display} {isStudentCls && '⭐'}
+                      <td className={`px-5 py-4 text-sm font-extrabold text-left border-r border-[#1e233d] flex items-center gap-1.5 ${isStudentCls ? 'text-indigo-400' : 'text-white'}`}>
+                        {cls.display} {isStudentCls && <IconStar className="w-3.5 h-3.5 text-indigo-400" />}
                       </td>
                       {timeSlots.map(ts => {
                         const slot    = getSlot(sectionCode, cls.display, ts);
@@ -147,19 +149,22 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5">
-        <div className="text-sm text-zinc-400">
-          ✨ Live college schedule. Hover tiles for interactions. Export each section as a PNG below.
+        <div className="text-sm text-zinc-400 flex items-center gap-2">
+          <IconSparkles className="w-4 h-4 text-cyan-400" />
+          <span>Live college schedule. Hover tiles for interactions. Export each section as a PNG below.</span>
         </div>
       </div>
 
       {role === 'STUDENT' && studentClassName && (
-        <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-4 text-sm text-indigo-300">
-          ⭐ Your class (<span className="font-bold text-white">{studentClassName}</span>) rows are highlighted.
+        <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-4 text-sm text-indigo-300 flex items-center gap-2">
+          <IconStar className="w-4 h-4 text-indigo-400" />
+          <span>Your class (<span className="font-bold text-white">{studentClassName}</span>) rows are highlighted.</span>
         </div>
       )}
       {role === 'TEACHER' && teacherName && (
-        <div className="bg-cyan-950/20 border border-cyan-500/20 rounded-xl p-4 text-sm text-cyan-300">
-          ⭐ Your slots (<span className="font-bold text-white">{teacherName}</span>) are highlighted in cyan.
+        <div className="bg-cyan-950/20 border border-cyan-500/20 rounded-xl p-4 text-sm text-cyan-300 flex items-center gap-2">
+          <IconStar className="w-4 h-4 text-cyan-400" />
+          <span>Your slots (<span className="font-bold text-white">{teacherName}</span>) are highlighted in cyan.</span>
         </div>
       )}
 

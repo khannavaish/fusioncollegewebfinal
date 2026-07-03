@@ -174,3 +174,78 @@ export function IconChatBubble({ className = 'w-4 h-4' }) {
     </svg>
   );
 }
+
+export function IconPlus({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="10" y1="5" x2="10" y2="15" />
+      <line x1="5" y1="10" x2="15" y2="10" />
+    </svg>
+  );
+}
+
+export function IconDownload({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2" />
+      <polyline points="7 10 10 13 13 10" />
+      <line x1="10" y1="13" x2="10" y2="3" />
+    </svg>
+  );
+}
+
+export function IconSettings({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="3" />
+      <path d="M17 10c0-.8-.5-1.5-1.2-1.8l-.4-1.2.6-1.1c.5-.7.4-1.6-.2-2.2s-1.5-.7-2.2-.2l-1.1.6-1.2-.4C11.5 3.5 10.8 3 10 3s-1.5.5-1.8 1.2l-1.2.4-1.1-.6c-.7-.5-1.6-.4-2.2.2s-.7 1.5-.2 2.2l.6 1.1-.4 1.2C3.5 8.5 3 9.2 3 10s.5 1.5 1.2 1.8l.4 1.2-.6 1.1c-.5.7-.4 1.6.2 2.2s1.5.7 2.2.2l1.1-.6 1.2.4c.3.7 1 1.2 1.8 1.2s1.5-.5 1.8-1.2l1.2-.4 1.1.6c.7.5 1.6.4 2.2-.2s.7-1.5.2-2.2l-.6-1.1.4-1.2c.7-.3 1.2-1 1.2-1.8z" />
+    </svg>
+  );
+}
+
+export function IconClock({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="8" />
+      <polyline points="10 5 10 10 13 13" />
+    </svg>
+  );
+}
+
+export function IconHelpCircle({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="8" />
+      <path d="M7.5 8a2.5 2.5 0 015 0c0 1.5-1.5 2.5-1.5 2.5" />
+      <line x1="10" y1="14.5" x2="10.01" y2="14.5" strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+export function IconStar({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  );
+}
+
+export function IconDocumentText({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7l-5-5z" />
+      <path d="M12 2v5h5" />
+      <line x1="6" y1="11" x2="14" y2="11" />
+      <line x1="6" y1="14" x2="11" y2="14" />
+    </svg>
+  );
+}
+
+export function IconSchool({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2L2 6.5l8 4.5 8-4.5L10 2z" />
+      <path d="M5 8.5V14l5 3 5-3V8.5" />
+    </svg>
+  );
+}

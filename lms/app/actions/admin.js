@@ -316,6 +316,8 @@ export async function createStudent(_prev, formData) {
   const classId = formData.get('classId')?.toString();
   const guardianName = formData.get('guardianName')?.toString().trim();
   const guardianPhone = formData.get('guardianPhone')?.toString().trim();
+  const cnic = formData.get('cnic')?.toString().trim() || null;
+  const fatherCnic = formData.get('fatherCnic')?.toString().trim() || null;
 
   if (!name || !fatherName || !classId || !guardianName || !guardianPhone) {
     return { error: 'Name, father\'s name, class, guardian name, and guardian phone are required.' };
@@ -381,7 +383,7 @@ export async function createStudent(_prev, formData) {
           status: 'ACTIVE',
           plainPassword: password,
           student: {
-            create: { id: authId, name, rollNumber, fatherName, classId },
+            create: { id: authId, name, rollNumber, fatherName, classId, cnic, fatherCnic },
           },
         },
       });
