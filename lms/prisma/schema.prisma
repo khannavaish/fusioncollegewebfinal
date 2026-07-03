@@ -229,6 +229,8 @@ model TimetableConfig {
 
 model WhatsAppConfig {
   id           String  @id @default("default")
+  provider     String  @default("ULTRAMSG") // "ULTRAMSG" or "CUSTOM"
+  gatewayUrl   String  @default("http://localhost:3001")
   senderNumber String  @default("")
   apiToken     String  @default("")
   instanceId   String  @default("")

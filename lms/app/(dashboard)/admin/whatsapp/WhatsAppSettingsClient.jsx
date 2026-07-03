@@ -5,6 +5,8 @@ import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary } from '@/app
 import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
 
 export default function WhatsAppSettingsClient({ config }) {
+  const [provider, setProvider]         = useState(config?.provider || 'ULTRAMSG');
+  const [gatewayUrl, setGatewayUrl]     = useState(config?.gatewayUrl || 'http://localhost:3001');
   const [senderNumber, setSenderNumber] = useState(config?.senderNumber || '');
   const [apiToken, setApiToken]         = useState(config?.apiToken || '');
   const [instanceId, setInstanceId]     = useState(config?.instanceId || '');
@@ -24,6 +26,8 @@ export default function WhatsAppSettingsClient({ config }) {
     setSaveMsg(null);
     startSave(async () => {
       const fd = new FormData();
+      fd.append('provider', provider);
+      fd.append('gatewayUrl', gatewayUrl);
       fd.append('senderNumber', senderNumber);
       fd.append('apiToken', apiToken);
       fd.append('instanceId', instanceId);
@@ -53,7 +57,7 @@ export default function WhatsAppSettingsClient({ config }) {
       fd.append('date', eodDate);
       const res = await sendEndOfDaySummary(fd);
       if (res?.error) setEodMsg({ type: 'error', text: res.error });
-      else setEodMsg({ type: 'success', text: `Sent to parents of ${res.sent} students. ${res.skipped} skipped (no parent phone).` });
+      else setEodMsg({ type: 'success', text: `Sent to parents of ${res.sent} students. ${res.skipped} skipped.` });
     });
   };
 
@@ -66,21 +70,20 @@ export default function WhatsAppSettingsClient({ config }) {
 
   return (
     <div className="space-y-8">
-      {/* Section 1: API Configuration */}
+      {/* Configuration Form */}
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
         <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d]">
-          <h2 className="text-sm font-bold text-white">UltraMsg API Configuration</h2>
-          <p className="text-[11px] text-zinc-500 mt-1">
-            Sign up at <a href="https://app.ultramsg.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">app.ultramsg.com</a> to get your Instance ID and API Token.
-          </p>
+          <h2 className="text-sm font-bold text-white">WhatsApp Provider Configuration</h2>
+          <p className="text-[11px] text-zinc-500 mt-1">Configure your WhatsApp sending client credentials below.</p>
         </div>
         <form onSubmit={handleSave} className="p-6 space-y-5">
           {saveMsg && <AlertMsg msg={saveMsg} />}
 
-          <div className="flex items-center gap-3 pb-5 border-b border-[#1e233d]">
-            <div className="flex-1">
+          {/* Toggle Enable */}
+          <div className="flex items-center justify-between pb-5 border-b border-[#1e233d]">
+            <div>
               <div className="text-sm font-bold text-white">Enable WhatsApp Notifications</div>
-              <div className="text-xs text-zinc-500 mt-0.5">When enabled, messages will be sent to parents automatically.</div>
+              <div className="text-xs text-zinc-500 mt-0.5">Automate parent arrival and daily summary alerts.</div>
             </div>
             <button type="button" onClick={() => setIsEnabled(v => !v)}
               className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-emerald-600' : 'bg-zinc-700'}`}>
@@ -88,27 +91,74 @@ export default function WhatsAppSettingsClient({ config }) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Your Sender Number</label>
-              <input type="text" value={senderNumber} onChange={e => setSenderNumber(e.target.value)}
-                placeholder="e.g. 03001234567"
-                className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600" />
-              <p className="text-[10px] text-zinc-600 mt-1">The WhatsApp number you are sending FROM (for reference only)</p>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg Instance ID</label>
-              <input type="text" value={instanceId} onChange={e => setInstanceId(e.target.value)}
-                placeholder="e.g. instance12345"
-                className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg API Token</label>
-              <input type="password" value={apiToken} onChange={e => setApiToken(e.target.value)}
-                placeholder="Your UltraMsg API token"
-                className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600" />
+          {/* Provider Selection */}
+          <div>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Service Provider</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setProvider('ULTRAMSG')}
+                className={`py-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                  provider === 'ULTRAMSG' ? 'bg-cyan-950/20 border-cyan-500/40 text-cyan-400 font-bold' : 'border-[#1e233d] text-zinc-500 bg-transparent'
+                }`}>
+                UltraMsg (Paid API Cloud)
+              </button>
+              <button type="button" onClick={() => setProvider('CUSTOM')}
+                className={`py-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                  provider === 'CUSTOM' ? 'bg-cyan-950/20 border-cyan-500/40 text-cyan-400 font-bold' : 'border-[#1e233d] text-zinc-500 bg-transparent'
+                }`}>
+                Free Self-Hosted Gateway (Scan QR)
+              </button>
             </div>
           </div>
+
+          {provider === 'CUSTOM' ? (
+            // Custom Self-Hosted API Panel
+            <div className="space-y-4 pt-2">
+              <div className="p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 space-y-2">
+                <p className="font-bold text-white">✨ Free &amp; Unlimited WhatsApp Sending</p>
+                <p>
+                  We have generated a custom microservice script for you in this codebase under:
+                  <code className="text-white bg-black/40 px-1 py-0.5 rounded ml-1 font-mono">scratch/whatsapp-gateway.js</code>
+                </p>
+                <p className="font-semibold text-white mt-1">To run it on your local server/machine:</p>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li>Open a terminal in the project directory.</li>
+                  <li>Install dependencies: <code className="text-cyan-300">npm install express whatsapp-web.js qrcode-terminal</code></li>
+                  <li>Start the gateway service: <code className="text-cyan-300">node scratch/whatsapp-gateway.js</code></li>
+                  <li>Scan the terminal's QR code with your phone's WhatsApp Linked Devices to log in.</li>
+                </ol>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Self-Hosted Gateway URL</label>
+                <input type="text" value={gatewayUrl} onChange={e => setGatewayUrl(e.target.value)}
+                  placeholder="e.g. http://localhost:3001"
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+                <p className="text-[10px] text-zinc-500 mt-1">Your self-hosted API gateway endpoint address.</p>
+              </div>
+            </div>
+          ) : (
+            // UltraMsg API Panel
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sender Number</label>
+                <input type="text" value={senderNumber} onChange={e => setSenderNumber(e.target.value)}
+                  placeholder="e.g. 03001234567"
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg Instance ID</label>
+                <input type="text" value={instanceId} onChange={e => setInstanceId(e.target.value)}
+                  placeholder="e.g. instance12345"
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg API Token</label>
+                <input type="password" value={apiToken} onChange={e => setApiToken(e.target.value)}
+                  placeholder="Your UltraMsg API token"
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+              </div>
+            </div>
+          )}
 
           <button type="submit" disabled={isSaving}
             className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
@@ -117,7 +167,7 @@ export default function WhatsAppSettingsClient({ config }) {
         </form>
       </div>
 
-      {/* Section 2: Test Message */}
+      {/* Test Message */}
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
         <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d]">
           <h2 className="text-sm font-bold text-white">Send Test Message</h2>
@@ -137,13 +187,12 @@ export default function WhatsAppSettingsClient({ config }) {
         </form>
       </div>
 
-      {/* Section 3: End of Day Report */}
+      {/* End of Day Report */}
       <div className="bg-[#0d0f1a] border border-amber-500/20 rounded-xl overflow-hidden">
         <div className="px-6 py-4 bg-amber-950/10 border-b border-amber-500/20">
           <h2 className="text-sm font-bold text-white">Send End-of-Day Attendance Report</h2>
           <p className="text-[11px] text-zinc-500 mt-1">
             Sends every parent a full summary of their child's attendance and lecture topics for the selected date.
-            This includes how many classes the student attended and what was taught.
           </p>
         </div>
         <form onSubmit={handleEod} className="p-6 space-y-4">
@@ -159,25 +208,7 @@ export default function WhatsAppSettingsClient({ config }) {
               {isEod ? 'Sending Reports...' : 'Send End-of-Day Reports'}
             </button>
           </div>
-          <div className="bg-amber-950/20 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-300">
-            <strong>Message includes:</strong> Student name, roll number, classes attended today, subjects covered, and topics taught per subject.
-          </div>
         </form>
-      </div>
-
-      {/* Section 4: How it works */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
-        <h2 className="text-sm font-bold text-white mb-4">How WhatsApp Notifications Work</h2>
-        <div className="space-y-3 text-xs text-zinc-400">
-          <div className="flex gap-3">
-            <div className="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 text-[10px]">1</div>
-            <div><strong className="text-white">Arrival Message (Automatic):</strong> When a teacher marks a student as Present for the first time today, the parent immediately receives: <em>"Your child [Name] has arrived at Fusion College today."</em></div>
-          </div>
-          <div className="flex gap-3">
-            <div className="w-6 h-6 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold flex-shrink-0 text-[10px]">2</div>
-            <div><strong className="text-white">End-of-Day Report (Manual):</strong> At the end of school, click <em>"Send End-of-Day Reports"</em> above. Each parent receives a full breakdown of attendance in every class and what topics each teacher taught.</div>
-          </div>
-        </div>
       </div>
     </div>
   );

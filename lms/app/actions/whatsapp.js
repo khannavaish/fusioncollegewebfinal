@@ -13,10 +13,10 @@ async function verifyAdmin() {
   return user;
 }
 
-// ─── Send via UltraMsg ────────────────────────────────────────────────────────
+// ─── Send via Custom / UltraMsg ────────────────────────────────────────────────
 async function sendWhatsAppMessage(to, message) {
   const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
-  if (!config || !config.isEnabled || !config.apiToken || !config.instanceId) {
+  if (!config || !config.isEnabled) {
     console.log('[WhatsApp] Not configured or disabled. Message not sent.');
     return { skipped: true };
   }
@@ -24,25 +24,46 @@ async function sendWhatsAppMessage(to, message) {
   const phone = to.replace(/[^0-9]/g, '');
   const formattedPhone = phone.startsWith('92') ? phone : `92${phone.replace(/^0/, '')}`;
 
-  const url = `https://api.ultramsg.com/${config.instanceId}/messages/chat`;
-  const body = new URLSearchParams({
-    token: config.apiToken,
-    to: formattedPhone,
-    body: message,
-    priority: '10',
-  });
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
+  if (config.provider === 'CUSTOM') {
+    const url = `${config.gatewayUrl.replace(/\/$/, '')}/send`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: formattedPhone, message }),
+      });
+      const data = await res.json();
+      return { success: true, data };
+    } catch (e) {
+      console.error('[WhatsApp] Self-hosted gateway send error:', e);
+      return { error: e.message };
+    }
+  } else {
+    // UltraMsg Mode
+    if (!config.apiToken || !config.instanceId) {
+      console.log('[WhatsApp] UltraMsg token or instanceId is missing.');
+      return { skipped: true };
+    }
+    const url = `https://api.ultramsg.com/${config.instanceId}/messages/chat`;
+    const body = new URLSearchParams({
+      token: config.apiToken,
+      to: formattedPhone,
+      body: message,
+      priority: '10',
     });
-    const data = await res.json();
-    return { success: true, data };
-  } catch (e) {
-    console.error('[WhatsApp] Send error:', e);
-    return { error: e.message };
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      });
+      const data = await res.json();
+      return { success: true, data };
+    } catch (e) {
+      console.error('[WhatsApp] UltraMsg send error:', e);
+      return { error: e.message };
+    }
   }
 }
 
@@ -50,14 +71,16 @@ async function sendWhatsAppMessage(to, message) {
 export async function getWhatsAppConfig() {
   try {
     const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
-    return config || { senderNumber: '', apiToken: '', instanceId: '', isEnabled: false };
+    return config || { provider: 'ULTRAMSG', gatewayUrl: 'http://localhost:3001', senderNumber: '', apiToken: '', instanceId: '', isEnabled: false };
   } catch {
-    return { senderNumber: '', apiToken: '', instanceId: '', isEnabled: false };
+    return { provider: 'ULTRAMSG', gatewayUrl: 'http://localhost:3001', senderNumber: '', apiToken: '', instanceId: '', isEnabled: false };
   }
 }
 
 export async function saveWhatsAppConfig(formData) {
   await verifyAdmin();
+  const provider     = formData.get('provider')?.toString() || 'ULTRAMSG';
+  const gatewayUrl   = formData.get('gatewayUrl')?.toString().trim() || 'http://localhost:3001';
   const senderNumber = formData.get('senderNumber')?.toString().trim() || '';
   const apiToken     = formData.get('apiToken')?.toString().trim() || '';
   const instanceId   = formData.get('instanceId')?.toString().trim() || '';
@@ -66,8 +89,8 @@ export async function saveWhatsAppConfig(formData) {
   try {
     await prisma.whatsAppConfig.upsert({
       where: { id: 'default' },
-      update: { senderNumber, apiToken, instanceId, isEnabled },
-      create: { id: 'default', senderNumber, apiToken, instanceId, isEnabled },
+      update: { provider, gatewayUrl, senderNumber, apiToken, instanceId, isEnabled },
+      create: { id: 'default', provider, gatewayUrl, senderNumber, apiToken, instanceId, isEnabled },
     });
     revalidatePath('/admin/whatsapp');
     return { success: true };
