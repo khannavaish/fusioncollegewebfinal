@@ -19,7 +19,7 @@ async function verifyAdminOrTeacher() {
 }
 
 // Helper to calculate grade
-export function calculateGrade(marksObt, totalMarks) {
+function calculateGrade(marksObt, totalMarks) {
   if (!totalMarks || totalMarks <= 0) return '—';
   const percentage = (Number(marksObt) / Number(totalMarks)) * 100;
   if (percentage >= 95) return 'A+';
