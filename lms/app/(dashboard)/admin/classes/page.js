@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { createClass, updateClass, deleteClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
+import DeleteClassForm from './DeleteClassForm';
+import { createClass, updateClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
 
 export default async function AdminClassesPage() {
   const supabase = await createClient();
@@ -81,12 +82,7 @@ export default async function AdminClassesPage() {
                       </form>
                     </div>
                   </details>
-                  <form action={deleteClass} onSubmit="return confirm('Delete this class and all its assignments?')">
-                    <input type="hidden" name="id" value={cls.id} />
-                    <button type="submit" className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 text-xs font-medium hover:bg-red-950/20 transition-colors cursor-pointer">
-                      Delete
-                    </button>
-                  </form>
+                  <DeleteClassForm id={cls.id} />
                 </div>
               </div>
 

@@ -90,7 +90,8 @@ export async function deleteClass(formData) {
     await prisma.class.delete({ where: { id } });
     revalidatePath('/admin/classes');
     return { success: true };
-  } catch {
+  } catch (e) {
+    console.error('Failed to delete class:', e);
     return { error: 'Failed to delete class. Remove all students from it first.' };
   }
 }
