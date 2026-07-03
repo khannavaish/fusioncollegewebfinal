@@ -78,6 +78,11 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
 
   const renderSection = (sectionTitle, sectionCode, classesList, sectionRef, exportKey) => {
     if (classesList.length === 0) return null;
+
+    // A time slot is a "break" if no class has any subject assigned to it
+    const isBreakSlot = (ts) =>
+      classesList.every(cls => !getSlot(sectionCode, cls.display, ts)?.subject);
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-[#1e233d] pb-3">
@@ -100,7 +105,11 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
                   <th className="px-5 py-4 text-left w-36 border-r border-[#1e233d]">Class</th>
                   {timeSlots.map(ts => (
-                    <th key={ts} className="px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0">{ts}</th>
+                    <th key={ts} className={`px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0 ${
+                      isBreakSlot(ts) ? 'text-amber-400 bg-amber-950/20' : ''
+                    }`}>
+                      {isBreakSlot(ts) ? <span className="flex items-center justify-center gap-1">☕ <span>{ts}</span></span> : ts}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -116,6 +125,18 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                         const slot    = getSlot(sectionCode, cls.display, ts);
                         const isTeacher = shouldHighlightSlot(slot);
                         const color   = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
+
+                        if (isBreakSlot(ts)) {
+                          return (
+                            <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
+                              <div className="min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border border-amber-600/40 bg-gradient-to-br from-amber-950/40 to-orange-950/30">
+                                <span className="text-xl leading-none">☕</span>
+                                <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                              </div>
+                            </td>
+                          );
+                        }
+
                         return (
                           <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
                             <motion.div

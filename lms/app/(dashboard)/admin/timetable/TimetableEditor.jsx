@@ -221,6 +221,15 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             {timeSlots.map(ts => {
               const slot = getSlot(sectionCode, cls.display, ts);
               const color = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
+              const isBreak = !slot?.subject;
+              if (isBreak) {
+                return (
+                  <tr key={ts} className="bg-gradient-to-r from-amber-950/30 to-orange-950/20">
+                    <td className="px-4 py-3 text-sm font-bold text-amber-400 border-r border-[#1e233d] text-left">{ts}</td>
+                    <td colSpan={2} className="px-4 py-3 text-sm font-bold text-amber-400 text-center">☕ BREAK</td>
+                  </tr>
+                );
+              }
               return (
                 <tr key={ts} className={`bg-gradient-to-r ${color.bg}`}>
                   <td className="px-4 py-3 text-sm font-bold text-zinc-300 border-r border-[#1e233d] text-left">{ts}</td>
@@ -238,6 +247,11 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
   // ─── full section renderer (grid view + export container) ─────────────────
   const renderSection = (sectionTitle, sectionCode, classesList, sectionRef, exportKey) => {
     if (classesList.length === 0) return null;
+
+    // A time slot is a "break" if no class has any subject assigned to it
+    const isBreakSlot = (ts) =>
+      classesList.every(cls => !getSlot(sectionCode, cls.display, ts)?.subject);
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-[#1e233d] pb-3">
@@ -260,21 +274,29 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
                   <th className="px-5 py-4 text-left w-36 border-r border-[#1e233d]">Class</th>
-                  {timeSlots.map(ts => (
-                    <th key={ts} className="px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0 relative group">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span>{ts}</span>
-                        <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                          <button type="button" onClick={() => editTimeColumn(ts)} className="p-0.5 hover:bg-[#2b3052] rounded text-cyan-400 cursor-pointer" title="Edit">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                          </button>
-                          <button type="button" onClick={() => deleteTimeColumn(ts)} className="p-0.5 hover:bg-red-950 rounded text-red-400 cursor-pointer" title="Delete">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                          </button>
+                  {timeSlots.map(ts => {
+                    const isBreak = isBreakSlot(ts);
+                    return (
+                      <th key={ts} className={`px-4 py-4 min-w-[160px] border-r border-[#1e233d] last:border-r-0 relative group ${
+                        isBreak ? 'text-amber-400 bg-amber-950/20' : ''
+                      }`}>
+                        <div className="flex items-center justify-center gap-1.5">
+                          {isBreak && <span>☕</span>}
+                          <span>{ts}</span>
+                          {!isBreak && (
+                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                              <button type="button" onClick={() => editTimeColumn(ts)} className="p-0.5 hover:bg-[#2b3052] rounded text-cyan-400 cursor-pointer" title="Edit">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                              </button>
+                              <button type="button" onClick={() => deleteTimeColumn(ts)} className="p-0.5 hover:bg-red-950 rounded text-red-400 cursor-pointer" title="Delete">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </th>
-                  ))}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1e233d]">
@@ -284,9 +306,22 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                       {cls.display}
                     </td>
                     {timeSlots.map(ts => {
+                      const isBreak  = isBreakSlot(ts);
                       const slot     = getSlot(sectionCode, cls.display, ts);
                       const isSelected = selectedSlotKey === getSlotKey(sectionCode, cls.display, ts);
                       const color    = SUBJECT_COLORS[slot?.subject] || DEFAULT_COLOR;
+
+                      if (isBreak) {
+                        return (
+                          <td key={ts} className="p-2 border-r border-[#1e233d] last:border-r-0">
+                            <div className="min-h-[68px] flex flex-col justify-center items-center rounded-xl px-2 py-2 border border-amber-600/40 bg-gradient-to-br from-amber-950/40 to-orange-950/30">
+                              <span className="text-xl leading-none">☕</span>
+                              <span className="text-[11px] font-bold text-amber-400 mt-1 uppercase tracking-wider">Break</span>
+                            </div>
+                          </td>
+                        );
+                      }
+
                       return (
                         <td
                           key={ts}

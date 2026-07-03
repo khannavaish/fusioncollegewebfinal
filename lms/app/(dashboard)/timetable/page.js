@@ -92,7 +92,7 @@ export default async function UnifiedTimetablePage() {
 
   const initialTimeSlots = (config?.slots && Array.isArray(config.slots)) 
     ? config.slots 
-    : ['7:30-8:10', '8:10-8:50', '8:50-9:30', '9:50-10:30', '10:30-11:10', '11:10-11:50'];
+    : ['7:30-8:10', '8:10-8:50', '8:50-9:30', '9:30-9:50', '9:50-10:30', '10:30-11:10', '11:10-11:50'];
 
   return (
     <div className="space-y-8 font-sans">
