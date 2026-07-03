@@ -201,6 +201,7 @@ export async function createTeacher(_prev, formData) {
         email,
         role: 'TEACHER',
         status: 'ACTIVE',
+        plainPassword: password,
         teacher: {
           create: { id: authId, name, phone, qualification },
         },
@@ -323,6 +324,7 @@ export async function createStudent(_prev, formData) {
           email,
           role: 'STUDENT',
           status: 'ACTIVE',
+          plainPassword: password,
           student: {
             create: { id: authId, name, rollNumber, fatherName, classId },
           },
@@ -338,6 +340,7 @@ export async function createStudent(_prev, formData) {
             email: parentEmail,
             role: 'PARENT',
             status: 'ACTIVE',
+            plainPassword: parentPassword,
             parent: {
               create: { id: parentAuthId, name: guardianName, phone: guardianPhone },
             },
@@ -469,6 +472,7 @@ export async function createParent(formData) {
         email,
         role: 'PARENT',
         status: 'ACTIVE',
+        plainPassword: password,
         parent: { create: { id: authId, name, phone } },
       },
       include: { parent: true },
@@ -544,5 +548,37 @@ export async function updateEnquiryStatus(formData) {
     return { success: true };
   } catch {
     return { error: 'Failed to update enquiry.' };
+  }
+}
+
+// ─── ADMIN CREDENTIALS ────────────────────────────────────────────────────────
+export async function updateUserPassword(formData) {
+  await verifyAdmin();
+  const userId = formData.get('userId')?.toString();
+  const newPassword = formData.get('newPassword')?.toString();
+  if (!userId || !newPassword) return { error: 'User ID and new password are required.' };
+  if (newPassword.length < 6) return { error: 'Password must be at least 6 characters.' };
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return { error: 'User not found.' };
+
+    const admin = adminClient();
+    const { error: authError } = await admin.auth.admin.updateUserById(user.authId, { password: newPassword });
+    if (authError) return { error: authError.message };
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { plainPassword: newPassword },
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/teachers');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/parents');
+
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to update password.' };
   }
 }

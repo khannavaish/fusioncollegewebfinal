@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { createParent, updateParent, deleteParent } from '@/app/actions/admin';
+import { createParent, updateParent, deleteParent, updateUserPassword } from '@/app/actions/admin';
 import { IconUsers } from '@/app/components/icons';
 
 export default async function AdminParentsPage() {
@@ -92,6 +92,21 @@ export default async function AdminParentsPage() {
                   <div>
                     <div className="font-bold text-sm text-white">{p.name}</div>
                     <div className="text-[11px] text-zinc-400 mt-0.5">{p.user?.email} · {p.phone}</div>
+                    <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-1">
+                      <span>Password: <span className="font-mono text-zinc-300">{p.user?.plainPassword || '••••••••'}</span></span>
+                      <details className="relative">
+                        <summary className="p-0.5 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400 inline-block">
+                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </summary>
+                        <div className="absolute left-0 top-5 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
+                          <form action={updateUserPassword} className="space-y-2">
+                            <input type="hidden" name="userId" value={p.userId} />
+                            <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
+                            <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
+                          </form>
+                        </div>
+                      </details>
+                    </div>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {p.children.length === 0 ? (
                         <span className="text-[10px] text-zinc-600">No children linked</span>

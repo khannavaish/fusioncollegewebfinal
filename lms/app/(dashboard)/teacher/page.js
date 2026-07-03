@@ -37,7 +37,20 @@ export default async function TeacherDashboard() {
     const dbUser = await prisma.user.findUnique({
       where: { authId: user.id },
       include: {
-        teacher: true,
+        teacher: {
+          include: {
+            subjects: {
+              include: {
+                subject: true,
+                class: {
+                  include: {
+                    _count: { select: { students: true } }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
     });
     teacher = dbUser?.teacher;
@@ -48,15 +61,14 @@ export default async function TeacherDashboard() {
   const teacherName = teacher?.name || user.email;
   const qualification = teacher?.qualification || 'Senior Subject Specialist';
 
-  const classes = [
-    { name: 'F.Sc Pre-Medical Part I', subject: 'Biology', students: 48, schedule: '08:00 AM - 09:30 AM' },
-    { name: 'ICS Computer Science Part II', subject: 'Computer Science', students: 35, schedule: '10:00 AM - 11:30 AM' },
-  ];
+  const classes = teacher?.subjects?.map(cs => ({
+    name: cs.class.name,
+    subject: cs.subject.name,
+    students: cs.class._count.students,
+    schedule: 'Scheduled', // Time slots are in timetable
+  })) || [];
 
-  const pendingSubmissions = [
-    { student: 'Ahmad Ali', roll: 'FC-2026-004', assignment: 'Mitosis Diagram Submission', date: 'June 28, 2026' },
-    { student: 'Fatima Khan', roll: 'FC-2026-012', assignment: 'Mitosis Diagram Submission', date: 'June 28, 2026' },
-  ];
+  const totalStudents = classes.reduce((sum, cls) => sum + cls.students, 0);
 
   return (
     <div className="space-y-8 font-sans">
@@ -72,16 +84,11 @@ export default async function TeacherDashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
           <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Assigned Classes</div>
-          <div className="text-3xl font-black text-cyan-400 mt-2">2 Classes</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Total active students: 83</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Submissions to Grade</div>
-          <div className="text-3xl font-black text-white mt-2">14 Pending</div>
-          <p className="text-[10px] text-zinc-500 mt-1">From Mitosis Diagram assignment</p>
+          <div className="text-3xl font-black text-cyan-400 mt-2">{classes.length} Classes</div>
+          <p className="text-[10px] text-zinc-500 mt-1">Total active students: {totalStudents}</p>
         </div>
         <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
           <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Attendance Lock Status</div>
@@ -90,52 +97,31 @@ export default async function TeacherDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Classes List */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-bold text-white tracking-tight">Today's Class Schedule</h2>
-          <div className="space-y-4">
-            {classes.map((cls, idx) => (
-              <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <div className="font-bold text-white text-base">{cls.name}</div>
-                  <div className="text-xs text-cyan-400 mt-0.5">Subject: {cls.subject}</div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-400">Time Slot</div>
-                    <div className="text-xs font-semibold text-white mt-0.5">{cls.schedule}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-400">Total Students</div>
-                    <div className="text-xs font-semibold text-white mt-0.5">{cls.students} enrolled</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Panel */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold text-white tracking-tight">Recent Submissions Awaiting Grade</h2>
+          <h2 className="text-lg font-bold text-white tracking-tight">My Classes</h2>
           <div className="space-y-4">
-            {pendingSubmissions.map((sub, idx) => (
-              <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 space-y-3">
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <div className="font-semibold text-sm text-white">{sub.student}</div>
-                    <div className="text-[10px] text-zinc-400 mt-0.5">{sub.roll}</div>
-                  </div>
-                  <button className="text-[10px] px-2.5 py-1 bg-[#1e233d] border border-[#2b3052] rounded font-bold uppercase tracking-wider text-cyan-400 hover:bg-cyan-950/20 transition-colors cursor-pointer">
-                    Grade
-                  </button>
-                </div>
-                <div className="text-xs text-zinc-400 border-t border-[#1e233d] pt-2 truncate">
-                  {sub.assignment}
-                </div>
+            {classes.length === 0 ? (
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+                You have not been assigned any classes yet.
               </div>
-            ))}
+            ) : (
+              classes.map((cls, idx) => (
+                <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="font-bold text-white text-base">{cls.name}</div>
+                    <div className="text-xs text-cyan-400 mt-0.5">Subject: {cls.subject}</div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <div className="text-xs text-zinc-400">Total Students</div>
+                      <div className="text-xs font-semibold text-white mt-0.5">{cls.students} enrolled</div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

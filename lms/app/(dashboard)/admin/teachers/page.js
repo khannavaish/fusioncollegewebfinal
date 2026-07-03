@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import TeacherCreateForm from './TeacherCreateForm';
-import { updateTeacher, deleteTeacher } from '@/app/actions/admin';
+import { updateTeacher, deleteTeacher, updateUserPassword } from '@/app/actions/admin';
 
 export default async function AdminTeachersPage() {
   const supabase = await createClient();
@@ -58,6 +58,7 @@ export default async function AdminTeachersPage() {
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">#</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Password</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Qualification</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Phone</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Subjects</th>
@@ -71,6 +72,23 @@ export default async function AdminTeachersPage() {
                     <td className="px-5 py-4 text-xs text-zinc-600">{i + 1}</td>
                     <td className="px-5 py-4 font-semibold text-sm text-white">{t.name}</td>
                     <td className="px-5 py-4 text-xs font-mono text-zinc-400">{t.user?.email}</td>
+                    <td className="px-5 py-4 text-xs font-mono text-zinc-400">
+                      <div className="flex items-center gap-2">
+                        <span>{t.user?.plainPassword || '••••••••'}</span>
+                        <details className="relative">
+                          <summary className="p-1 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </summary>
+                          <div className="absolute left-0 top-6 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
+                            <form action={updateUserPassword} className="space-y-2">
+                              <input type="hidden" name="userId" value={t.userId} />
+                              <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
+                              <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{t._count.subjects} assigned</td>

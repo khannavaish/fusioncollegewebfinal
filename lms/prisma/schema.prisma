@@ -14,8 +14,9 @@ model User {
   email     String     @unique
   role      UserRole   @default(STUDENT)
   status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  plainPassword String?
   admin     Admin?
   parent    Parent?
   student   Student?

@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import StudentCreateForm from './StudentCreateForm';
-import { updateStudent, deleteStudent, transferStudent } from '@/app/actions/admin';
+import { updateStudent, deleteStudent, transferStudent, updateUserPassword } from '@/app/actions/admin';
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
@@ -59,6 +59,7 @@ export default async function AdminStudentsPage() {
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Class</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Father&apos;s Name</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Login Email</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Password</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
                   <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -76,6 +77,23 @@ export default async function AdminStudentsPage() {
                     <td className="px-5 py-4 text-xs text-zinc-400">{s.class?.name || '—'}</td>
                     <td className="px-5 py-4 text-xs text-zinc-400">{s.fatherName}</td>
                     <td className="px-5 py-4 text-xs text-zinc-500 font-mono">{s.user?.email}</td>
+                    <td className="px-5 py-4 text-xs font-mono text-zinc-400">
+                      <div className="flex items-center gap-2">
+                        <span>{s.user?.plainPassword || '••••••••'}</span>
+                        <details className="relative">
+                          <summary className="p-1 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </summary>
+                          <div className="absolute left-0 top-6 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
+                            <form action={updateUserPassword} className="space-y-2">
+                              <input type="hidden" name="userId" value={s.userId} />
+                              <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
+                              <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </td>
                     <td className="px-5 py-4">
                       <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[s.user?.status] || statusColors.ACTIVE}`}>
                         {s.user?.status || 'ACTIVE'}
