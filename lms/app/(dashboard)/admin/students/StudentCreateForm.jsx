@@ -1,22 +1,40 @@
 'use client';
 
-import { useActionState, useEffect, useRef } from 'react';
-import { createStudent } from '@/app/actions/admin';
+import { useActionState, useEffect, useRef, useState } from 'react';
+import { createStudent, checkGuardianName } from '@/app/actions/admin';
 import { IconCheckCircle, IconAlertTriangle, IconIdCard, IconMail, IconKey, IconUsers } from '@/app/components/icons';
 
 const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors";
 
 export default function StudentCreateForm({ classes }) {
   const [state, action, pending] = useActionState(createStudent, null);
+  const [guardianNameInput, setGuardianNameInput] = useState('');
+  const [matchingParents, setMatchingParents] = useState([]);
   const formRef = useRef(null);
   const dialogRef = useRef(null);
 
   useEffect(() => {
     if (state?.success && state?.credentials) {
       formRef.current?.reset();
+      setGuardianNameInput('');
+      setMatchingParents([]);
       dialogRef.current?.showModal();
     }
   }, [state]);
+
+  // Debounced/On-change duplicate check for guardian name
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (guardianNameInput.trim().length >= 3) {
+        const matches = await checkGuardianName(guardianNameInput);
+        setMatchingParents(matches || []);
+      } else {
+        setMatchingParents([]);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [guardianNameInput]);
 
   const creds = state?.credentials;
 
@@ -29,7 +47,7 @@ export default function StudentCreateForm({ classes }) {
       >
         <div className="p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500/40 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-950/50 border border-emerald-500/40 flex items-center justify-center">
               <IconCheckCircle className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
@@ -139,8 +157,8 @@ export default function StudentCreateForm({ classes }) {
         {classes.length === 0 ? (
           <p className="text-sm text-amber-400">Please <a href="/admin/classes" className="underline">create at least one class</a> before enrolling students.</p>
         ) : (
-          <form ref={formRef} action={action}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <form ref={formRef} action={action} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <input name="name" placeholder="Student Full Name *" className={inputCls} required />
               <input name="fatherName" placeholder="Father's Name *" className={inputCls} required />
               <select name="classId" className={inputCls} required>
@@ -150,13 +168,56 @@ export default function StudentCreateForm({ classes }) {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <input name="guardianName" placeholder="Guardian Name (Mother/Father/Guardian) *" className={inputCls} required />
-              <input name="guardianPhone" placeholder="Guardian Phone Number *" className={inputCls} required />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-2 relative">
+                <input
+                  name="guardianName"
+                  value={guardianNameInput}
+                  onChange={(e) => setGuardianNameInput(e.target.value)}
+                  placeholder="Guardian Name (Mother/Father/Guardian) *"
+                  className={inputCls}
+                  required
+                />
+                
+                {/* Warning message for duplicates */}
+                {matchingParents.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-1 z-10 bg-[#16192b] border border-amber-500/30 rounded-lg p-3 text-xs shadow-xl space-y-2">
+                    <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                      <IconAlertTriangle className="w-3.5 h-3.5" />
+                      Guardian duplicate warning:
+                    </div>
+                    <div className="text-[10px] text-zinc-400">
+                      The following existing parents match this name. To link them, use the exact phone number below:
+                    </div>
+                    <div className="space-y-1 divide-y divide-[#1e233d]">
+                      {matchingParents.map((p) => (
+                        <div key={p.id} className="pt-1 flex justify-between items-center text-[10px]">
+                          <span className="text-white font-medium">{p.name}</span>
+                          <span className="font-mono text-cyan-400 select-all cursor-pointer" title="Click to copy phone number" onClick={() => {
+                            const input = document.getElementsByName('guardianPhone')[0];
+                            if (input) {
+                              input.value = p.phone;
+                              setMatchingParents([]);
+                            }
+                          }}>{p.phone}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <input
+                name="guardianPhone"
+                placeholder="Guardian Phone Number *"
+                className={inputCls}
+                required
+              />
             </div>
 
             {state?.error && (
-              <div className="mb-3 px-3 py-2 bg-red-950/40 border border-red-500/30 rounded-lg text-xs text-red-400">
+              <div className="px-3 py-2 bg-red-950/40 border border-red-500/30 rounded-lg text-xs text-red-400">
                 {state.error}
               </div>
             )}

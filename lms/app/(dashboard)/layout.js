@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import {
   IconHome, IconGraduationCap, IconUserTie, IconFamily,
-  IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers,
+  IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble,
 } from '@/app/components/icons';
 
 export default async function DashboardLayout({ children }) {
@@ -155,6 +155,10 @@ export default async function DashboardLayout({ children }) {
               <a href="/admin/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Edit Timetable
+              </a>
+              <a href="/admin/whatsapp" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                WhatsApp Alerts
               </a>
             </>
           )}

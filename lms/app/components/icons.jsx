@@ -166,3 +166,11 @@ export function IconChevronRight({ className = 'w-4 h-4' }) {
     </svg>
   );
 }
+
+export function IconChatBubble({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 10c0 4-4 7-8 7a8.2 8.2 0 01-4-1l-4 1.5L3.5 13A7 7 0 012 10c0-4 4-7 8-7s8 3 8 7z" />
+    </svg>
+  );
+}

@@ -583,3 +583,32 @@ export async function updateUserPassword(formData) {
     return { error: 'Failed to update password.' };
   }
 }
+
+export async function checkGuardianName(name) {
+  try {
+    await verifyAdmin();
+    if (!name || name.trim().length < 3) return [];
+    const parents = await prisma.parent.findMany({
+      where: {
+        name: {
+          contains: name.trim(),
+          mode: 'insensitive'
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        user: {
+          select: {
+            email: true
+          }
+        }
+      },
+      take: 5
+    });
+    return parents;
+  } catch {
+    return [];
+  }
+}

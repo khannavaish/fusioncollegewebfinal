@@ -143,6 +143,7 @@ model Lecture {
   topic          String
   pictureUrl     String       @default("")
   classSubjectId String
+  whatsappSent   Boolean      @default(false)
   attendance     Attendance[]
   classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
 }
@@ -222,4 +223,12 @@ model TimetableSlot {
 model TimetableConfig {
   id    String @id @default("default")
   slots Json
+}
+
+model WhatsAppConfig {
+  id           String  @id @default("default")
+  senderNumber String  @default("")
+  apiToken     String  @default("")
+  instanceId   String  @default("")
+  isEnabled    Boolean @default(false)
 }
