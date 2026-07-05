@@ -95,10 +95,7 @@ export function slotMatchesClass(slot, className = '') {
   const slotSection = normalizeComparableText(slot.section);
   const targetClassName = normalizeComparableText(classInfo.className);
   const sectionMatch = !classInfo.section || slotSection === normalizeComparableText(classInfo.section);
-  const classMatch =
-    slotClassName === targetClassName ||
-    slotClassName.includes(targetClassName) ||
-    targetClassName.includes(slotClassName);
+  const classMatch = slotClassName === targetClassName;
 
   return sectionMatch && classMatch;
 }
