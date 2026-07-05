@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { createParent, updateParent, deleteParent, updateUserPassword } from '@/app/actions/admin';
 import { IconUsers } from '@/app/components/icons';
 import PasswordShowHide from '@/app/components/PasswordShowHide';
@@ -15,6 +15,46 @@ const statusColors = {
 function ParentCard({ p, students }) {
   const [editOpen, setEditOpen] = useState(false);
   const [pwOpen, setPwOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleEdit(e) {
+    e.preventDefault();
+    setError(null);
+    const fd = new FormData(e.target);
+    startTransition(async () => {
+      const res = await updateParent(fd);
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setEditOpen(false);
+      }
+    });
+  }
+
+  function handlePwChange(e) {
+    e.preventDefault();
+    setError(null);
+    const fd = new FormData(e.target);
+    startTransition(async () => {
+      const res = await updateUserPassword(fd);
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setPwOpen(false);
+        e.target.reset();
+      }
+    });
+  }
+
+  function handleDelete(e) {
+    e.preventDefault();
+    if (!confirm(`Delete parent "${p.name}"? This cannot be undone.`)) return;
+    const fd = new FormData(e.target);
+    startTransition(async () => {
+      await deleteParent(fd);
+    });
+  }
 
   return (
     <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
@@ -31,7 +71,7 @@ function ParentCard({ p, students }) {
               <span>Password: <PasswordShowHide password={p.plainPassword} /></span>
               <button
                 type="button"
-                onClick={() => { setPwOpen(!pwOpen); setEditOpen(false); }}
+                onClick={() => { setPwOpen(!pwOpen); setEditOpen(false); setError(null); }}
                 className="p-0.5 hover:bg-[#1e233d] rounded cursor-pointer text-cyan-400 inline-block"
                 title="Change password"
               >
@@ -58,16 +98,17 @@ function ParentCard({ p, students }) {
           </span>
           <button
             type="button"
-            onClick={() => { setEditOpen(!editOpen); setPwOpen(false); }}
+            onClick={() => { setEditOpen(!editOpen); setPwOpen(false); setError(null); }}
             className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-xs font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer"
           >
             {editOpen ? 'Close' : 'Edit'}
           </button>
-          <form action={deleteParent}>
+          <form onSubmit={handleDelete}>
             <input type="hidden" name="id" value={p.id} />
             <button
               type="submit"
-              className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 text-xs font-medium hover:bg-red-950/20 transition-colors cursor-pointer"
+              disabled={isPending}
+              className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 text-xs font-medium hover:bg-red-950/20 transition-colors cursor-pointer disabled:opacity-50"
             >
               Delete
             </button>
@@ -75,11 +116,18 @@ function ParentCard({ p, students }) {
         </div>
       </div>
 
+      {/* Error banner */}
+      {error && (
+        <div className="mx-5 mb-3 p-3 bg-red-950/40 border border-red-500/30 rounded-lg text-red-400 text-xs">
+          ⚠️ {error}
+        </div>
+      )}
+
       {/* Change Password inline panel */}
       {pwOpen && (
         <div className="border-t border-[#1e233d] px-5 py-4 bg-[#0a0c18]">
           <p className="text-xs font-bold text-white mb-3">Change Password</p>
-          <form action={updateUserPassword} className="flex items-end gap-2">
+          <form onSubmit={handlePwChange} className="flex items-end gap-2">
             <input type="hidden" name="userId" value={p.userId} />
             <input
               name="newPassword"
@@ -88,8 +136,12 @@ function ParentCard({ p, students }) {
               className={`${inputCls} text-xs flex-1`}
               required
             />
-            <button type="submit" className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer whitespace-nowrap">
-              Update
+            <button
+              type="submit"
+              disabled={isPending}
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50"
+            >
+              {isPending ? 'Saving…' : 'Update'}
             </button>
           </form>
         </div>
@@ -99,7 +151,7 @@ function ParentCard({ p, students }) {
       {editOpen && (
         <div className="border-t border-[#1e233d] px-5 py-5 bg-[#0a0c18]">
           <p className="text-xs font-bold text-white mb-4">Edit Parent</p>
-          <form action={updateParent} className="space-y-3">
+          <form onSubmit={handleEdit} className="space-y-3">
             <input type="hidden" name="id" value={p.id} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
@@ -141,10 +193,18 @@ function ParentCard({ p, students }) {
               </div>
             )}
             <div className="flex gap-2 pt-1">
-              <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-                Save Changes
+              <button
+                type="submit"
+                disabled={isPending}
+                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isPending ? 'Saving…' : 'Save Changes'}
               </button>
-              <button type="button" onClick={() => setEditOpen(false)} className="px-4 py-2 bg-[#1e233d] hover:bg-[#2b3052] text-zinc-400 text-xs font-medium rounded-lg transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                className="px-4 py-2 bg-[#1e233d] hover:bg-[#2b3052] text-zinc-400 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+              >
                 Cancel
               </button>
             </div>
@@ -159,11 +219,7 @@ export default function ParentsClientPage({ parents, students }) {
   return (
     <div className="space-y-4">
       {parents.map((p) => (
-        <ParentCard
-          key={p.id}
-          p={p}
-          students={students}
-        />
+        <ParentCard key={p.id} p={p} students={students} />
       ))}
     </div>
   );
