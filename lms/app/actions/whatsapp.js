@@ -27,9 +27,22 @@ export async function sendWhatsAppMessage(to, message) {
   const formattedPhone = isWhatsAppJid ? rawTarget : (phone.startsWith('92') ? phone : `92${phone.replace(/^0/, '')}`);
 
   if (config.provider === 'CUSTOM') {
-    const url = `${config.gatewayUrl.replace(/\/$/, '')}/send`;
+    const baseUrl = config.gatewayUrl.replace(/\/$/, '');
     try {
-      const res = await fetch(url, {
+      // First verify the WhatsApp socket is actually connected
+      const statusRes = await fetch(`${baseUrl}/status`, { method: 'GET' });
+      const contentType = statusRes.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        // Gateway is sleeping / returning HTML — Render cold start
+        return { error: 'Gateway is starting up. Please try again in 30 seconds.' };
+      }
+      const statusData = await statusRes.json();
+      if (!statusData.connected) {
+        return { error: 'WhatsApp not connected. Admin must scan the QR code at /admin/whatsapp.' };
+      }
+
+      // Socket is connected — send the message
+      const res = await fetch(`${baseUrl}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify({ to: formattedPhone, message }),
