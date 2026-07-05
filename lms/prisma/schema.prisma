@@ -101,6 +101,7 @@ model ClassSubject {
   exams     Exam[]
   lectures  Lecture[]
   materials Material[]
+  assignments Assignment[]
 
   @@unique([classId, subjectId])
 }
@@ -116,13 +117,15 @@ model Material {
 }
 
 model Assignment {
-  id          String       @id @default(uuid())
-  title       String
-  description String
-  deadline    DateTime
-  fileUrl     String?
-  createdAt   DateTime     @default(now())
-  submissions Submission[]
+  id             String       @id @default(uuid())
+  title          String
+  description    String
+  deadline       DateTime
+  fileUrl        String?
+  classSubjectId String
+  createdAt      DateTime     @default(now())
+  submissions    Submission[]
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
 }
 
 model Submission {
