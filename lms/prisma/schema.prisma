@@ -283,3 +283,11 @@ model AnnouncementRead {
 
   @@unique([announcementId, userId])
 }
+
+model PasswordResetRequest {
+  id        String   @id @default(uuid())
+  email     String
+  status    String   @default("PENDING") // "PENDING", "RESOLVED"
+  createdAt DateTime @default(now())
+}
+

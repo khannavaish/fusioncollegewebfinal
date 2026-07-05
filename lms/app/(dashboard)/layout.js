@@ -111,6 +111,14 @@ export default async function DashboardLayout({ children }) {
   const name = dbUser?.student?.name || dbUser?.teacher?.name || dbUser?.admin?.name || dbUser?.parent?.name || user.email;
   const role = dbUser?.role || 'STUDENT';
 
+  // Pending password reset count — only loaded for admins (cheap, single count query)
+  let pendingResetCount = 0;
+  if (role === 'ADMIN') {
+    try {
+      pendingResetCount = await prisma.passwordResetRequest.count({ where: { status: 'PENDING' } });
+    } catch {}
+  }
+
   const handleSignOut = async () => {
     'use server';
     const supabaseServer = await createClient();
@@ -180,7 +188,12 @@ export default async function DashboardLayout({ children }) {
               </a>
               <a href="/admin/notifications" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-colors" />
-                Notification History
+                <span className="flex-1">Notification History</span>
+                {pendingResetCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1 bg-amber-500 text-black text-[10px] font-extrabold rounded-full flex items-center justify-center">
+                    {pendingResetCount}
+                  </span>
+                )}
               </a>
               <a href="/admin/reports" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
