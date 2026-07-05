@@ -65,6 +65,18 @@ export function teacherNameMatches(a = '', b = '') {
   return !!normalizedA && !!normalizedB && normalizedA === normalizedB;
 }
 
+export function teacherMatchesSlot(teacher, slot) {
+  if (!teacher || !slot) return false;
+  
+  // If slot has teacherId, use ID-based matching (most reliable)
+  if (slot.teacherId) {
+    return teacher.id === slot.teacherId;
+  }
+  
+  // Fallback to name-based matching
+  return teacherNameMatches(teacher.name, slot.teacher);
+}
+
 export function getClassSubjectKey(className = '', subjectName = '') {
   return `${normalizeComparableText(className)}|${normalizeComparableText(subjectName)}`;
 }
@@ -158,11 +170,11 @@ export function sortSlotsByTime(slots, timeSlots) {
   return slotsToSort.sort((a, b) => compareTimeSlots(a.timeSlot, b.timeSlot));
 }
 
-export function getScheduledSlotsForClassSubject(classSubject, timetableSlots, timeSlots, teacherName = '') {
+export function getScheduledSlotsForClassSubject(classSubject, timetableSlots, timeSlots, teacher = null) {
   return sortSlotsByTime(
     timetableSlots.filter((slot) => {
       const matchesClassSubject = slotMatchesClassSubject(slot, classSubject);
-      const matchesTeacher = !teacherName || teacherNameMatches(slot.teacher, teacherName);
+      const matchesTeacher = !teacher || teacherMatchesSlot(teacher, slot);
       return matchesClassSubject && matchesTeacher && slot.timeSlot;
     }),
     timeSlots,

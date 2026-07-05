@@ -37,6 +37,7 @@ model Teacher {
   phone         String?
   qualification String?
   subjects      ClassSubject[]
+  inchargeClasses Class[]       @relation("ClassIncharge")
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -77,11 +78,13 @@ model ParentStudent {
 }
 
 model Class {
-  id         String         @id @default(uuid())
-  name       String         @unique
-  academicYr String
-  subjects   ClassSubject[]
-  students   Student[]
+  id               String         @id @default(uuid())
+  name             String         @unique
+  academicYr       String
+  inchargeTeacherId String?
+  inchargeTeacher   Teacher?      @relation("ClassIncharge", fields: [inchargeTeacherId], references: [id])
+  subjects         ClassSubject[]
+  students         Student[]
 }
 
 model Subject {
@@ -198,12 +201,13 @@ model ContactEnquiry {
 }
 
 model TimetableSlot {
-  id        String @id @default(uuid())
+  id        String  @id @default(uuid())
   section   String
   className String
   timeSlot  String
   subject   String
   teacher   String
+  teacherId String?
 }
 
 model TimetableConfig {

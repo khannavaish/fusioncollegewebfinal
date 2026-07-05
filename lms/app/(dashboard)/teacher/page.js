@@ -10,7 +10,7 @@ import {
   getScheduledSlotsForClassSubject,
   getScheduleStatus,
   resolveTimeSlots,
-  teacherNameMatches,
+  teacherMatchesSlot,
 } from '@/utils/timetable';
 
 export const dynamic = 'force-dynamic';
@@ -29,15 +29,35 @@ function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, time
         classSubject,
         timetableSlots,
         timeSlots,
-        teacher.name,
+        teacher,
       ),
     }))
     .filter((classSubject) => classSubject.scheduledSlots.length > 0);
 }
 
 function getClassInchargeList(allClassSubjects, teacher, timetableSlots, timeSlots) {
-  if (!teacher || timetableSlots.length === 0) return [];
+  if (!teacher) return [];
 
+  // First, check for manual incharge overrides from Class model
+  const manualInchargeClasses = allClassSubjects
+    .filter((cs) => cs.class?.inchargeTeacherId === teacher.id)
+    .map((cs) => {
+      const slot = timetableSlots.find((s) => 
+        s?.className && classDisplayNameFromSlot(s) === cs.class.name
+      );
+      return {
+        id: `manual-${cs.class.id}`,
+        className: cs.class.name,
+        subject: cs.subject.name,
+        timeSlot: slot?.timeSlot || 'Manual Assignment',
+        students: cs.class._count?.students || 0,
+      };
+    });
+
+  // If no timetable slots, return only manual assignments
+  if (timetableSlots.length === 0) return manualInchargeClasses;
+
+  // Then, add first-period teachers for remaining classes
   const classGroups = new Map();
   for (const slot of timetableSlots) {
     if (!slot?.className || !slot?.timeSlot) continue;
@@ -46,12 +66,17 @@ function getClassInchargeList(allClassSubjects, teacher, timetableSlots, timeSlo
     classGroups.get(key).push(slot);
   }
 
-  return [...classGroups.values()]
+  const firstPeriodIncharges = [...classGroups.values()]
     .map((slots) => getFirstClassSlot(slots, timeSlots))
-    .filter((slot) => slot && teacherNameMatches(slot.teacher, teacher.name))
+    .filter((slot) => slot && teacherMatchesSlot(teacher, slot))
     .map((slot) => {
       const classSubject = findMatchingClassSubject(allClassSubjects, slot);
       if (!classSubject) return null;
+
+      // Skip if this class already has a manual incharge assignment
+      if (manualInchargeClasses.some((mic) => mic.className === classDisplayNameFromSlot(slot))) {
+        return null;
+      }
 
       return {
         id: `${slot.section}-${slot.className}-${slot.subject}-${slot.timeSlot}`,
@@ -62,6 +87,8 @@ function getClassInchargeList(allClassSubjects, teacher, timetableSlots, timeSlo
       };
     })
     .filter(Boolean);
+
+  return [...manualInchargeClasses, ...firstPeriodIncharges];
 }
 
 export default async function TeacherDashboard() {
@@ -94,14 +121,19 @@ export default async function TeacherDashboard() {
     const allClassSubjects = await prisma.classSubject.findMany({
       include: {
         subject: true,
-        class: { include: { _count: { select: { students: true } } } },
+        class: { 
+          include: { 
+            _count: { select: { students: true } },
+            inchargeTeacher: true,
+          } 
+        },
       },
     });
 
     classSubjects = getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timetableTimeSlots);
     classInchargeList = getClassInchargeList(allClassSubjects, teacher, timetableSlots, timetableTimeSlots);
     const teacherSlots = teacher
-      ? timetableSlots.filter((slot) => teacherNameMatches(slot.teacher, teacher.name))
+      ? timetableSlots.filter((slot) => teacherMatchesSlot(teacher, slot))
       : [];
     classStatusCard = getScheduleStatus(teacherSlots);
   } catch (e) {
