@@ -3,99 +3,16 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
-import { resolveTimeSlots } from '@/utils/timetable';
+import {
+  classDisplayNameFromSlot,
+  getFirstClassSlot,
+  getScheduledSlotsForClassSubject,
+  resolveTimeSlots,
+  sameTimetableText,
+  slotMatchesClass,
+  teacherNameMatches,
+} from '@/utils/timetable';
 
-function normalizeText(value = '') {
-  return value.toString().trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
-function splitTimetableClassName(name = '') {
-  const trimmed = name.toString().trim();
-  const upper = trimmed.toUpperCase();
-
-  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '').trim() };
-  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '').trim() };
-  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '').trim() };
-
-  return { section: null, className: trimmed };
-}
-
-function sameText(a = '', b = '') {
-  return normalizeText(a) === normalizeText(b);
-}
-
-function classDisplayNameFromSlot(slot) {
-  if (!slot?.className) return '';
-  return normalizeText(slot.section) === 'other' ? slot.className : `${slot.section} ${slot.className}`.trim();
-}
-
-function slotMatchesClass(slot, classInfo) {
-  const slotClassName = normalizeText(slot.className);
-  const slotSection = normalizeText(slot.section);
-  const className = normalizeText(classInfo.className);
-  const sectionMatch = !classInfo.section || slotSection === normalizeText(classInfo.section);
-  const classMatch = slotClassName === className || slotClassName.includes(className) || className.includes(slotClassName);
-  return sectionMatch && classMatch;
-}
-
-function sortSlotsByTime(slots, timeSlots) {
-  const rankByTime = new Map(timeSlots.map((slot, index) => [normalizeText(slot), index]));
-  return [...slots].sort((a, b) => {
-    const ai = rankByTime.has(normalizeText(a.timeSlot)) ? rankByTime.get(normalizeText(a.timeSlot)) : Number.MAX_SAFE_INTEGER;
-    const bi = rankByTime.has(normalizeText(b.timeSlot)) ? rankByTime.get(normalizeText(b.timeSlot)) : Number.MAX_SAFE_INTEGER;
-    return ai - bi;
-  });
-}
-
-async function getFirstScheduledSlot(classSubject) {
-  const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
-  const timeSlots = resolveTimeSlots(config?.slots);
-  const timetableSlots = await prisma.timetableSlot.findMany();
-  const classInfo = splitTimetableClassName(classSubject.class.name);
-
-  const classMatches = timetableSlots.filter((slot) => slotMatchesClass(slot, classInfo));
-  const ordered = sortSlotsByTime(classMatches, timeSlots);
-
-  return ordered[0] || null;
-}
-
-async function isFirstLectureOfClass(classSubjectId, dateStr) {
-  try {
-    const classSubject = await prisma.classSubject.findUnique({
-      where: { id: classSubjectId },
-      include: {
-        class: true,
-        subject: true,
-        teacher: true,
-      },
-    });
-    if (!classSubject) return false;
-
-    const firstSlot = await getFirstScheduledSlot(classSubject);
-    if (firstSlot) {
-      return (
-        sameText(classSubject.class.name, classDisplayNameFromSlot(firstSlot)) ||
-        sameText(classSubject.class.name, firstSlot.className)
-      ) && sameText(classSubject.subject.name, firstSlot.subject);
-    }
-
-    const targetDate = new Date(dateStr);
-    const startOfDay = new Date(targetDate); startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
-
-    const priorLectures = await prisma.lecture.findFirst({
-      where: {
-        classSubject: { classId: classSubject.classId },
-        date: { gte: startOfDay, lte: endOfDay },
-        classSubjectId: { not: classSubjectId },
-      },
-    });
-    return !priorLectures;
-  } catch (e) {
-    console.error('Error in isFirstLectureOfClass:', e);
-    return false;
-  }
-}
 async function verifyTeacher() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -108,6 +25,45 @@ async function verifyTeacher() {
   return dbUser.teacher;
 }
 
+async function getTimetableContext() {
+  const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
+  const timetableSlots = await prisma.timetableSlot.findMany();
+  return {
+    timetableSlots,
+    timeSlots: resolveTimeSlots(config?.slots),
+  };
+}
+
+async function canTeacherTakeClassSubject(classSubject, teacher, timetableSlots, timeSlots) {
+  const classSubjectSlots = getScheduledSlotsForClassSubject(classSubject, timetableSlots, timeSlots);
+  if (classSubjectSlots.length > 0) {
+    return classSubjectSlots.some((slot) => teacherNameMatches(slot.teacher, teacher.name));
+  }
+
+  return classSubject.teacherId === teacher.id;
+}
+
+async function isFirstLectureOfClass(classSubject, teacher, timetableSlots, timeSlots) {
+  try {
+    const classSlots = timetableSlots.filter((slot) => slotMatchesClass(slot, classSubject.class.name));
+    const firstSlot = getFirstClassSlot(classSlots, timeSlots);
+
+    if (firstSlot) {
+      return (
+        (sameTimetableText(classSubject.class.name, classDisplayNameFromSlot(firstSlot)) ||
+          sameTimetableText(classSubject.class.name, firstSlot.className)) &&
+        sameTimetableText(classSubject.subject.name, firstSlot.subject) &&
+        teacherNameMatches(firstSlot.teacher, teacher.name)
+      );
+    }
+
+    return classSubject.teacherId === teacher.id;
+  } catch (e) {
+    console.error('Error in isFirstLectureOfClass:', e);
+    return false;
+  }
+}
+
 export async function markAttendanceOnly(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -116,27 +72,33 @@ export async function markAttendanceOnly(formData) {
 
     if (!classSubjectId) return { error: 'Class Subject ID is required.' };
 
-    const classSubject = await prisma.classSubject.findUnique({ where: { id: classSubjectId } });
-    if (!classSubject || classSubject.teacherId !== teacher.id) {
-      return { error: 'You are not assigned to this class subject.' };
+    const classSubject = await prisma.classSubject.findUnique({
+      where: { id: classSubjectId },
+      include: { class: true, subject: true, teacher: true },
+    });
+    if (!classSubject) return { error: 'Class subject not found.' };
+
+    const { timetableSlots, timeSlots } = await getTimetableContext();
+    const isAllowed = await canTeacherTakeClassSubject(classSubject, teacher, timetableSlots, timeSlots);
+    if (!isAllowed) {
+      return { error: 'You are not assigned to this timetable slot.' };
     }
 
     const attendanceMap = {};
     const studentIds = [];
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('attendance_')) {
-        const sid = key.replace('attendance_', '');
-        attendanceMap[sid] = value.toString();
-        studentIds.push(sid);
+        const studentId = key.replace('attendance_', '');
+        attendanceMap[studentId] = value.toString();
+        studentIds.push(studentId);
       }
     }
 
-    // Check if a lecture already exists today for this class subject
     const targetDate = new Date(dateStr);
     const startOfDay = new Date(targetDate); startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay   = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(targetDate); endOfDay.setHours(23, 59, 59, 999);
 
-    let existingLecture = await prisma.lecture.findFirst({
+    const existingLecture = await prisma.lecture.findFirst({
       where: {
         classSubjectId,
         date: { gte: startOfDay, lte: endOfDay },
@@ -145,16 +107,13 @@ export async function markAttendanceOnly(formData) {
 
     let lectureId;
     if (existingLecture) {
-      // Update existing attendance rather than creating a duplicate lecture
       lectureId = existingLecture.id;
-      // Delete old attendance for this lecture to re-mark
       await prisma.attendance.deleteMany({ where: { lectureId } });
     } else {
-      // Create a new lecture with pending topic
       const newLecture = await prisma.lecture.create({
         data: {
           date: targetDate,
-          topic: 'Pending Ã¢â‚¬â€ lecture notes to be added after class.',
+          topic: 'Pending - lecture notes to be added after class.',
           pictureUrl: '',
           classSubjectId,
         },
@@ -162,28 +121,29 @@ export async function markAttendanceOnly(formData) {
       lectureId = newLecture.id;
     }
 
-    // Save attendance
     if (studentIds.length > 0) {
       await prisma.attendance.createMany({
-        data: studentIds.map(sid => ({
+        data: studentIds.map((studentId) => ({
           lectureId,
-          studentId: sid,
-          status: attendanceMap[sid] || 'PRESENT',
+          studentId,
+          status: attendanceMap[studentId] || 'PRESENT',
         })),
         skipDuplicates: true,
       });
     }
 
-    // Check if this is the FIRST lecture of the class for today (from timetable or first created today)
-    const isFirstLec = await isFirstLectureOfClass(classSubjectId, dateStr);
+    const isFirstLec = await isFirstLectureOfClass(classSubject, teacher, timetableSlots, timeSlots);
 
     if (isFirstLec) {
-      const presentStudentIds = studentIds.filter(sid => attendanceMap[sid] === 'PRESENT' || attendanceMap[sid] === 'LATE');
-      for (const sid of presentStudentIds) {
-        // Double check they haven't somehow gotten an arrival message today already
+      const presentStudentIds = studentIds.filter((studentId) => {
+        const status = attendanceMap[studentId] || 'PRESENT';
+        return status === 'PRESENT' || status === 'LATE';
+      });
+
+      for (const studentId of presentStudentIds) {
         const priorAttendance = await prisma.attendance.findFirst({
           where: {
-            studentId: sid,
+            studentId,
             status: { in: ['PRESENT', 'LATE'] },
             lecture: {
               date: { gte: startOfDay, lte: endOfDay },
@@ -194,7 +154,7 @@ export async function markAttendanceOnly(formData) {
 
         const alreadySentToday = await prisma.whatsAppLog.findFirst({
           where: {
-            studentId: sid,
+            studentId,
             messageType: 'ARRIVAL',
             sentAt: { gte: startOfDay, lte: endOfDay },
             success: true,
@@ -204,7 +164,7 @@ export async function markAttendanceOnly(formData) {
         if (!priorAttendance && !alreadySentToday) {
           try {
             const { sendArrivalWhatsApp } = await import('@/app/actions/whatsapp');
-            await sendArrivalWhatsApp(sid);
+            await sendArrivalWhatsApp(studentId);
           } catch (e) {
             console.error('WhatsApp arrival error:', e);
           }
@@ -213,6 +173,8 @@ export async function markAttendanceOnly(formData) {
     }
 
     revalidatePath(`/teacher/classes/${classSubjectId}/attendance`);
+    revalidatePath('/teacher');
+    revalidatePath('/teacher/attendance');
     return { success: true, lectureId };
   } catch (e) {
     console.error('Error marking attendance:', e);
@@ -220,7 +182,6 @@ export async function markAttendanceOnly(formData) {
   }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ STEP 2: Save Lecture Notes (post-class) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 export async function saveLectureNotes(formData) {
   try {
     const teacher = await verifyTeacher();
@@ -232,10 +193,17 @@ export async function saveLectureNotes(formData) {
 
     const lecture = await prisma.lecture.findUnique({
       where: { id: lectureId },
-      include: { classSubject: true },
+      include: {
+        classSubject: {
+          include: { class: true, subject: true, teacher: true },
+        },
+      },
     });
     if (!lecture) return { error: 'Lecture not found.' };
-    if (lecture.classSubject.teacherId !== teacher.id) return { error: 'Unauthorized.' };
+
+    const { timetableSlots, timeSlots } = await getTimetableContext();
+    const isAllowed = await canTeacherTakeClassSubject(lecture.classSubject, teacher, timetableSlots, timeSlots);
+    if (!isAllowed) return { error: 'Unauthorized.' };
 
     await prisma.lecture.update({
       where: { id: lectureId },
@@ -250,9 +218,6 @@ export async function saveLectureNotes(formData) {
   }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ LEGACY: Combined (kept for backward compat) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 export async function submitAttendanceAndLecture(formData) {
   return markAttendanceOnly(formData);
 }
-
-

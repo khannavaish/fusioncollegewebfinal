@@ -1,8 +1,29 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronRight, IconClipboard } from '@/app/components/icons';
+import { getScheduleStatus, getScheduledSlotsForClassSubject, resolveTimeSlots } from '@/utils/timetable';
+
+function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timeSlots) {
+  if (!teacher) return [];
+
+  if (timetableSlots.length === 0) {
+    return allClassSubjects.filter((classSubject) => classSubject.teacherId === teacher.id);
+  }
+
+  return allClassSubjects
+    .map((classSubject) => ({
+      ...classSubject,
+      scheduledSlots: getScheduledSlotsForClassSubject(
+        classSubject,
+        timetableSlots,
+        timeSlots,
+        teacher.name,
+      ),
+    }))
+    .filter((classSubject) => classSubject.scheduledSlots.length > 0);
+}
 
 export default async function TeacherAttendanceIndexPage() {
   const supabase = await createClient();
@@ -15,28 +36,40 @@ export default async function TeacherAttendanceIndexPage() {
   } catch {}
   if (!dbUser || dbUser.role !== 'TEACHER') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
-  let teacher = null, classSubjects = [];
+  let classSubjects = [];
+  let classStatusCard = null;
   try {
     const fullUser = await prisma.user.findUnique({ where: { authId: user.id }, include: { teacher: true } });
-    teacher = fullUser?.teacher;
+    const teacher = fullUser?.teacher;
     if (teacher) {
-      classSubjects = await prisma.classSubject.findMany({
-        where: { teacherId: teacher.id },
+      const today = new Date();
+      const startOfDay = new Date(today); startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(today); endOfDay.setHours(23, 59, 59, 999);
+      const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
+      const timetableSlots = await prisma.timetableSlot.findMany();
+      const timetableTimeSlots = resolveTimeSlots(config?.slots);
+
+      const allClassSubjects = await prisma.classSubject.findMany({
         include: {
           class: { include: { students: true } },
           subject: true,
           lectures: {
-            where: {
-              date: {
-                gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                lte: new Date(new Date().setHours(23, 59, 59, 999)),
-              }
-            },
+            where: { date: { gte: startOfDay, lte: endOfDay } },
             take: 1,
-          }
+          },
         },
         orderBy: { class: { name: 'asc' } },
       });
+
+      classSubjects = getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timetableTimeSlots);
+      const teacherSlots = classSubjects.flatMap((cs) =>
+        (cs.scheduledSlots || []).map((slot) => ({
+          ...slot,
+          className: cs.class.name,
+          subject: cs.subject.name,
+        })),
+      );
+      classStatusCard = getScheduleStatus(teacherSlots);
     }
   } catch (err) {
     console.error('Error fetching teacher data:', err);
@@ -48,7 +81,7 @@ export default async function TeacherAttendanceIndexPage() {
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Attendance Center</h1>
           <p className="text-zinc-400 text-sm mt-1">
-            Mark attendance at the start of class. Add lecture notes after class ends.
+            Mark attendance for classes assigned to you in the saved timetable.
           </p>
         </div>
         <Link href="/teacher" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
@@ -62,17 +95,29 @@ export default async function TeacherAttendanceIndexPage() {
           <div>
             <p className="font-bold text-white">Two-step workflow</p>
             <p className="text-zinc-400 text-xs mt-1">
-              <strong className="text-emerald-400">Step 1 — Start of Class:</strong> Mark each student as Present, Absent, Late, or Leave.
+              <strong className="text-emerald-400">Step 1 - Start of Class:</strong> Mark each student as Present, Absent, Late, or Leave.
               Parents receive a WhatsApp notification when their child is first marked present for the day.<br/>
-              <strong className="text-indigo-400">Step 2 — After Class:</strong> Add what topics were taught and optionally attach a board photo.
+              <strong className="text-indigo-400">Step 2 - After Class:</strong> Add what topics were taught and optionally attach a board photo.
             </p>
           </div>
         </div>
       </div>
 
+      {classStatusCard && (
+        <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">
+            {classStatusCard.label}
+          </div>
+          <div className="mt-1 text-sm font-semibold text-white">{classStatusCard.detail}</div>
+          {classStatusCard.time && (
+            <div className="mt-1 text-[11px] text-zinc-400">{classStatusCard.time}</div>
+          )}
+        </div>
+      )}
+
       {classSubjects.length === 0 ? (
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-          No classes assigned. Contact admin to assign classes.
+          No timetable slots are assigned to you yet.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -85,6 +130,9 @@ export default async function TeacherAttendanceIndexPage() {
                     <div>
                       <h3 className="text-base font-bold text-white group-hover:text-cyan-400 transition-colors">{cs.class.name}</h3>
                       <p className="text-sm font-semibold text-cyan-400 mt-0.5">{cs.subject.name}</p>
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Time Slot: {cs.scheduledSlots?.map((slot) => slot.timeSlot).join(', ') || 'Not scheduled yet'}
+                      </p>
                     </div>
                     {todayMarked ? (
                       <span className="text-[10px] px-2.5 py-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 font-bold uppercase rounded">

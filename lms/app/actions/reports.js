@@ -2,6 +2,7 @@
 
 import prisma from '@/utils/db';
 import { createClient } from '@/utils/supabase/server';
+import { classDisplayNameFromSlot, getClassSubjectKey } from '@/utils/timetable';
 
 // ─── Verification Helper ─────────────────────────────────────────────────────
 async function verifyAdminOrTeacher() {
@@ -450,11 +451,11 @@ export async function getTeacherCompletenessReport(dateStr) {
   slots.forEach(slot => {
     if (!slot.subject || slot.subject.trim() === '' || slot.subject.trim() === '—') return;
 
-    const fullClassName = `${slot.section} - ${slot.className}`;
+    const fullClassName = classDisplayNameFromSlot(slot) || `${slot.section} ${slot.className}`.trim();
+    const slotKey = getClassSubjectKey(fullClassName, slot.subject);
 
     const matchingLecture = lecturesToday.find(l => 
-      l.classSubject.class.name === fullClassName && 
-      l.classSubject.subject.name.toLowerCase() === slot.subject.toLowerCase()
+      getClassSubjectKey(l.classSubject.class.name, l.classSubject.subject.name) === slotKey
     );
 
     completeness.push({

@@ -1,75 +1,64 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { resolveTimeSlots } from '@/utils/timetable';
+import {
+  classDisplayNameFromSlot,
+  findMatchingClassSubject,
+  getClassGroupKey,
+  getFirstClassSlot,
+  getScheduledSlotsForClassSubject,
+  getScheduleStatus,
+  resolveTimeSlots,
+  teacherNameMatches,
+} from '@/utils/timetable';
 
-function normalizeText(value = '') {
-  return value.toString().trim().replace(/\s+/g, ' ').toLowerCase();
+function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timeSlots) {
+  if (!teacher) return [];
+
+  if (timetableSlots.length === 0) {
+    return allClassSubjects.filter((classSubject) => classSubject.teacherId === teacher.id);
+  }
+
+  return allClassSubjects
+    .map((classSubject) => ({
+      ...classSubject,
+      scheduledSlots: getScheduledSlotsForClassSubject(
+        classSubject,
+        timetableSlots,
+        timeSlots,
+        teacher.name,
+      ),
+    }))
+    .filter((classSubject) => classSubject.scheduledSlots.length > 0);
 }
 
-function sameText(a = '', b = '') {
-  return normalizeText(a) === normalizeText(b);
-}
+function getClassInchargeList(allClassSubjects, teacher, timetableSlots, timeSlots) {
+  if (!teacher || timetableSlots.length === 0) return [];
 
-function timeToMinutes(t) {
-  if (!t) return null;
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
-}
+  const classGroups = new Map();
+  for (const slot of timetableSlots) {
+    if (!slot?.className || !slot?.timeSlot) continue;
+    const key = getClassGroupKey(slot);
+    if (!classGroups.has(key)) classGroups.set(key, []);
+    classGroups.get(key).push(slot);
+  }
 
-function parseSlot(slotStr) {
-  if (!slotStr) return null;
-  const parts = slotStr.split('-');
-  if (parts.length < 2) return null;
-  const startMin = timeToMinutes(parts[0].trim());
-  const endMin = timeToMinutes(parts[1].trim());
-  if (startMin == null || endMin == null) return null;
-  return { startMin, endMin };
-}
+  return [...classGroups.values()]
+    .map((slots) => getFirstClassSlot(slots, timeSlots))
+    .filter((slot) => slot && teacherNameMatches(slot.teacher, teacher.name))
+    .map((slot) => {
+      const classSubject = findMatchingClassSubject(allClassSubjects, slot);
+      if (!classSubject) return null;
 
-function splitTimetableClassName(name = '') {
-  const trimmed = name.toString().trim();
-  const upper = trimmed.toUpperCase();
-  if (upper.startsWith('BOYS ')) return { section: 'BOYS', className: trimmed.replace(/^boys\s+/i, '').trim() };
-  if (upper.startsWith('GIRLS ')) return { section: 'GIRLS', className: trimmed.replace(/^girls\s+/i, '').trim() };
-  if (upper.startsWith('OTHER ')) return { section: 'OTHER', className: trimmed.replace(/^other\s+/i, '').trim() };
-  return { section: null, className: trimmed };
-}
-
-function classDisplayNameFromSlot(slot) {
-  if (!slot?.className) return '';
-  return normalizeText(slot.section) === 'other' ? slot.className : `${slot.section} ${slot.className}`.trim();
-}
-
-function slotMatchesClass(slot, classInfo) {
-  const slotClassName = normalizeText(slot.className);
-  const slotSection = normalizeText(slot.section);
-  const className = normalizeText(classInfo.className);
-  const sectionMatch = !classInfo.section || slotSection === normalizeText(classInfo.section);
-  const classMatch = slotClassName === className || slotClassName.includes(className) || className.includes(slotClassName);
-  return sectionMatch && classMatch;
-}
-
-function sortSlotsByTime(slots, timeSlots) {
-  const rankByTime = new Map(timeSlots.map((slot, index) => [normalizeText(slot), index]));
-  return [...slots].sort((a, b) => {
-    const ai = rankByTime.has(normalizeText(a.timeSlot)) ? rankByTime.get(normalizeText(a.timeSlot)) : Number.MAX_SAFE_INTEGER;
-    const bi = rankByTime.has(normalizeText(b.timeSlot)) ? rankByTime.get(normalizeText(b.timeSlot)) : Number.MAX_SAFE_INTEGER;
-    return ai - bi;
-  });
-}
-
-function getScheduledTimeSlots(className, subjectName, timetableSlots, timeSlots) {
-  const classInfo = splitTimetableClassName(className);
-  return sortSlotsByTime(
-    timetableSlots.filter((slot) => {
-      if (!slot?.className || !slot?.subject || !slot?.timeSlot) return false;
-      return slotMatchesClass(slot, classInfo) && sameText(slot.subject, subjectName);
-    }),
-    timeSlots,
-  )
-    .map((slot) => slot.timeSlot)
+      return {
+        id: `${slot.section}-${slot.className}-${slot.subject}-${slot.timeSlot}`,
+        className: classDisplayNameFromSlot(slot),
+        subject: slot.subject,
+        timeSlot: slot.timeSlot,
+        students: classSubject.class?._count?.students || 0,
+      };
+    })
     .filter(Boolean);
 }
 
@@ -86,174 +75,33 @@ export default async function TeacherDashboard() {
 
   let teacher = null;
   let classSubjects = [];
-  let timetableSlots = [];
-  let timetableTimeSlots = [];
   let classInchargeList = [];
   let classStatusCard = null;
 
   try {
     const fullUser = await prisma.user.findUnique({
       where: { authId: user.id },
-      include: {
-        teacher: {
-          include: {
-            subjects: {
-              include: {
-                subject: true,
-                class: { include: { _count: { select: { students: true } } } },
-              },
-            },
-          },
-        },
-      },
+      include: { teacher: true },
     });
     teacher = fullUser?.teacher;
-    classSubjects = teacher?.subjects || [];
 
     const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
-    timetableSlots = await prisma.timetableSlot.findMany();
-    timetableTimeSlots = resolveTimeSlots(config?.slots);
+    const timetableSlots = await prisma.timetableSlot.findMany();
+    const timetableTimeSlots = resolveTimeSlots(config?.slots);
 
-    // ── Filter My Classes to only show entries where the teacher actually
-    // ── appears in at least one timetable slot for that class+subject.
-    // ── This prevents a class from showing up just because the DB has the
-    // ── teacher assigned (e.g. via auto-incharge sync or manual admin entry)
-    // ── when the timetable never actually lists them for that class.
-    if (timetableSlots.length > 0 && teacher) {
-      const teacherNameNorm = normalizeText(teacher.name || '');
-      const teacherNameNoSir = teacherNameNorm.replace(/^sir\s+/, '');
-
-      classSubjects = classSubjects.filter((cs) => {
-        const classInfo = splitTimetableClassName(cs.class.name);
-        return timetableSlots.some((slot) => {
-          if (!slot?.className || !slot?.subject || !slot?.teacher) return false;
-          // Match class
-          const slotSection = normalizeText(slot.section);
-          const slotClass = normalizeText(slot.className);
-          const csSection = normalizeText(classInfo.section || '');
-          const csClass = normalizeText(classInfo.className);
-          const classMatches = (!classInfo.section || slotSection === csSection) && slotClass === csClass;
-          // Match subject
-          const subjectMatches = sameText(slot.subject, cs.subject.name);
-          // Match teacher name (strip honorifics for comparison)
-          const slotTeacherNorm = normalizeText(slot.teacher);
-          const slotTeacherNoSir = slotTeacherNorm.replace(/^sir\s+/, '');
-          const teacherMatches =
-            sameText(teacherNameNorm, slotTeacherNorm) ||
-            sameText(teacherNameNoSir, slotTeacherNoSir) ||
-            sameText(teacherNameNorm, slotTeacherNoSir) ||
-            sameText(teacherNameNoSir, slotTeacherNorm);
-          return classMatches && subjectMatches && teacherMatches;
-        });
-      });
-    }
-
-    const classGroups = new Map();
-    for (const slot of timetableSlots) {
-      if (!slot?.className || !slot?.subject || !slot?.timeSlot) continue;
-      const key = normalizeText(`${slot.section || ''}|${slot.className}`);
-      if (!classGroups.has(key)) classGroups.set(key, []);
-      classGroups.get(key).push(slot);
-    }
-
-    classInchargeList = [...classGroups.values()]
-      .map((slots) => {
-        const head = sortSlotsByTime(slots, timetableTimeSlots)[0];
-        if (!head) return null;
-
-        const teacherName = normalizeText(teacher?.name || '');
-        const slotTeacher = normalizeText(head.teacher || '');
-        const teacherNameNoSir = teacherName.replace(/^sir\s+/, '');
-        const slotTeacherNoSir = slotTeacher.replace(/^sir\s+/, '');
-        
-        const teacherMatch = sameText(teacherName, slotTeacher) || 
-                              sameText(teacherNameNoSir, slotTeacherNoSir) ||
-                              sameText(teacherName, slotTeacherNoSir) ||
-                              sameText(teacherNameNoSir, slotTeacher);
-
-        if (!teacherMatch) return null;
-
-        const displayClass = classDisplayNameFromSlot(head);
-        const matchedClassSubject = classSubjects.find(
-          (cs) => sameText(cs.class.name, displayClass) && sameText(cs.subject.name, head.subject),
-        ) || classSubjects.find(
-          (cs) => sameText(cs.class.name, head.className) && sameText(cs.subject.name, head.subject),
-        ) || classSubjects.find(
-          (cs) => sameText(cs.class.name, head.className.replace(/\./g, '').replace(/\s/g, '')) && sameText(cs.subject.name, head.subject),
-        );
-
-        if (!matchedClassSubject || matchedClassSubject.teacherId !== teacher?.id) return null;
-
-        return {
-          id: `${head.section}-${head.className}-${head.subject}-${head.timeSlot}`,
-          className: displayClass,
-          subject: head.subject,
-          timeSlot: head.timeSlot,
-          students: matchedClassSubject.class?._count?.students || 0,
-        };
-      })
-      .filter(Boolean);
-
-    const teacherSlots = timetableSlots.filter((slot) => {
-      const teacherName = normalizeText(teacher?.name || '');
-      const slotTeacher = normalizeText(slot.teacher || '');
-      
-      const teacherNameNoSir = teacherName.replace(/^sir\s+/, '');
-      const slotTeacherNoSir = slotTeacher.replace(/^sir\s+/, '');
-      
-      const teacherMatch = sameText(teacherName, slotTeacher) || 
-                            sameText(teacherNameNoSir, slotTeacherNoSir) ||
-                            sameText(teacherName, slotTeacherNoSir) ||
-                            sameText(teacherNameNoSir, slotTeacher);
-      
-      const subjectMatch = classSubjects.some((cs) => (
-        sameText(cs.subject.name, slot.subject) &&
-        (sameText(cs.class.name, classDisplayNameFromSlot(slot)) || sameText(cs.class.name, slot.className))
-      ));
-      
-      return subjectMatch && teacherMatch;
+    const allClassSubjects = await prisma.classSubject.findMany({
+      include: {
+        subject: true,
+        class: { include: { _count: { select: { students: true } } } },
+      },
     });
 
-    if (teacherSlots.length > 0) {
-      const now = new Date();
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-      const parsedSlots = teacherSlots
-        .map((slot) => ({ ...slot, parsed: parseSlot(slot.timeSlot) }))
-        .filter((slot) => slot.parsed)
-        .sort((a, b) => a.parsed.startMin - b.parsed.startMin);
-
-      const currentClass = parsedSlots.find((slot) => nowMinutes >= slot.parsed.startMin && nowMinutes <= slot.parsed.endMin);
-      const nextClass = parsedSlots.find((slot) => slot.parsed.startMin > nowMinutes);
-      const allDone = parsedSlots.length > 0 && parsedSlots.every((slot) => slot.parsed.endMin < nowMinutes);
-
-      if (currentClass) {
-        classStatusCard = {
-          type: 'active',
-          label: 'Class In Progress',
-          detail: `${currentClass.subject} - ${classDisplayNameFromSlot(currentClass)}`,
-          time: currentClass.timeSlot,
-          color: 'emerald',
-        };
-      } else if (nextClass) {
-        const minsUntil = nextClass.parsed.startMin - nowMinutes;
-        classStatusCard = {
-          type: 'next',
-          label: minsUntil <= 10 ? 'Next Class Starting Soon' : 'Next Class',
-          detail: `${nextClass.subject} - ${classDisplayNameFromSlot(nextClass)}`,
-          time: nextClass.timeSlot,
-          color: minsUntil <= 10 ? 'amber' : 'cyan',
-        };
-      } else if (allDone) {
-        classStatusCard = {
-          type: 'done',
-          label: 'Done for Today',
-          detail: `You had ${parsedSlots.length} class${parsedSlots.length !== 1 ? 'es' : ''} today.`,
-          time: null,
-          color: 'zinc',
-        };
-      }
-    }
+    classSubjects = getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timetableTimeSlots);
+    classInchargeList = getClassInchargeList(allClassSubjects, teacher, timetableSlots, timetableTimeSlots);
+    const teacherSlots = teacher
+      ? timetableSlots.filter((slot) => teacherNameMatches(slot.teacher, teacher.name))
+      : [];
+    classStatusCard = getScheduleStatus(teacherSlots);
   } catch (e) {
     console.error('Timetable status error:', e);
   }
@@ -263,10 +111,10 @@ export default async function TeacherDashboard() {
   const totalStudents = classSubjects.reduce((sum, cs) => sum + (cs.class._count?.students || 0), 0);
 
   const colorMap = {
-    emerald: { bg: 'bg-emerald-950/30', border: 'border-emerald-500/30', text: 'text-emerald-400', badge: 'bg-emerald-500', dot: 'bg-emerald-400 animate-pulse' },
-    amber: { bg: 'bg-amber-950/30', border: 'border-amber-500/30', text: 'text-amber-400', badge: 'bg-amber-500', dot: 'bg-amber-400 animate-pulse' },
-    cyan: { bg: 'bg-cyan-950/20', border: 'border-cyan-500/20', text: 'text-cyan-400', badge: 'bg-cyan-600', dot: 'bg-cyan-400' },
-    zinc: { bg: 'bg-zinc-900/30', border: 'border-zinc-700/30', text: 'text-zinc-300', badge: 'bg-zinc-600', dot: 'bg-zinc-500' },
+    emerald: { bg: 'bg-emerald-950/30', border: 'border-emerald-500/30', text: 'text-emerald-400', dot: 'bg-emerald-400 animate-pulse' },
+    amber: { bg: 'bg-amber-950/30', border: 'border-amber-500/30', text: 'text-amber-400', dot: 'bg-amber-400 animate-pulse' },
+    cyan: { bg: 'bg-cyan-950/20', border: 'border-cyan-500/20', text: 'text-cyan-400', dot: 'bg-cyan-400' },
+    zinc: { bg: 'bg-zinc-900/30', border: 'border-zinc-700/30', text: 'text-zinc-300', dot: 'bg-zinc-500' },
   };
 
   return (
@@ -303,13 +151,13 @@ export default async function TeacherDashboard() {
         </div>
       ) : (
         <div className="bg-zinc-900/20 border border-zinc-700/20 rounded-xl p-4 text-xs text-zinc-500">
-          No timetable schedule found yet. Ask admin to set up the timetable.
+          No class is scheduled right now. Check the timetable for upcoming slots.
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Assigned Classes</div>
+          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Scheduled Classes</div>
           <div className="text-3xl font-black text-cyan-400 mt-2">{classSubjects.length} Classes</div>
           <p className="text-[10px] text-zinc-500 mt-1">Total enrolled students: {totalStudents}</p>
         </div>
@@ -318,14 +166,14 @@ export default async function TeacherDashboard() {
           <Link href="/teacher/attendance" className="text-3xl font-black text-emerald-400 mt-2 block hover:text-emerald-300 transition-colors">
             Mark Now
           </Link>
-          <p className="text-[10px] text-zinc-500 mt-1">Separate Step 1 (roll call) &amp; Step 2 (lecture notes)</p>
+          <p className="text-[10px] text-zinc-500 mt-1">Classes come directly from the saved timetable.</p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold text-white tracking-tight">Class Incharge</h2>
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500">Based on the first scheduled lecture</span>
+          <span className="text-[10px] uppercase tracking-wider text-zinc-500">Based on the first saved lecture</span>
         </div>
         {classInchargeList.length === 0 ? (
           <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
@@ -355,7 +203,7 @@ export default async function TeacherDashboard() {
         <h2 className="text-lg font-bold text-white tracking-tight">My Classes</h2>
         {classSubjects.length === 0 ? (
           <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-            No classes assigned yet.
+            No timetable slots are assigned to you yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -365,7 +213,7 @@ export default async function TeacherDashboard() {
                   <div className="font-bold text-white text-base">{cs.class.name}</div>
                   <div className="text-xs text-cyan-400 mt-0.5">{cs.subject.name}</div>
                   <div className="text-[11px] text-zinc-500 mt-1">
-                    Time Slot: {getScheduledTimeSlots(cs.class.name, cs.subject.name, timetableSlots, timetableTimeSlots).join(', ') || 'Not scheduled yet'}
+                    Time Slot: {cs.scheduledSlots?.map((slot) => slot.timeSlot).join(', ') || 'Not scheduled yet'}
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-1">{cs.class._count?.students || 0} students</div>
                 </div>
