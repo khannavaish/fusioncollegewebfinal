@@ -174,7 +174,7 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const message = `*FUSION COLLEGE NAROWAL — DAILY REPORT* 🏫
+    const message = `*FUSION COLLEGE NAROWAL — ARRIVAL NOTIFICATION* 🏫
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
