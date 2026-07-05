@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String     @id @default(uuid())
+  authId        String     @unique
+  email         String     @unique
+  role          UserRole   @default(STUDENT)
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  plainPassword String?
+  admin         Admin?
+  parent        Parent?
+  student       Student?
+  teacher       Teacher?
+}
+
+model Admin {
+  id     String @id @default(uuid())
+  userId String @unique
+  name   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Teacher {
+  id            String         @id @default(uuid())
+  userId        String         @unique
+  name          String
+  phone         String?
+  qualification String?
+  subjects      ClassSubject[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Student {
+  id          String          @id @default(uuid())
+  userId      String          @unique
+  name        String
+  rollNumber  String          @unique
+  fatherName  String
+  classId     String
+  cnic        String?
+  fatherCnic  String?
+  attendance  Attendance[]
+  examResults ExamResult[]
+  parents     ParentStudent[]
+  class       Class           @relation(fields: [classId], references: [id])
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+  whatsAppLogs WhatsAppLog[]
+}
+
+model Parent {
+  id       String          @id @default(uuid())
+  userId   String          @unique
+  name     String
+  phone    String
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  children ParentStudent[]
+}
+
+model ParentStudent {
+  parentId  String
+  studentId String
+  parent    Parent  @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, studentId])
+}
+
+model Class {
+  id         String         @id @default(uuid())
+  name       String         @unique
+  academicYr String
+  subjects   ClassSubject[]
+  students   Student[]
+}
+
+model Subject {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  classSubjects ClassSubject[]
+}
+
+model ClassSubject {
+  id        String     @id @default(uuid())
+  classId   String
+  subjectId String
+  teacherId String
+  class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher   Teacher    @relation(fields: [teacherId], references: [id])
+  exams     Exam[]
+  lectures  Lecture[]
+  materials Material[]
+
+  @@unique([classId, subjectId])
+}
+
+model Material {
+  id             String       @id @default(uuid())
+  title          String
+  description    String?
+  fileUrl        String
+  classSubjectId String
+  createdAt      DateTime     @default(now())
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+}
+
+model Assignment {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  deadline    DateTime
+  fileUrl     String?
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+}
+
+model Submission {
+  id           String     @id @default(uuid())
+  assignmentId String
+  studentId    String
+  fileUrl      String
+  grade        String?
+  remarks      String?
+  status       String     @default("SUBMITTED")
+  submittedAt  DateTime   @default(now())
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+}
+
+model Lecture {
+  id             String       @id @default(uuid())
+  date           DateTime     @default(now())
+  topic          String
+  classSubjectId String
+  pictureUrl     String       @default("")
+  whatsappSent   Boolean      @default(false)
+  attendance     Attendance[]
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  lectureId String
+  studentId String
+  status    AttendanceStatus @default(PRESENT)
+  lecture   Lecture          @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([lectureId, studentId])
+}
+
+model Exam {
+  id             String       @id @default(uuid())
+  title          String
+  date           DateTime
+  totalMarks     Int
+  classSubjectId String
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+  results        ExamResult[]
+}
+
+model ExamResult {
+  id        String  @id @default(uuid())
+  examId    String
+  studentId String
+  marksObt  Decimal @db.Decimal(5, 2)
+  status    String  @default("PASSED")
+  exam      Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+}
+
+model ContactEnquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String
+  message   String
+  status    String   @default("UNREAD")
+  createdAt DateTime @default(now())
+}
+
+model TimetableSlot {
+  id        String @id @default(uuid())
+  section   String
+  className String
+  timeSlot  String
+  subject   String
+  teacher   String
+}
+
+model TimetableConfig {
+  id    String @id @default("default")
+  slots Json
+}
+
+model WhatsAppConfig {
+  id           String  @id @default("default")
+  senderNumber String  @default("")
+  apiToken     String  @default("")
+  instanceId   String  @default("")
+  isEnabled    Boolean @default(false)
+  gatewayUrl   String  @default("http://localhost:3001")
+  provider     String  @default("ULTRAMSG")
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  LATE
+}
+
+model WhatsAppLog {
+  id          String   @id @default(uuid())
+  studentId   String
+  parentPhone String
+  messageType String   // "ARRIVAL" or "EOD_SUMMARY"
+  sentAt      DateTime @default(now())
+  success     Boolean  @default(true)
+  errorMessage String?  // Stores failure reason if success is false
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+
+model Announcement {
+  id              String   @id @default(uuid())
+  title           String
+  message         String
+  audience        String
+  classIds        Json?
+  teacherIds      Json?
+  whatsappTargets Json?
+  shareOnWhatsapp Boolean  @default(false)
+  whatsappSent    Int      @default(0)
+  createdAt       DateTime @default(now())
+}

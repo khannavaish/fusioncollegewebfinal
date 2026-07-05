@@ -121,15 +121,8 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
     formData.append('academicYr', new Date().getFullYear().toString());
     startTransition(async () => {
       const res = await createClass(formData);
-      if (res?.error) {
-        alert(res.error);
-      } else {
-        setNewClassName('');
-        // Reload the page so the new class row appears in the timetable grid.
-        // The first slot assigned to this class will automatically be picked up
-        // as the class incharge when the timetable is next saved.
-        window.location.reload();
-      }
+      if (res?.error) alert(res.error);
+      else { setNewClassName(''); alert(`Class "${fullName}" created! The page will refresh to show the new row.`); }
     });
   };
 
@@ -389,7 +382,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
       {success && (
         <div className="flex items-center gap-2.5 px-4 py-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-sm text-emerald-400">
           <IconCheckCircle className="w-4 h-4 flex-shrink-0" />
-          Timetable saved and published successfully! Class incharges have been auto-assigned based on the first slot of each class.
+          Timetable and column configuration saved and published successfully!
         </div>
       )}
       {error && (
