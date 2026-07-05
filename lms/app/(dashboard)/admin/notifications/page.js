@@ -137,19 +137,49 @@ export default async function AdminNotificationsPage() {
                   Show {resolvedResets.length} resolved request{resolvedResets.length > 1 ? 's' : ''}
                 </summary>
                 <div className="mt-2 space-y-2">
-                  {resolvedResets.map((req) => (
-                    <div key={req.id} className="bg-[#0d0f1a]/60 border border-[#1e233d] rounded-xl px-5 py-3 flex items-center justify-between gap-4 opacity-60">
-                      <div>
-                        <p className="text-sm text-zinc-400 truncate">{req.email}</p>
-                        <p className="text-xs text-zinc-600 mt-0.5">
-                          {new Date(req.createdAt).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
-                        </p>
+                  {resolvedResets.map((req) => {
+                    const needsManual = req.resolvedNote && req.resolvedNote.startsWith('⚠️');
+                    return (
+                      <div
+                        key={req.id}
+                        className={`bg-[#0d0f1a] border rounded-xl overflow-hidden ${needsManual ? 'border-amber-500/30' : 'border-[#1e233d] opacity-60'}`}
+                      >
+                        <div className="flex items-center justify-between gap-4 px-5 py-3">
+                          <div className="min-w-0">
+                            <p className={`text-sm truncate ${needsManual ? 'text-white font-medium' : 'text-zinc-400'}`}>{req.email}</p>
+                            <p className="text-xs text-zinc-600 mt-0.5">
+                              {new Date(req.createdAt).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
+                            </p>
+                          </div>
+                          <span className={`px-2 py-0.5 border text-[10px] font-bold rounded-full uppercase flex-shrink-0 ${
+                            needsManual
+                              ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                              : 'bg-emerald-950/40 border-emerald-500/20 text-emerald-500'
+                          }`}>
+                            {needsManual ? 'Action Needed' : 'Resolved'}
+                          </span>
+                        </div>
+
+                        {/* Show manual password note if WhatsApp failed */}
+                        {needsManual && req.resolvedNote && (
+                          <div className="mx-4 mb-4 p-3 bg-amber-950/30 border border-amber-500/20 rounded-lg">
+                            <p className="text-xs text-amber-300 font-semibold mb-1.5">Manual Delivery Required</p>
+                            <pre className="text-xs text-amber-200/80 whitespace-pre-wrap font-mono leading-relaxed select-all">
+                              {req.resolvedNote.replace('⚠️ ', '')}
+                            </pre>
+                            <p className="text-[10px] text-amber-500/60 mt-2">Select all text above to copy credentials.</p>
+                          </div>
+                        )}
+
+                        {/* WhatsApp success note */}
+                        {!needsManual && req.resolvedNote && (
+                          <div className="px-5 pb-3">
+                            <p className="text-[11px] text-emerald-600">{req.resolvedNote}</p>
+                          </div>
+                        )}
                       </div>
-                      <span className="px-2 py-0.5 bg-emerald-950/40 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold rounded-full uppercase flex-shrink-0">
-                        Resolved
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </details>
             )}

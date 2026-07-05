@@ -150,14 +150,8 @@ export async function resolvePasswordResetAction(formData) {
       phone = user.parent.phone;
     }
     
-    // Update request state
-    await prisma.passwordResetRequest.update({
-      where: { id: requestId },
-      data: { status: 'RESOLVED' }
-    });
-    
-    let whatsappStatus = 'No registered phone number found to send notification.';
-    
+    let resolvedNote = null;
+
     // Send WhatsApp notification directly with new credentials
     if (phone) {
       const message = `*FUSION COLLEGE NAROWAL — PASSWORD RESET* 🔑
@@ -177,18 +171,24 @@ Fusion College Narowal Administration`;
       
       const res = await sendWhatsAppMessage(phone, message);
       if (res.success) {
-        whatsappStatus = `Successfully sent password directly via WhatsApp to ${phone}!`;
+        resolvedNote = `✅ Password sent via WhatsApp to ${phone}.`;
       } else if (res.skipped) {
-        whatsappStatus = `Reset done. WhatsApp skipped (gateway disabled). New password is: ${newPassword}`;
+        resolvedNote = `⚠️ WhatsApp gateway is disabled. Share manually:\n📧 Email: ${user.email}\n🔑 Password: ${newPassword}`;
       } else {
-        whatsappStatus = `Reset done. WhatsApp failed to send: ${res.error}. New password is: ${newPassword}`;
+        resolvedNote = `⚠️ WhatsApp failed (${res.error}). Share manually:\n📧 Email: ${user.email}\n🔑 Password: ${newPassword}`;
       }
     } else {
-      whatsappStatus = `Reset done. No phone found. Please copy and share this password manually: ${newPassword}`;
+      resolvedNote = `⚠️ No phone number on file. Share manually:\n📧 Email: ${user.email}\n🔑 Password: ${newPassword}`;
     }
+
+    // Update request state with the note
+    await prisma.passwordResetRequest.update({
+      where: { id: requestId },
+      data: { status: 'RESOLVED', resolvedNote },
+    });
     
     revalidatePath('/admin/notifications');
-    return { success: true, message: whatsappStatus };
+    return { success: true, message: resolvedNote };
   } catch (e) {
     console.error('Password reset resolve error:', e);
     return { error: e.message || 'Failed to resolve password reset.' };

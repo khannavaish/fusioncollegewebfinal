@@ -285,9 +285,10 @@ model AnnouncementRead {
 }
 
 model PasswordResetRequest {
-  id        String   @id @default(uuid())
-  email     String
-  status    String   @default("PENDING") // "PENDING", "RESOLVED"
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  email        String
+  status       String   @default("PENDING") // "PENDING", "RESOLVED"
+  resolvedNote String?  // Admin-facing note shown when WhatsApp delivery fails
+  createdAt    DateTime @default(now())
 }
 
