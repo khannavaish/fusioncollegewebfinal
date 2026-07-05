@@ -2,8 +2,10 @@
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
-import { IconChevronRight, IconClipboard } from '@/app/components/icons';
+import { IconClipboard } from '@/app/components/icons';
 import { getScheduleStatus, getScheduledSlotsForClassSubject, resolveTimeSlots } from '@/utils/timetable';
+
+export const dynamic = 'force-dynamic';
 
 function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timeSlots) {
   if (!teacher) return [];

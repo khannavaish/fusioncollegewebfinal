@@ -7,6 +7,8 @@ import MarkAttendanceForm from './MarkAttendanceForm';
 import LectureNotesForm from './LectureNotesForm';
 import { getScheduleStatus, getScheduledSlotsForClassSubject, resolveTimeSlots } from '@/utils/timetable';
 
+export const dynamic = 'force-dynamic';
+
 export default async function TeacherAttendancePage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;

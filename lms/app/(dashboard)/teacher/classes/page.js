@@ -4,6 +4,8 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { getScheduledSlotsForClassSubject, resolveTimeSlots } from '@/utils/timetable';
 
+export const dynamic = 'force-dynamic';
+
 function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, timeSlots) {
   if (!teacher) return [];
 
