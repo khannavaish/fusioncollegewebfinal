@@ -135,16 +135,13 @@ export async function markAttendanceOnly(formData) {
     const isFirstLec = await isFirstLectureOfClass(classSubject, teacher, timetableSlots, timeSlots);
 
     if (isFirstLec) {
-      const presentStudentIds = studentIds.filter((studentId) => {
+      for (const studentId of studentIds) {
         const status = attendanceMap[studentId] || 'PRESENT';
-        return status === 'PRESENT' || status === 'LATE';
-      });
 
-      for (const studentId of presentStudentIds) {
         const priorAttendance = await prisma.attendance.findFirst({
           where: {
             studentId,
-            status: { in: ['PRESENT', 'LATE'] },
+            status: { in: ['PRESENT', 'LATE', 'ABSENT', 'LEAVE'] },
             lecture: {
               date: { gte: startOfDay, lte: endOfDay },
               id: { not: lectureId },
@@ -164,7 +161,7 @@ export async function markAttendanceOnly(formData) {
         if (!priorAttendance && !alreadySentToday) {
           try {
             const { sendArrivalWhatsApp } = await import('@/app/actions/whatsapp');
-            await sendArrivalWhatsApp(studentId);
+            await sendArrivalWhatsApp(studentId, status);
           } catch (e) {
             console.error('WhatsApp arrival error:', e);
           }

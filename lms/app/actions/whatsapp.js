@@ -160,7 +160,7 @@ export async function logoutWhatsAppGateway() {
 }
 
 // â”€â”€â”€ Send First-Arrival Message (called after first attendance of day) â”€â”€â”€â”€â”€â”€â”€â”€
-export async function sendArrivalWhatsApp(studentId) {
+export async function sendArrivalWhatsApp(studentId, status = 'PRESENT') {
   try {
     const student = await prisma.student.findUnique({
       where: { id: studentId },
@@ -174,15 +174,30 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    let englishStatus = `has arrived safely at the college today, ${today}.`;
+    let urduStatus = `آج مورخہ ${today} کو بحفظ کالج پہنچ چکا ہے۔`;
+
+    if (status === 'LATE') {
+      englishStatus = `has arrived late at the college today, ${today}.`;
+      urduStatus = `آج مورخہ ${today} کو کالج دیر سے پہنچا ہے۔`;
+    } else if (status === 'ABSENT') {
+      englishStatus = `is absent from the college today, ${today}.`;
+      urduStatus = `آج مورخہ ${today} کو کالج سے غیر حاضر ہے۔`;
+    } else if (status === 'LEAVE') {
+      englishStatus = `is on approved leave today, ${today}.`;
+      urduStatus = `آج مورخہ ${today} کو رخصت پر ہے۔`;
+    }
+
     const message = `*FUSION COLLEGE NAROWAL — ARRIVAL NOTIFICATION* 🏫
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
-Your child *${student.name}* (Roll No: ${student.rollNumber}) has arrived safely at the college today, ${today}.
+Your child *${student.name}* (Roll No: ${student.rollNumber}) ${englishStatus}
 
 *اردو:*
 السلام علیکم
-آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) آج مورخہ ${today} کو بحفظ کالج پہنچ چکا ہے
+آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) ${urduStatus}
 ----------------------------------------
 Regards,
 Fusion College Narowal Administration`;
