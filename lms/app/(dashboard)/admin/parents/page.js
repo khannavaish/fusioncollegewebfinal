@@ -3,15 +3,16 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
-import { createParent, updateParent, deleteParent, updateUserPassword } from '@/app/actions/admin';
-import { IconUsers } from '@/app/components/icons';
-import PasswordShowHide from '@/app/components/PasswordShowHide';
+import { createParent } from '@/app/actions/admin';
+import ParentsClient from './ParentsClient';
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminParentsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect('/login');
+
   let dbUser = null;
   try { dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } }); } catch {}
   if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
@@ -20,7 +21,7 @@ export default async function AdminParentsPage() {
   try {
     parents = await prisma.parent.findMany({
       include: {
-        user: true,
+        user: { select: { email: true, status: true, plainPassword: true } },
         children: { include: { student: { include: { class: true } } } },
       },
       orderBy: { name: 'asc' },
@@ -31,9 +32,34 @@ export default async function AdminParentsPage() {
     });
   } catch {}
 
+  // Flatten to plain serialisable objects for the client component
+  const serialisedParents = parents.map((p) => ({
+    id: p.id,
+    userId: p.userId,
+    name: p.name,
+    phone: p.phone,
+    email: p.user?.email || '',
+    plainPassword: p.user?.plainPassword || null,
+    status: p.user?.status || 'ACTIVE',
+    children: p.children.map((ch) => ({
+      studentId: ch.studentId,
+      student: {
+        name: ch.student.name,
+        rollNumber: ch.student.rollNumber,
+        class: ch.student.class ? { name: ch.student.class.name } : null,
+      },
+    })),
+  }));
+
+  const serialisedStudents = students.map((s) => ({
+    id: s.id,
+    name: s.name,
+    rollNumber: s.rollNumber,
+    class: s.class ? { name: s.class.name } : null,
+  }));
+
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
   const checkboxCls = "accent-cyan-500 w-3.5 h-3.5 rounded cursor-pointer";
-  const statusColors = { ACTIVE: 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30', INACTIVE: 'bg-red-950/50 text-red-400 border-red-500/30' };
 
   return (
     <div className="space-y-8 font-sans">
@@ -57,11 +83,11 @@ export default async function AdminParentsPage() {
             <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
             <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
           </div>
-          {students.length > 0 && (
+          {serialisedStudents.length > 0 && (
             <div className="mb-4">
               <div className="text-xs font-semibold text-zinc-400 mb-2">Link to Children (optional)</div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
-                {students.map((s) => (
+                {serialisedStudents.map((s) => (
                   <label key={s.id} className="flex items-center gap-2 bg-[#16192b]/50 border border-[#1e233d] rounded-lg px-3 py-2 cursor-pointer hover:border-[#2b3052] transition-colors">
                     <input type="checkbox" name="studentIds" value={s.id} className={checkboxCls} />
                     <div>
@@ -79,98 +105,13 @@ export default async function AdminParentsPage() {
         </form>
       </div>
 
-      {/* Parents Table */}
-      {parents.length === 0 ? (
+      {/* Parents List */}
+      {serialisedParents.length === 0 ? (
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
           No parents registered yet. Add your first parent above.
         </div>
       ) : (
-        <div className="space-y-4">
-          {parents.map((p) => (
-            <div key={p.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-violet-900/50 border border-violet-500/30 rounded-full flex items-center justify-center flex-shrink-0">
-                    <IconUsers className="w-5 h-5 text-violet-400" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-white">{p.name}</div>
-                    <div className="text-[11px] text-zinc-400 mt-0.5">{p.user?.email} · {p.phone}</div>
-                    <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-1">
-                      <span>Password: <PasswordShowHide password={p.user?.plainPassword} /></span>
-                      <details className="relative">
-                        <summary className="p-0.5 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400 inline-block">
-                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </summary>
-                        <div className="absolute left-0 top-5 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
-                          <form action={updateUserPassword} className="space-y-2">
-                            <input type="hidden" name="userId" value={p.userId} />
-                            <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
-                            <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
-                          </form>
-                        </div>
-                      </details>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {p.children.length === 0 ? (
-                        <span className="text-[10px] text-zinc-600">No children linked</span>
-                      ) : p.children.map((ch) => (
-                        <span key={ch.studentId} className="text-[10px] px-2 py-0.5 bg-cyan-950/40 border border-cyan-500/20 text-cyan-400 rounded-full">
-                          {ch.student.name} ({ch.student.class?.name})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                  <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[p.user?.status] || statusColors.ACTIVE}`}>
-                    {p.user?.status || 'ACTIVE'}
-                  </span>
-                  <details className="relative">
-                    <summary className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-xs font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer list-none">
-                      Edit
-                    </summary>
-                    <div className="absolute right-0 top-9 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-80 shadow-2xl">
-                      <h3 className="text-xs font-bold text-white mb-3">Edit Parent</h3>
-                      <form action={updateParent} className="space-y-2">
-                        <input type="hidden" name="id" value={p.id} />
-                        <input name="name" defaultValue={p.name} className={`${inputCls} text-xs`} required />
-                        <input name="phone" defaultValue={p.phone} className={`${inputCls} text-xs`} required />
-                        <select name="status" defaultValue={p.user?.status || 'ACTIVE'} className={`${inputCls} text-xs`}>
-                          <option value="ACTIVE">Active</option>
-                          <option value="INACTIVE">Inactive</option>
-                        </select>
-                        {students.length > 0 && (
-                          <div>
-                            <div className="text-[10px] text-zinc-400 mb-1">Children</div>
-                            <div className="space-y-1 max-h-36 overflow-y-auto">
-                              {students.map((s) => (
-                                <label key={s.id} className="flex items-center gap-2 text-[10px] text-zinc-300 cursor-pointer">
-                                  <input type="checkbox" name="studentIds" value={s.id} className={checkboxCls}
-                                    defaultChecked={p.children.some((ch) => ch.studentId === s.id)} />
-                                  {s.name} ({s.rollNumber})
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <button type="submit" className="w-full py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-                          Save Changes
-                        </button>
-                      </form>
-                    </div>
-                  </details>
-                  <form action={deleteParent}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <button type="submit" className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 text-xs font-medium hover:bg-red-950/20 transition-colors cursor-pointer">
-                      Delete
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ParentsClient parents={serialisedParents} students={serialisedStudents} />
       )}
     </div>
   );
