@@ -222,3 +222,37 @@ export async function createExamForClassSubject(classSubjectId, title, dateStr, 
   }
 }
 
+export async function adminCreateExam(formData) {
+  try {
+    const classSubjectId = formData.get('classSubjectId')?.toString();
+    const title = formData.get('title')?.toString().trim();
+    const dateStr = formData.get('date')?.toString();
+    const totalMarks = formData.get('totalMarks')?.toString();
+
+    if (!classSubjectId || !title || !dateStr || !totalMarks) {
+      return { error: 'All fields are required.' };
+    }
+
+    const res = await createExamForClassSubject(classSubjectId, title, dateStr, totalMarks);
+    if (res.error) return { error: res.error };
+
+    revalidatePath('/admin/exams');
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function adminDeleteExam(formData) {
+  try {
+    const examId = formData.get('examId')?.toString();
+    if (!examId) return { error: 'Exam ID required.' };
+    await prisma.exam.delete({ where: { id: examId } });
+    revalidatePath('/admin/exams');
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+

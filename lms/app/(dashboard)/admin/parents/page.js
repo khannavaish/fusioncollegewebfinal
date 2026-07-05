@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
 import { createParent, updateParent, deleteParent, updateUserPassword } from '@/app/actions/admin';
 import { IconUsers } from '@/app/components/icons';
+import PasswordShowHide from '@/app/components/PasswordShowHide';
 
 export default async function AdminParentsPage() {
   const supabase = await createClient();
@@ -96,7 +97,7 @@ export default async function AdminParentsPage() {
                     <div className="font-bold text-sm text-white">{p.name}</div>
                     <div className="text-[11px] text-zinc-400 mt-0.5">{p.user?.email} · {p.phone}</div>
                     <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-1">
-                      <span>Password: <span className="font-mono text-zinc-300">{p.user?.plainPassword || '••••••••'}</span></span>
+                      <span>Password: <PasswordShowHide password={p.user?.plainPassword} /></span>
                       <details className="relative">
                         <summary className="p-0.5 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400 inline-block">
                           <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>

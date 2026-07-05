@@ -5,6 +5,7 @@ import {
   IconHome, IconGraduationCap, IconUserTie, IconFamily,
   IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble,
 } from '@/app/components/icons';
+import MobileMenu from '@/app/components/MobileMenu';
 
 export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
@@ -163,6 +164,10 @@ export default async function DashboardLayout({ children }) {
                 <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Edit Timetable
               </a>
+              <a href="/admin/exams" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                Schedule Exams
+              </a>
               <a href="/admin/whatsapp" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 WhatsApp Alerts
@@ -281,14 +286,17 @@ export default async function DashboardLayout({ children }) {
 
       {/* Main pane */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-        <header className="h-16 border-b border-[#1e233d] bg-[#0d0f1a]/50 backdrop-blur px-6 flex items-center justify-between md:justify-end">
-          <div className="md:hidden flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="Fusion College Logo"
-              className="w-8 h-8 rounded-full object-contain bg-white"
-            />
-            <span className="font-bold text-white text-sm">FUSION LMS</span>
+        <header className="h-16 border-b border-[#1e233d] bg-[#0d0f1a]/50 backdrop-blur px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MobileMenu role={role} name={name} handleSignOutAction={handleSignOut} />
+            <div className="md:hidden flex items-center gap-2">
+              <img
+                src="/logo.png"
+                alt="Fusion College Logo"
+                className="w-8 h-8 rounded-full object-contain bg-white"
+              />
+              <span className="font-bold text-white text-sm">FUSION LMS</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">

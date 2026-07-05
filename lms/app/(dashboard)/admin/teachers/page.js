@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
 import TeacherCreateForm from './TeacherCreateForm';
 import { updateTeacher, deleteTeacher, updateUserPassword } from '@/app/actions/admin';
+import PasswordShowHide from '@/app/components/PasswordShowHide';
 
 export default async function AdminTeachersPage() {
   const supabase = await createClient();
@@ -77,7 +78,7 @@ export default async function AdminTeachersPage() {
                     <td className="px-5 py-4 text-xs font-mono text-zinc-400">{t.user?.email}</td>
                     <td className="px-5 py-4 text-xs font-mono text-zinc-400">
                       <div className="flex items-center gap-2">
-                        <span>{t.user?.plainPassword || '••••••••'}</span>
+                        <PasswordShowHide password={t.user?.plainPassword} />
                         <details className="relative">
                           <summary className="p-1 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
