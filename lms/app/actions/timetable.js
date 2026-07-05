@@ -24,13 +24,29 @@ export async function saveTimetableSlots(slots, timeSlots) {
       return { error: 'Invalid slots format.' };
     }
 
-    const cleanSlots = slots.map((slot) => ({
-      section: slot.section?.toString() || 'BOYS',
-      className: slot.className?.toString() || '',
-      timeSlot: slot.timeSlot?.toString() || '',
-      subject: slot.subject?.toString() || '',
-      teacher: slot.teacher?.toString() || '',
-    }));
+    // Fetch all teachers to map names to IDs
+    const teachers = await prisma.teacher.findMany({
+      select: { id: true, name: true },
+    });
+
+    const teacherNameToId = new Map();
+    teachers.forEach((teacher) => {
+      teacherNameToId.set(teacher.name.toLowerCase(), teacher.id);
+    });
+
+    const cleanSlots = slots.map((slot) => {
+      const teacherName = slot.teacher?.toString() || '';
+      const teacherId = teacherName ? teacherNameToId.get(teacherName.toLowerCase()) : null;
+      
+      return {
+        section: slot.section?.toString() || 'BOYS',
+        className: slot.className?.toString() || '',
+        timeSlot: slot.timeSlot?.toString() || '',
+        subject: slot.subject?.toString() || '',
+        teacher: teacherName,
+        teacherId: teacherId,
+      };
+    });
 
     await prisma.$transaction(async (tx) => {
       await tx.timetableSlot.deleteMany();

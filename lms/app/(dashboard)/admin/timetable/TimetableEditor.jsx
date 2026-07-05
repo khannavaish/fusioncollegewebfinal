@@ -56,12 +56,12 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
     const bi = ns.findIndex(s => s.section === section    && s.className === className    && s.timeSlot === timeSlot);
     const a  = ai !== -1 ? ns[ai] : null;
     const b  = bi !== -1 ? ns[bi] : null;
-    const [sa, ta] = [a?.subject || '', a?.teacher || ''];
-    const [sb, tb] = [b?.subject || '', b?.teacher || ''];
-    if (ai !== -1) ns[ai] = { ...ns[ai], subject: sb, teacher: tb };
-    else ns.push({ section: selSection, className: selClassName, timeSlot: selTimeSlot, subject: sb, teacher: tb });
-    if (bi !== -1) ns[bi] = { ...ns[bi], subject: sa, teacher: ta };
-    else ns.push({ section, className, timeSlot, subject: sa, teacher: ta });
+    const [sa, ta, tai] = [a?.subject || '', a?.teacher || '', a?.teacherId || null];
+    const [sb, tb, tbi] = [b?.subject || '', b?.teacher || '', b?.teacherId || null];
+    if (ai !== -1) ns[ai] = { ...ns[ai], subject: sb, teacher: tb, teacherId: tbi };
+    else ns.push({ section: selSection, className: selClassName, timeSlot: selTimeSlot, subject: sb, teacher: tb, teacherId: tbi });
+    if (bi !== -1) ns[bi] = { ...ns[bi], subject: sa, teacher: ta, teacherId: tai };
+    else ns.push({ section, className, timeSlot, subject: sa, teacher: ta, teacherId: tai });
     setSlots(ns);
     setSelectedSlotKey(null);
   };
@@ -80,12 +80,12 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
     const bi = ns.findIndex(s => s.section === section && s.className === className && s.timeSlot === timeSlot);
     const a  = ai !== -1 ? ns[ai] : null;
     const b  = bi !== -1 ? ns[bi] : null;
-    const [sa, ta] = [a?.subject || '', a?.teacher || ''];
-    const [sb, tb] = [b?.subject || '', b?.teacher || ''];
-    if (ai !== -1) ns[ai] = { ...ns[ai], subject: sb, teacher: tb };
-    else ns.push({ section: ss, className: sc, timeSlot: st, subject: sb, teacher: tb });
-    if (bi !== -1) ns[bi] = { ...ns[bi], subject: sa, teacher: ta };
-    else ns.push({ section, className, timeSlot, subject: sa, teacher: ta });
+    const [sa, ta, tai] = [a?.subject || '', a?.teacher || '', a?.teacherId || null];
+    const [sb, tb, tbi] = [b?.subject || '', b?.teacher || '', b?.teacherId || null];
+    if (ai !== -1) ns[ai] = { ...ns[ai], subject: sb, teacher: tb, teacherId: tbi };
+    else ns.push({ section: ss, className: sc, timeSlot: st, subject: sb, teacher: tb, teacherId: tbi });
+    if (bi !== -1) ns[bi] = { ...ns[bi], subject: sa, teacher: ta, teacherId: tai };
+    else ns.push({ section, className, timeSlot, subject: sa, teacher: ta, teacherId: tai });
     setSlots(ns);
   };
 
@@ -136,7 +136,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
   // ─── edit modal ────────────────────────────────────────────────────────────
   const openEditModal = (e, section, className, timeSlot) => {
     e.stopPropagation();
-    setEditingSlot(getSlot(section, className, timeSlot) || { section, className, timeSlot, subject: '', teacher: '' });
+    setEditingSlot(getSlot(section, className, timeSlot) || { section, className, timeSlot, subject: '', teacher: '', teacherId: null });
   };
 
   const saveEdit = (e) => {
@@ -479,7 +479,14 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                   <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Teacher Name</label>
                   <select
                     value={editingSlot.teacher || 'No Teacher assigned yet'}
-                    onChange={e => setEditingSlot({ ...editingSlot, teacher: e.target.value })}
+                    onChange={e => {
+                      const selectedTeacher = dbTeachers.find(t => t.name === e.target.value);
+                      setEditingSlot({ 
+                        ...editingSlot, 
+                        teacher: e.target.value, 
+                        teacherId: selectedTeacher ? selectedTeacher.id : null 
+                      });
+                    }}
                     className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 cursor-pointer animate-none"
                   >
                     <option value="No Teacher assigned yet">No Teacher assigned yet</option>
