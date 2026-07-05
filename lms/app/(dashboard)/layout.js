@@ -166,9 +166,14 @@ export default async function DashboardLayout({ children }) {
               <a href="/admin/whatsapp" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 WhatsApp Alerts
-              </a>              <a href="/admin/announcements" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+              </a>
+              <a href="/admin/announcements" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Announcements
+              </a>
+              <a href="/admin/notifications" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-colors" />
+                Notification History
               </a>
               <a href="/admin/reports" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
@@ -184,17 +189,29 @@ export default async function DashboardLayout({ children }) {
                 <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
                 My Classes
               </a>
+              <a href="/teacher/assignments" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-colors" />
+                Assignments
+              </a>
               <a href="/teacher/attendance" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Attendance
               </a>
               <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
-                <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
                 Timetable
               </a>
               <a href="/teacher/reports" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
-                Reports & Marks
+                Reports &amp; Marks
+              </a>
+              <a href="/teacher/announcements" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Announcements
+              </a>
+              <a href="/teacher/profile" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconUsers className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                My Profile
               </a>
             </>
           )}
@@ -206,17 +223,29 @@ export default async function DashboardLayout({ children }) {
                 <IconBookOpen className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 My Subjects
               </a>
+              <a href="/student/assignments" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-violet-400 transition-colors" />
+                Assignments
+              </a>
               <a href="/student/attendance" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconClipboard className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                 Attendance
               </a>
-              <a href="/student/results" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+              <a href="/student/grades" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
-                Results
+                My Grades
               </a>
               <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />
                 Timetable
+              </a>
+              <a href="/student/announcements" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                Announcements
+              </a>
+              <a href="/student/profile" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconUsers className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                My Profile
               </a>
             </>
           )}

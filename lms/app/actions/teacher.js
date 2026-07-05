@@ -221,3 +221,25 @@ export async function saveLectureNotes(formData) {
 export async function submitAttendanceAndLecture(formData) {
   return markAttendanceOnly(formData);
 }
+
+// ==================== Update Teacher Profile ====================
+export async function updateTeacherProfile(formData) {
+  try {
+    const teacher = await verifyTeacher();
+    const phone = formData.get('phone')?.toString().trim() || null;
+    const qualification = formData.get('qualification')?.toString().trim() || null;
+
+    await prisma.teacher.update({
+      where: { id: teacher.id },
+      data: { phone, qualification },
+    });
+
+    revalidatePath('/teacher/profile');
+    revalidatePath('/teacher');
+    return { success: true };
+  } catch (e) {
+    console.error('updateTeacherProfile error:', e);
+    return { error: e.message || 'Failed to update profile.' };
+  }
+}
+

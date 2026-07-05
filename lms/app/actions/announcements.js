@@ -103,3 +103,40 @@ export async function createAnnouncement(_prev, formData) {
     return { error: e.message || 'Failed to publish announcement.' };
   }
 }
+
+// ==================== Delete Announcement ====================
+export async function deleteAnnouncement(formData) {
+  try {
+    await verifyAdmin();
+    const id = formData.get('id')?.toString();
+    if (!id) return { error: 'ID required.' };
+    await prisma.announcement.delete({ where: { id } });
+    revalidatePath('/admin/announcements');
+    return { success: true };
+  } catch (e) {
+    console.error('deleteAnnouncement error:', e);
+    return { error: e.message || 'Failed to delete announcement.' };
+  }
+}
+
+// ==================== Edit Announcement ====================
+export async function editAnnouncement(formData) {
+  try {
+    await verifyAdmin();
+    const id = formData.get('id')?.toString();
+    const title = formData.get('title')?.toString().trim();
+    const message = formData.get('message')?.toString().trim();
+    if (!id || !title || !message) return { error: 'ID, title and message are required.' };
+
+    await prisma.announcement.update({
+      where: { id },
+      data: { title, message },
+    });
+    revalidatePath('/admin/announcements');
+    return { success: true };
+  } catch (e) {
+    console.error('editAnnouncement error:', e);
+    return { error: e.message || 'Failed to edit announcement.' };
+  }
+}
+
