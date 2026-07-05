@@ -175,21 +175,27 @@ export async function sendArrivalWhatsApp(studentId, status = 'PRESENT') {
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
+    let statusBlock = '```\n🟢 STATUS: PRESENT (حاضر)\n```';
     let englishStatus = `has arrived safely at the college today, ${today}.`;
     let urduStatus = `آج مورخہ ${today} کو بحفظ کالج پہنچ چکا ہے۔`;
 
     if (status === 'LATE') {
+      statusBlock = '```\n🟡 STATUS: LATE (دیر سے)\n```';
       englishStatus = `has arrived late at the college today, ${today}.`;
       urduStatus = `آج مورخہ ${today} کو کالج دیر سے پہنچا ہے۔`;
     } else if (status === 'ABSENT') {
+      statusBlock = '```\n🔴 STATUS: ABSENT (غیر حاضر)\n```';
       englishStatus = `is absent from the college today, ${today}.`;
       urduStatus = `آج مورخہ ${today} کو کالج سے غیر حاضر ہے۔`;
     } else if (status === 'LEAVE') {
+      statusBlock = '```\n🔵 STATUS: LEAVE (رخصت)\n```';
       englishStatus = `is on approved leave today, ${today}.`;
       urduStatus = `آج مورخہ ${today} کو رخصت پر ہے۔`;
     }
 
     const message = `*FUSION COLLEGE NAROWAL — ARRIVAL NOTIFICATION* 🏫
+----------------------------------------
+${statusBlock}
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
