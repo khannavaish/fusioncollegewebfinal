@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
   --background: #ffffff;
@@ -56,3 +56,90 @@ body {
 *::-webkit-scrollbar-corner {
   background: #090b11;
 }
+
+/* ─── Light Mode Overrides ─── */
+.theme-light body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.theme-light .bg-\[\#090b11\] {
+  background-color: #f1f5f9 !important;
+}
+
+.theme-light .bg-\[\#0d0f1a\] {
+  background-color: #ffffff !important;
+}
+
+.theme-light .bg-\[\#16192b\] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.theme-light .border-\[\#1e233d\] {
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light .border-\[\#2b3052\] {
+  border-color: #94a3b8 !important;
+}
+
+.theme-light .text-zinc-100 {
+  color: #1e293b !important;
+}
+
+.theme-light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+.theme-light .text-zinc-400 {
+  color: #475569 !important;
+}
+
+.theme-light .text-zinc-500 {
+  color: #64748b !important;
+}
+
+.theme-light .text-white {
+  color: #0f172a !important;
+}
+
+.theme-light aside {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light header {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light input, 
+.theme-light select, 
+.theme-light textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.theme-light input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-light table thead tr {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+.theme-light table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.theme-light dialog {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+

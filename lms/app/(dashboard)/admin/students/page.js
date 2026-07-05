@@ -6,8 +6,11 @@ import { IconChevronLeft } from '@/app/components/icons';
 import StudentCreateForm from './StudentCreateForm';
 import { updateStudent, deleteStudent, transferStudent, updateUserPassword } from '@/app/actions/admin';
 import PasswordShowHide from '@/app/components/PasswordShowHide';
+import Pagination from '@/app/components/Pagination';
 
-export default async function AdminStudentsPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminStudentsPage({ searchParams }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,13 +19,22 @@ export default async function AdminStudentsPage() {
   try { dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } }); } catch {}
   if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
-  let students = [], classes = [];
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  let students = [], classes = [], total = 0;
   try {
-    students = await prisma.student.findMany({
-      include: { class: true, user: true },
-      orderBy: { name: 'asc' },
-    });
-    classes = await prisma.class.findMany({ orderBy: { name: 'asc' } });
+    [students, total, classes] = await Promise.all([
+      prisma.student.findMany({
+        include: { class: true, user: true },
+        orderBy: { name: 'asc' },
+        skip,
+        take: PAGE_SIZE,
+      }),
+      prisma.student.count(),
+      prisma.class.findMany({ orderBy: { name: 'asc' } }),
+    ]);
   } catch {}
 
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
@@ -153,6 +165,9 @@ export default async function AdminStudentsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="px-5 pb-5">
+            <Pagination page={page} total={total} pageSize={PAGE_SIZE} basePath="/admin/students" />
           </div>
         </div>
       )}

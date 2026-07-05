@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { IconChevronLeft, IconChevronRight } from '@/app/components/icons';
 import DeleteClassForm from './DeleteClassForm';
 import { createClass, updateClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
+import Pagination from '@/app/components/Pagination';
 
-export default async function AdminClassesPage() {
+const PAGE_SIZE = 12;
+
+export default async function AdminClassesPage({ searchParams }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,20 +19,30 @@ export default async function AdminClassesPage() {
   try { dbUser = await prisma.user.findUnique({ where: { authId: user.id }, select: { role: true } }); } catch {}
   if (!dbUser || dbUser.role !== 'ADMIN') redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
 
-  let classes = [], subjects = [], teachers = [];
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  let classes = [], subjects = [], teachers = [], total = 0;
   try {
-    classes = await prisma.class.findMany({
-      include: {
-        _count: { select: { students: true } },
-        subjects: { include: { subject: true, teacher: true } },
-      },
-      orderBy: { academicYr: 'desc' },
-    });
-    subjects = await prisma.subject.findMany({ orderBy: { name: 'asc' } });
-    teachers = await prisma.teacher.findMany({ orderBy: { name: 'asc' } });
+    [classes, total, subjects, teachers] = await Promise.all([
+      prisma.class.findMany({
+        include: {
+          _count: { select: { students: true } },
+          subjects: { include: { subject: true, teacher: true } },
+        },
+        orderBy: { academicYr: 'desc' },
+        skip,
+        take: PAGE_SIZE,
+      }),
+      prisma.class.count(),
+      prisma.subject.findMany({ orderBy: { name: 'asc' } }),
+      prisma.teacher.findMany({ orderBy: { name: 'asc' } }),
+    ]);
   } catch {}
 
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
+
   const btnPrimary = "px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer";
 
   return (
@@ -137,6 +150,7 @@ export default async function AdminClassesPage() {
           ))}
         </div>
       )}
+      <Pagination page={page} total={total} pageSize={PAGE_SIZE} basePath="/admin/classes" />
     </div>
   );
 }

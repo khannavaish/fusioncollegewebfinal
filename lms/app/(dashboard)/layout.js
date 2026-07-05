@@ -6,6 +6,8 @@ import {
   IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble,
 } from '@/app/components/icons';
 import MobileMenu from '@/app/components/MobileMenu';
+import ThemeToggle from '@/app/components/ThemeToggle';
+
 
 export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
@@ -300,6 +302,7 @@ export default async function DashboardLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <span className="text-xs px-2.5 py-1 rounded bg-[#1e233d] border border-[#2b3052] font-semibold text-zinc-300">
               Session 2026
             </span>

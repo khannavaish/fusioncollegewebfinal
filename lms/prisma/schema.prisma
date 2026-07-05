@@ -21,6 +21,7 @@ model User {
   parent        Parent?
   student       Student?
   teacher       Teacher?
+  announcementReads AnnouncementRead[]
 }
 
 model Admin {
@@ -97,10 +98,10 @@ model ClassSubject {
   id        String     @id @default(uuid())
   classId   String
   subjectId String
-  teacherId String
+  teacherId String?
   class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  teacher   Teacher    @relation(fields: [teacherId], references: [id])
+  teacher   Teacher?   @relation(fields: [teacherId], references: [id])
   exams     Exam[]
   lectures  Lecture[]
   materials Material[]
@@ -135,7 +136,8 @@ model Submission {
   id           String     @id @default(uuid())
   assignmentId String
   studentId    String
-  fileUrl      String
+  fileUrl      String?
+  textAnswer   String?
   grade        String?
   remarks      String?
   status       String     @default("SUBMITTED")
@@ -258,14 +260,26 @@ model WhatsAppLog {
 
 
 model Announcement {
-  id              String   @id @default(uuid())
+  id              String               @id @default(uuid())
   title           String
   message         String
   audience        String
   classIds        Json?
   teacherIds      Json?
   whatsappTargets Json?
-  shareOnWhatsapp Boolean  @default(false)
-  whatsappSent    Int      @default(0)
-  createdAt       DateTime @default(now())
+  shareOnWhatsapp Boolean              @default(false)
+  whatsappSent    Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  reads           AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String   @id @default(uuid())
+  announcementId String
+  userId         String
+  readAt         DateTime @default(now())
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
 }
