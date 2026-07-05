@@ -1,4 +1,4 @@
-﻿'use server';
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
@@ -37,9 +37,27 @@ function generatePassword(length = 10) {
 }
 
 function classPrefix(className) {
-  // Extract letters & numbers, uppercase, take first 4
-  const clean = className.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  return clean.slice(0, 4) || 'STU';
+  const trimmed = className.trim();
+  const upper = trimmed.toUpperCase();
+
+  let section = '';
+  let rest = '';
+
+  if (upper.startsWith('BOYS ')) {
+    section = 'BOYS';
+    rest = trimmed.slice(5);
+  } else if (upper.startsWith('GIRLS ')) {
+    section = 'GIRLS';
+    rest = trimmed.slice(6);
+  } else if (upper.startsWith('OTHER ')) {
+    section = 'OTHER';
+    rest = trimmed.slice(6);
+  } else {
+    return trimmed.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'STU';
+  }
+
+  const cleanRest = rest.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return `${section}-${cleanRest}`;
 }
 
 async function generateRollNumber(classId) {
