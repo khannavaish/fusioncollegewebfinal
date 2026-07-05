@@ -26,7 +26,7 @@ function adminClient() {
   );
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ Password + Credential helpers ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// Password + Credential helpers
 function generatePassword(length = 10) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   let pw = '';
@@ -50,7 +50,7 @@ async function generateRollNumber(classId) {
   return `${prefix}-${String(next).padStart(3, '0')}`;
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ CLASSES ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// CLASSES
 export async function createClass(formData) {
   await verifyAdmin();
   const name = formData.get('name')?.toString().trim();
@@ -140,7 +140,7 @@ export async function deleteClass(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ SUBJECTS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// SUBJECTS
 export async function createSubject(formData) {
   await verifyAdmin();
   const name = formData.get('name')?.toString().trim();
@@ -183,7 +183,7 @@ export async function deleteSubject(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ CLASS-SUBJECTS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// CLASS-SUBJECTS
 export async function assignTeacherToSubject(formData) {
   await verifyAdmin();
   const classId = formData.get('classId')?.toString();
@@ -216,7 +216,7 @@ export async function removeClassSubject(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ TEACHERS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// TEACHERS
 export async function createTeacher(_prev, formData) {
   await verifyAdmin();
   const email = formData.get('email')?.toString().trim();
@@ -308,7 +308,7 @@ export async function deleteTeacher(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ STUDENTS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// STUDENTS
 export async function createStudent(_prev, formData) {
   await verifyAdmin();
   const name = formData.get('name')?.toString().trim();
@@ -499,7 +499,7 @@ export async function transferStudent(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ PARENTS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// PARENTS
 export async function createParent(formData) {
   await verifyAdmin();
   const email = formData.get('email')?.toString().trim();
@@ -593,7 +593,7 @@ export async function deleteParent(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ ENQUIRIES ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// ENQUIRIES
 export async function updateEnquiryStatus(formData) {
   await verifyAdmin();
   const id = formData.get('id')?.toString();
@@ -608,7 +608,7 @@ export async function updateEnquiryStatus(formData) {
   }
 }
 
-// ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ ADMIN CREDENTIALS ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢ÃƒÂ¢
+// ADMIN CREDENTIALS
 export async function updateUserPassword(formData) {
   await verifyAdmin();
   const userId = formData.get('userId')?.toString();
