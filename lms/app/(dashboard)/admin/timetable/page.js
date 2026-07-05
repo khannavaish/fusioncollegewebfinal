@@ -23,11 +23,19 @@ export default async function AdminTimetablePage() {
     redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
   }
 
-  // Fetch current slots, classes, and time slots configuration
-  let slots = [], dbClasses = [], config = null;
+  // Fetch current slots, classes, active teachers, and time slots configuration
+  let slots = [], dbClasses = [], dbTeachers = [], config = null;
   try {
     slots = await prisma.timetableSlot.findMany();
     dbClasses = await prisma.class.findMany({ orderBy: { name: 'asc' } });
+    dbTeachers = await prisma.teacher.findMany({
+      where: {
+        user: {
+          status: 'ACTIVE',
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
     config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
   } catch (err) {
     console.error('Error fetching timetable configuration:', err);
@@ -50,6 +58,7 @@ export default async function AdminTimetablePage() {
       <AdminTimetableShell initialSlots={slots} 
         dbClasses={dbClasses} 
         initialTimeSlots={initialTimeSlots} 
+        dbTeachers={dbTeachers}
       />
     </div>
   );

@@ -98,6 +98,13 @@ export default async function DashboardLayout({ children }) {
     console.error('Error fetching/creating user profile:', err);
   }
 
+  // Deactivated account check
+  if (dbUser && dbUser.status === 'INACTIVE') {
+    const supabaseServer = await createClient();
+    await supabaseServer.auth.signOut();
+    redirect('/login?error=inactive');
+  }
+
   const name = dbUser?.student?.name || dbUser?.teacher?.name || dbUser?.admin?.name || dbUser?.parent?.name || user.email;
   const role = dbUser?.role || 'STUDENT';
 

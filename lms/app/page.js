@@ -28,5 +28,11 @@ export default async function Home() {
     redirect('/login');
   }
 
+  if (dbUser.status === 'INACTIVE') {
+    const supabaseServer = await createClient();
+    await supabaseServer.auth.signOut();
+    redirect('/login?error=inactive');
+  }
+
   redirect(`/${dbUser.role.toLowerCase()}`);
 }

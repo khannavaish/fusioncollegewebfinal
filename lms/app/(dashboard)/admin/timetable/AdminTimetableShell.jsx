@@ -6,7 +6,7 @@ import TimetableClientView from '../../timetable/TimetableClientView';
 import TimetableEditor from './TimetableEditor';
 import { IconEdit, IconXCircle } from '@/app/components/icons';
 
-export default function AdminTimetableShell({ initialSlots, dbClasses, initialTimeSlots }) {
+export default function AdminTimetableShell({ initialSlots, dbClasses, initialTimeSlots, dbTeachers }) {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -66,6 +66,7 @@ export default function AdminTimetableShell({ initialSlots, dbClasses, initialTi
                   initialSlots={initialSlots}
                   dbClasses={dbClasses}
                   initialTimeSlots={initialTimeSlots}
+                  dbTeachers={dbTeachers}
                 />
               </div>
             </motion.div>

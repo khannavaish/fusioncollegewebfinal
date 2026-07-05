@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function LoginPage() {
@@ -9,6 +9,15 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('error') === 'inactive') {
+        setError('Your account has been deactivated. Please contact administration.');
+      }
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();

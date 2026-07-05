@@ -21,7 +21,7 @@ const SUBJECT_COLORS = {
 
 const DEFAULT_COLOR = { bg: 'from-zinc-900/80 to-slate-900/80', border: 'border-zinc-700/40', text: 'text-zinc-200', badge: 'bg-zinc-700/30' };
 
-export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSlots }) {
+export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSlots, dbTeachers = [] }) {
   const [slots, setSlots]           = useState(initialSlots);
   const [timeSlots, setTimeSlots]   = useState(initialTimeSlots);
   const [selectedSlotKey, setSelectedSlotKey] = useState(null);
@@ -477,11 +477,30 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Teacher Name</label>
-                  <input type="text" value={editingSlot.teacher}
+                  <select
+                    value={editingSlot.teacher || 'No Teacher assigned yet'}
                     onChange={e => setEditingSlot({ ...editingSlot, teacher: e.target.value })}
-                    placeholder="e.g. Sir Asif"
-                    className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500"
-                    required />
+                    className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 cursor-pointer animate-none"
+                  >
+                    <option value="No Teacher assigned yet">No Teacher assigned yet</option>
+                    <optgroup label="Available Active Teachers">
+                      {dbTeachers.map((t) => (
+                        <option key={t.id} value={t.name}>{t.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Options">
+                      <option value="ADD_NEW">Add Teacher first...</option>
+                    </optgroup>
+                  </select>
+                  {editingSlot.teacher === 'ADD_NEW' && (
+                    <p className="text-xs text-cyan-400 mt-2 leading-relaxed">
+                      To add a new teacher, please go to the{' '}
+                      <a href="/admin/teachers" target="_blank" className="underline font-bold hover:text-cyan-300">
+                        Manage Teachers
+                      </a>{' '}
+                      page, add the teacher, then refresh this page to update the list.
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button type="button" onClick={() => setEditingSlot(null)}
@@ -489,7 +508,8 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                     Cancel
                   </button>
                   <button type="submit"
-                    className="flex-1 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                    disabled={editingSlot.teacher === 'ADD_NEW'}
+                    className="flex-1 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
                     Apply Changes
                   </button>
                 </div>

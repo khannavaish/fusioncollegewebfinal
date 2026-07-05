@@ -287,24 +287,24 @@ export async function deleteTeacher(formData) {
   try {
     const teacher = await prisma.teacher.findUnique({ where: { id }, include: { user: true } });
     if (!teacher) return { error: 'Teacher not found.' };
-    const authId = teacher.user.authId;
 
     await prisma.$transaction(async (tx) => {
       // 1. Delete all class subject mappings for this teacher
       await tx.classSubject.deleteMany({
         where: { teacherId: id }
       });
-      // 2. Delete the user (which deletes the Teacher profile due to cascade)
-      await tx.user.delete({ where: { id: teacher.userId } });
+      // 2. Set the User status to INACTIVE
+      await tx.user.update({
+        where: { id: teacher.userId },
+        data: { status: 'INACTIVE' }
+      });
     });
 
-    const admin = adminClient();
-    await admin.auth.admin.deleteUser(authId);
     revalidatePath('/admin/teachers');
     return { success: true };
   } catch (e) {
     console.error('Failed to delete teacher:', e);
-    return { error: 'Failed to delete teacher. Make sure all of their logs are removed.' };
+    return { error: 'Failed to deactivate teacher.' };
   }
 }
 
