@@ -68,13 +68,17 @@ export function teacherNameMatches(a = '', b = '') {
 export function teacherMatchesSlot(teacher, slot) {
   if (!teacher || !slot) return false;
   
-  // If slot has teacherId, use ID-based matching (most reliable)
-  if (slot.teacherId) {
+  const isObject = typeof teacher === 'object' && teacher !== null;
+  const teacherId = isObject ? teacher.id : null;
+  const teacherName = isObject ? teacher.name : teacher;
+  
+  // If slot has teacherId and we have a valid teacher object with ID, use ID-based matching
+  if (slot.teacherId && teacherId) {
     return teacher.id === slot.teacherId;
   }
   
   // Fallback to name-based matching
-  return teacherNameMatches(teacher.name, slot.teacher);
+  return teacherNameMatches(teacherName, slot.teacher);
 }
 
 export function getClassSubjectKey(className = '', subjectName = '') {

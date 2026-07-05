@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
@@ -47,7 +47,7 @@ export default async function TeacherAttendancePage({ params }) {
       const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
       const timetableSlots = await prisma.timetableSlot.findMany();
       const timetableTimeSlots = resolveTimeSlots(config?.slots);
-      scheduledSlots = getScheduledSlotsForClassSubject(classSubject, timetableSlots, timetableTimeSlots, dbUser.teacher?.name || '');
+      scheduledSlots = getScheduledSlotsForClassSubject(classSubject, timetableSlots, timetableTimeSlots, dbUser.teacher);
       classStatusCard = getScheduleStatus(scheduledSlots);
       const isAssignedTeacher = classSubject.teacherId === dbUser.teacher?.id;
       const isTimetableTeacher = scheduledSlots.length > 0;

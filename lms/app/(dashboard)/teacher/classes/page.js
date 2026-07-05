@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
@@ -20,7 +20,7 @@ function getTeacherClassSubjects(allClassSubjects, teacher, timetableSlots, time
         classSubject,
         timetableSlots,
         timeSlots,
-        teacher.name,
+        teacher,
       ),
     }))
     .filter((classSubject) => classSubject.scheduledSlots.length > 0);
