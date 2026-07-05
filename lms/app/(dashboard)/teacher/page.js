@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
@@ -113,6 +113,40 @@ export default async function TeacherDashboard() {
     const config = await prisma.timetableConfig.findUnique({ where: { id: 'default' } });
     timetableSlots = await prisma.timetableSlot.findMany();
     timetableTimeSlots = resolveTimeSlots(config?.slots);
+
+    // ── Filter My Classes to only show entries where the teacher actually
+    // ── appears in at least one timetable slot for that class+subject.
+    // ── This prevents a class from showing up just because the DB has the
+    // ── teacher assigned (e.g. via auto-incharge sync or manual admin entry)
+    // ── when the timetable never actually lists them for that class.
+    if (timetableSlots.length > 0 && teacher) {
+      const teacherNameNorm = normalizeText(teacher.name || '');
+      const teacherNameNoSir = teacherNameNorm.replace(/^sir\s+/, '');
+
+      classSubjects = classSubjects.filter((cs) => {
+        const classInfo = splitTimetableClassName(cs.class.name);
+        return timetableSlots.some((slot) => {
+          if (!slot?.className || !slot?.subject || !slot?.teacher) return false;
+          // Match class
+          const slotSection = normalizeText(slot.section);
+          const slotClass = normalizeText(slot.className);
+          const csSection = normalizeText(classInfo.section || '');
+          const csClass = normalizeText(classInfo.className);
+          const classMatches = (!classInfo.section || slotSection === csSection) && slotClass === csClass;
+          // Match subject
+          const subjectMatches = sameText(slot.subject, cs.subject.name);
+          // Match teacher name (strip honorifics for comparison)
+          const slotTeacherNorm = normalizeText(slot.teacher);
+          const slotTeacherNoSir = slotTeacherNorm.replace(/^sir\s+/, '');
+          const teacherMatches =
+            sameText(teacherNameNorm, slotTeacherNorm) ||
+            sameText(teacherNameNoSir, slotTeacherNoSir) ||
+            sameText(teacherNameNorm, slotTeacherNoSir) ||
+            sameText(teacherNameNoSir, slotTeacherNorm);
+          return classMatches && subjectMatches && teacherMatches;
+        });
+      });
+    }
 
     const classGroups = new Map();
     for (const slot of timetableSlots) {
