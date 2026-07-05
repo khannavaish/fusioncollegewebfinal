@@ -3,8 +3,8 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ charset: 'utf-8' }));
+app.use(express.urlencoded({ extended: true, charset: 'utf-8' }));
 
 const PORT = process.env.PORT || 3001;
 
@@ -62,11 +62,26 @@ app.post('/send', async (req, res) => {
             cleanNumber = `${cleanNumber}@c.us`;
         }
 
-        const info = await client.sendMessage(cleanNumber, message);
+        // Ensure message is properly decoded
+        const decodedMessage = Buffer.from(message, 'utf8').toString('utf8');
+        
+        const info = await client.sendMessage(cleanNumber, decodedMessage);
         res.json({ success: true, messageId: info.id.id });
     } catch (err) {
         console.error('Failed to send message:', err);
         res.status(500).json({ error: 'Failed to send message: ' + err.message });
+    }
+});
+
+// API Route to logout from WhatsApp
+app.post('/logout', async (req, res) => {
+    try {
+        await client.logout();
+        console.log('✅ Successfully logged out from WhatsApp');
+        res.json({ success: true, message: 'Logged out successfully. Scan QR code again to reconnect.' });
+    } catch (err) {
+        console.error('Failed to logout:', err);
+        res.status(500).json({ error: 'Failed to logout: ' + err.message });
     }
 });
 

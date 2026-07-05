@@ -31,7 +31,7 @@ export async function sendWhatsAppMessage(to, message) {
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify({ to: formattedPhone, message }),
       });
       const data = await res.json();
@@ -116,6 +116,36 @@ export async function sendTestWhatsApp(formData) {
   return { success: true };
 }
 
+// ─── Logout from WhatsApp Gateway ────────────────────────────────────────────────────
+export async function logoutWhatsAppGateway() {
+  await verifyAdmin();
+  
+  const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
+  if (!config || config.provider !== 'CUSTOM') {
+    return { error: 'Logout is only available for custom self-hosted gateway.' };
+  }
+
+  if (!config.gatewayUrl) {
+    return { error: 'Gateway URL not configured.' };
+  }
+
+  try {
+    const url = `${config.gatewayUrl.replace(/\/$/, '')}/logout`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      return { error: data.error || 'Failed to logout from gateway.' };
+    }
+    return { success: true, message: data.message };
+  } catch (e) {
+    console.error('[WhatsApp] Gateway logout error:', e);
+    return { error: e.message || 'Failed to connect to gateway.' };
+  }
+}
+
 // â”€â”€â”€ Send First-Arrival Message (called after first attendance of day) â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendArrivalWhatsApp(studentId) {
   try {
@@ -131,15 +161,15 @@ export async function sendArrivalWhatsApp(studentId) {
     if (!student || student.parents.length === 0) return;
 
     const today = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const message = `*FUSION COLLEGE NAROWAL â€” DAILY REPORT* ðŸ«
+    const message = `*FUSION COLLEGE NAROWAL — DAILY REPORT* 🏫
 ----------------------------------------
 *English:*
 Assalamu Alaikum,
 Your child *${student.name}* (Roll No: ${student.rollNumber}) has arrived safely at the college today, ${today}.
 
-*Ø§Ø±Ø¯Ùˆ:*
-Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÛŒÚ©Ù…ØŒ
-Ø¢Ù¾ Ú©Ø§ Ø¨Ú†Û *${student.name}* (Ø±ÙˆÙ„ Ù†Ù…Ø¨Ø±: ${student.rollNumber}) Ø¢Ø¬ Ù…ÙˆØ±Ø®Û ${today} Ú©Ùˆ Ø¨Ø­ÙØ§Ø¸Øª Ú©Ø§Ù„Ø¬ Ù¾ÛÙ†Ú† Ú†Ú©Ø§ ÛÛ’Û”
+*اردو:*
+السلام علیکم
+آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) آج مورخہ ${today} کو بحفظ کالج پہنچ چکا ہے
 ----------------------------------------
 Regards,
 Fusion College Narowal Administration`;
@@ -253,17 +283,17 @@ export async function sendEndOfDaySummary(formData) {
 
       data.entries.forEach(e => {
         const isPresent = e.status === 'PRESENT' || e.status === 'LATE';
-        const sign = isPresent ? 'âœ…' : 'âŒ';
+        const sign = isPresent ? '✅' : '❌';
         
         // English line
         summaryLinesEn.push(`${sign} *${e.subject}* (by ${e.teacher}): ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
         
         // Urdu line
-        const statusUrdu = isPresent ? 'Ø­Ø§Ø¶Ø± (Ø­Ø§Ø¶Ø±ÛŒ Ø±ÛŒÚ©Ø§Ø±Úˆ Ú©ÛŒ Ú¯Ø¦ÛŒ)' : 'ØºÛŒØ± Ø­Ø§Ø¶Ø±';
-        summaryLinesUr.push(`${sign} *${e.subject}* (Ø¨Ø°Ø±ÛŒØ¹Û ${e.teacher}): ${statusUrdu}\n   Ù…ÙˆØ¶ÙˆØ¹: ${e.topic}`);
+        const statusUrdu = isPresent ? 'حاضر (حاضری ریکارڈ کے گئے)' : 'غیر حاضر';
+        summaryLinesUr.push(`${sign} *${e.subject}* (بذریعہ ${e.teacher}): ${statusUrdu}\n   موضوع: ${e.topic}`);
       });
 
-      const message = `*FUSION COLLEGE NAROWAL â€” END-OF-DAY ACADEMIC REPORT* ðŸ«
+      const message = `*FUSION COLLEGE NAROWAL — END-OF-DAY ACADEMIC REPORT* 🏫
 ----------------------------------------
 *Student:* ${data.student.name} (${data.student.rollNumber})
 *Date:* ${formattedDate}
@@ -272,16 +302,16 @@ export async function sendEndOfDaySummary(formData) {
 Assalamu Alaikum,
 Here is the daily performance and attendance summary of your child:
 
-ðŸ“Š *Summary:* Present in ${presentCount}/${totalClasses} lectures.
-ðŸ“– *Subject Details & Topics Taught:*
+📊 *Summary:* Present in ${presentCount}/${totalClasses} lectures.
+📖 *Subject Details & Topics Taught:*
 ${summaryLinesEn.join('\n\n')}
 
-*Ø§Ø±Ø¯Ùˆ:*
-Ø§Ù„Ø³Ù„Ø§Ù… Ø¹Ù„ÛŒÚ©Ù…ØŒ
-Ø¢Ù¾ Ú©Û’ Ø¨Ú†Û’ Ú©ÛŒ Ø±ÙˆØ²Ø§Ù†Û Ú©ÛŒ ØªØ¹Ù„ÛŒÙ…ÛŒ Ø§ÙˆØ± Ø­Ø§Ø¶Ø±ÛŒ Ú©ÛŒ Ø±Ù¾ÙˆØ±Ù¹ Ø¯Ø±Ø¬ Ø°ÛŒÙ„ ÛÛ’:
+*اردو:*
+السلام علیکم
+آپ کے بچے کی روزانہ تعلیمی اور حاضری کی رپورٹ درج ذیل ہے:
 
-ðŸ“Š *Ø®Ù„Ø§ØµÛ:* Ø­Ø§Ø¶Ø±ÛŒ ${presentCount}/${totalClasses} Ù„ÛŒÚ©Ú†Ø±Ø²Û”
-ðŸ“– *Ù…Ø¶Ø§Ù…ÛŒÙ† Ú©ÛŒ ØªÙØµÛŒÙ„Ø§Øª Ø§ÙˆØ± Ù¾Ú‘Ú¾Ø§ÛŒØ§ Ú¯ÛŒØ§ Ù…ÙˆØ¶ÙˆØ¹:*
+📊 *خلاصہ:* حاضری ${presentCount}/${totalClasses} لیکچرز
+📖 *مضامین کی تفصیلات اور پڑھائی گئے موضوع:*
 ${summaryLinesUr.join('\n\n')}
 ----------------------------------------
 JazakAllah Khair,

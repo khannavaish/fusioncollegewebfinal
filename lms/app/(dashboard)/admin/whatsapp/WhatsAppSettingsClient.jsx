@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary } from '@/app/actions/whatsapp';
+import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary, logoutWhatsAppGateway } from '@/app/actions/whatsapp';
 import { IconCheckCircle, IconAlertTriangle, IconSparkles } from '@/app/components/icons';
 
 export default function WhatsAppSettingsClient({ config, classes = [] }) {
@@ -18,9 +18,11 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
   const [saveMsg, setSaveMsg]   = useState(null);
   const [testMsg, setTestMsg]   = useState(null);
   const [eodMsg, setEodMsg]     = useState(null);
+  const [logoutMsg, setLogoutMsg] = useState(null);
   const [isSaving, startSave]   = useTransition();
   const [isTesting, startTest]  = useTransition();
   const [isEod, startEod]       = useTransition();
+  const [isLoggingOut, startLogout] = useTransition();
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -61,6 +63,17 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
       const res = await sendEndOfDaySummary(fd);
       if (res?.error) setEodMsg({ type: 'error', text: res.error });
       else setEodMsg({ type: 'success', text: `Sent to parents of ${res.sent} students. ${res.skipped} skipped.` });
+    });
+  };
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    setLogoutMsg(null);
+    if (!confirm('Logout from WhatsApp gateway? This will disconnect your WhatsApp account. You will need to scan the QR code again to reconnect.')) return;
+    startLogout(async () => {
+      const res = await logoutWhatsAppGateway();
+      if (res?.error) setLogoutMsg({ type: 'error', text: res.error });
+      else setLogoutMsg({ type: 'success', text: res.message });
     });
   };
 
@@ -140,6 +153,15 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
                   placeholder="e.g. http://localhost:3001"
                   className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
                 <p className="text-[10px] text-zinc-500 mt-1">Your self-hosted API gateway endpoint address.</p>
+              </div>
+
+              <div className="pt-2">
+                {logoutMsg && <AlertMsg msg={logoutMsg} />}
+                <button type="button" onClick={handleLogout} disabled={isLoggingOut}
+                  className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
+                  {isLoggingOut ? 'Logging Out...' : 'Logout from WhatsApp Gateway'}
+                </button>
+                <p className="text-[10px] text-zinc-500 mt-2">Disconnect your WhatsApp account from the gateway. You will need to scan the QR code again to reconnect.</p>
               </div>
             </div>
           ) : (
