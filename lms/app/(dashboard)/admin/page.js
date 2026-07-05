@@ -34,7 +34,7 @@ export default async function AdminDashboard() {
     classCount = await prisma.class.count();
     subjectCount = await prisma.subject.count();
     userCount = await prisma.user.count();
-    recentStudents = await prisma.student.findMany({ include: { class: true }, orderBy: { name: 'asc' }, take: 5 });
+    recentStudents = await prisma.student.findMany({ include: { class: true, user: true }, orderBy: { name: 'asc' }, take: 5 });
     recentTeachers = await prisma.teacher.findMany({ include: { user: true }, orderBy: { name: 'asc' }, take: 5 });
     enquiries = await prisma.contactEnquiry.findMany({ orderBy: { createdAt: 'desc' }, take: 10 });
   } catch {}
@@ -150,9 +150,9 @@ export default async function AdminDashboard() {
               <div key={s.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{s.name}</div>
-                  <div className="text-[10px] text-zinc-500">{s.rollNumber} Ã‚Â· {s.class?.name || 'No class'}</div>
+                  <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name || 'No class'}</div>
                 </div>
-                <div className="text-[10px] text-zinc-500">{new Date(s.createdAt).toLocaleDateString()}</div>
+                <div className="text-[10px] text-zinc-500">{s.user?.createdAt ? new Date(s.user.createdAt).toLocaleDateString() : '—'}</div>
               </div>
             ))}
           </div>
@@ -173,9 +173,9 @@ export default async function AdminDashboard() {
               <div key={t.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-4 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-sm text-white">{t.name}</div>
-                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} Ã‚Â· {t.user?.email}</div>
+                  <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} · {t.user?.email}</div>
                 </div>
-                <div className="text-[10px] text-zinc-500">{new Date(t.createdAt).toLocaleDateString()}</div>
+                <div className="text-[10px] text-zinc-500">{t.user?.createdAt ? new Date(t.user.createdAt).toLocaleDateString() : '—'}</div>
               </div>
             ))}
           </div>
@@ -193,7 +193,7 @@ export default async function AdminDashboard() {
               <div className="flex justify-between items-start gap-3 flex-wrap">
                 <div>
                   <div className="font-semibold text-sm text-white">{enq.name}</div>
-                  <div className="text-[10px] text-zinc-400">{enq.email} Ã‚Â· {enq.phone}</div>
+                  <div className="text-[10px] text-zinc-400">{enq.email} · {enq.phone}</div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[enq.status] || statusColors.UNREAD}`}>
