@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import {
   IconHome, IconGraduationCap, IconUserTie, IconFamily,
-  IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble,
+  IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble, IconDocumentText,
 } from '@/app/components/icons';
 import MobileMenu from '@/app/components/MobileMenu';
 import ThemeToggle from '@/app/components/ThemeToggle';
