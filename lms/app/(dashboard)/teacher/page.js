@@ -12,6 +12,7 @@ import {
   getScheduleStatus,
   resolveTimeSlots,
   teacherMatchesSlot,
+  compareTimeSlots,
 } from '@/utils/timetable';
 
 export const dynamic = 'force-dynamic';
@@ -89,7 +90,8 @@ function getClassInchargeList(allClassSubjects, teacher, timetableSlots, timeSlo
     })
     .filter(Boolean);
 
-  return [...manualInchargeClasses, ...firstPeriodIncharges];
+  const combinedList = [...manualInchargeClasses, ...firstPeriodIncharges];
+  return combinedList.sort((a, b) => compareTimeSlots(a.timeSlot, b.timeSlot));
 }
 
 export default async function TeacherDashboard() {
