@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import { resolveTimeSlots } from '@/utils/timetable';
 
 function normalizeText(value = '') {
@@ -178,113 +179,121 @@ export default async function StudentDashboard() {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Student Dashboard</h1>
-          <p className="text-zinc-400 text-sm mt-1">Welcome back, {student?.name || user.email}</p>
+      <AnimatedSection delay={0.05}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Student Dashboard</h1>
+            <p className="text-zinc-400 text-sm mt-1">Welcome back, {student?.name || user.email}</p>
+          </div>
+          <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
+            <div className="font-bold text-white">{studentClassName}</div>
+            <div className="text-[10px] text-zinc-400 mt-0.5">Roll No: {studentRollNumber}</div>
+          </div>
         </div>
-        <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
-          <div className="font-bold text-white">{studentClassName}</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Roll No: {studentRollNumber}</div>
-        </div>
-      </div>
+      </AnimatedSection>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Attendance Rate</div>
-          <div className="text-3xl font-black text-cyan-400 mt-2">{attendanceRate}%</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Goal: Keep above 85% for scholarship merit</p>
+      <AnimatedSection delay={0.1}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Attendance Rate</div>
+            <div className="text-3xl font-black text-cyan-400 mt-2">{attendanceRate}%</div>
+            <p className="text-[10px] text-zinc-500 mt-1">Goal: Keep above 85% for scholarship merit</p>
+          </div>
+          <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Assignments Submitted</div>
+            <div className="text-3xl font-black text-white mt-2">{submittedCount} / {totalAssignments}</div>
+            <p className="text-[10px] text-zinc-500 mt-1">{totalAssignments - submittedCount} pending tasks require completion</p>
+          </div>
+          <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Class Incharge</div>
+            <div className="text-2xl font-black text-emerald-400 mt-2 truncate">{classIncharge}</div>
+            <p className="text-[10px] text-zinc-500 mt-1">First Scheduled slot teacher</p>
+          </div>
         </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Assignments Submitted</div>
-          <div className="text-3xl font-black text-white mt-2">{submittedCount} / {totalAssignments}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">{totalAssignments - submittedCount} pending tasks require completion</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Class Incharge</div>
-          <div className="text-2xl font-black text-emerald-400 mt-2 truncate">{classIncharge}</div>
-          <p className="text-[10px] text-zinc-500 mt-1">First Scheduled slot teacher</p>
-        </div>
-      </div>
+      </AnimatedSection>
 
       {/* Course Detail Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-bold text-white tracking-tight">Active Courses</h2>
-          {activeCourses.length === 0 ? (
-            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
-              No active subjects assigned to your class yet.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {activeCourses.map((course, idx) => (
-                <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <div className="font-bold text-white text-base">{course.name}</div>
-                    <div className="text-xs text-zinc-400 mt-0.5">{course.teacher}</div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <div className="text-xs text-zinc-400">Attendance</div>
-                      <div className="text-sm font-black text-white mt-0.5">{course.progress}%</div>
+      <AnimatedSection delay={0.15}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <h2 className="text-lg font-bold text-white tracking-tight">Active Courses</h2>
+            {activeCourses.length === 0 ? (
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
+                No active subjects assigned to your class yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activeCourses.map((course, idx) => (
+                  <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <div className="font-bold text-white text-base">{course.name}</div>
+                      <div className="text-xs text-zinc-400 mt-0.5">{course.teacher}</div>
                     </div>
-                    <div className="w-24 bg-[#16192b] h-2 rounded-full overflow-hidden border border-[#2b3052]">
-                      <div className={`h-full ${course.progress >= 85 ? 'bg-emerald-500' : course.progress >= 75 ? 'bg-cyan-500' : 'bg-red-500'}`} style={{ width: `${course.progress}%` }} />
+                    <div className="flex items-center gap-6">
+                      <div className="text-right">
+                        <div className="text-xs text-zinc-400">Attendance</div>
+                        <div className="text-sm font-black text-white mt-0.5">{course.progress}%</div>
+                      </div>
+                      <div className="w-24 bg-[#16192b] h-2 rounded-full overflow-hidden border border-[#2b3052]">
+                        <div className={`h-full ${course.progress >= 85 ? 'bg-emerald-500' : course.progress >= 75 ? 'bg-cyan-500' : 'bg-red-500'}`} style={{ width: `${course.progress}%` }} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Assignments Panel */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-bold text-white tracking-tight">Upcoming Deadlines</h2>
-          {upcomingDeadlines.length === 0 ? (
-            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
-              No assignments assigned yet.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {upcomingDeadlines.map((assignment, idx) => (
-                <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 space-y-3">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="font-semibold text-sm text-white truncate">{assignment.title}</div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${assignment.status === 'Submitted' ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/20' : 'bg-amber-950/50 text-amber-400 border border-amber-500/20'}`}>
-                      {assignment.status}
-                    </span>
+                ))}
+              </div>
+            )}
+          </div>
+  
+          {/* Assignments Panel */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-bold text-white tracking-tight">Upcoming Deadlines</h2>
+            {upcomingDeadlines.length === 0 ? (
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
+                No assignments assigned yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {upcomingDeadlines.map((assignment, idx) => (
+                  <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 space-y-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="font-semibold text-sm text-white truncate">{assignment.title}</div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${assignment.status === 'Submitted' ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/20' : 'bg-amber-950/50 text-amber-400 border border-amber-500/20'}`}>
+                        {assignment.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-zinc-400">
+                      <span>{assignment.subject}</span>
+                      <span className="text-zinc-500">{assignment.deadline}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs text-zinc-400">
-                    <span>{assignment.subject}</span>
-                    <span className="text-zinc-500">{assignment.deadline}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* Quick Actions */}
-      <div className="space-y-6">
-        <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Link href="/student/courses" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            My Courses
-          </Link>
-          <Link href="/student/assignments" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            My Assignments
-          </Link>
-          <Link href="/student/grades" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            My Grades
-          </Link>
-          <Link href="/student/attendance" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            My Attendance
-          </Link>
+      <AnimatedSection delay={0.2}>
+        <div className="space-y-6">
+          <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Link href="/student/courses" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              My Courses
+            </Link>
+            <Link href="/student/assignments" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              My Assignments
+            </Link>
+            <Link href="/student/grades" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              My Grades
+            </Link>
+            <Link href="/student/attendance" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              My Attendance
+            </Link>
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
     </div>
   );
 }

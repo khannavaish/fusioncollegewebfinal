@@ -109,7 +109,7 @@ export default async function FeeHubPage() {
             <p className="text-zinc-400 text-sm mt-1">
               These students will be excluded from the automated billing cycle.
             </p>
-            <Link href="/admin/students" className="inline-flex items-center gap-1 text-amber-500 hover:text-amber-400 text-sm font-medium mt-2 transition-colors">
+            <Link href="/admin/fees/assign" className="inline-flex items-center gap-1 text-amber-500 hover:text-amber-400 text-sm font-medium mt-2 transition-colors">
               Assign packages now <IconChevronRight className="w-4 h-4" />
             </Link>
           </div>

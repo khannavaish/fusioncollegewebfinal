@@ -415,3 +415,28 @@ export async function getFeeStats(month, year) {
 
   return { total, unpaid, paid, partial, waived, totalDue, totalCollected };
 }
+
+// ─── Assign Fee Packages ──────────────────────────────────────────────────────
+export async function assignFeePackages(studentIds, feePackageId, customOverride = null) {
+  await verifyAdmin();
+  if (!studentIds || studentIds.length === 0) return { error: 'No students selected.' };
+  
+  try {
+    const data = {
+      feePackageId: feePackageId || null,
+      feeMonthlyOverride: customOverride !== null ? parseFloat(customOverride) : null,
+    };
+
+    await prisma.student.updateMany({
+      where: { id: { in: studentIds } },
+      data,
+    });
+    
+    revalidatePath('/admin/fees');
+    revalidatePath('/admin/fees/assign');
+    revalidatePath('/admin/students');
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to assign packages.' };
+  }
+}

@@ -472,3 +472,48 @@ export async function getTeacherCompletenessReport(dateStr) {
 
   return completeness;
 }
+
+// ─── Fee Report ──────────────────────────────────────────────────────────────
+export async function getFeeReport(dateFromStr, dateToStr, classId = '', studentId = '') {
+  await verifyAdminOrTeacher();
+  const dateFrom = new Date(dateFromStr);
+  const dateTo = new Date(dateToStr);
+  dateTo.setHours(23, 59, 59, 999);
+
+  const where = {
+    createdAt: {
+      gte: dateFrom,
+      lte: dateTo,
+    }
+  };
+
+  if (studentId) {
+    where.studentId = studentId;
+  } else if (classId && classId !== 'ALL') {
+    where.student = { classId };
+  }
+
+  const bills = await prisma.feeBill.findMany({
+    where,
+    include: {
+      student: {
+        select: { rollNumber: true, name: true, class: { select: { name: true } } }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return bills.map(b => ({
+    id: b.id,
+    rollNumber: b.student.rollNumber,
+    studentName: b.student.name,
+    className: b.student.class?.name || 'N/A',
+    month: b.month,
+    year: b.year,
+    totalAmount: Number(b.totalAmount),
+    paidAmount: Number(b.paidAmount || 0),
+    status: b.status,
+    dueDate: b.dueDate.toISOString(),
+    createdAt: b.createdAt.toISOString()
+  }));
+}

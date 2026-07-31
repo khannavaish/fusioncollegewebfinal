@@ -33,7 +33,8 @@ import {
   getWhatsAppLog,
   getDailyAbsenteeReport,
   getLowAttendanceWarningList,
-  getTeacherCompletenessReport
+  getTeacherCompletenessReport,
+  getFeeReport
 } from '@/app/actions/reports';
 import {
   updateAttendanceStatus,
@@ -77,6 +78,12 @@ export default function ReportsClient({ students, classes, teachers }) {
   const [selectedClassWA, setSelectedClassWA] = useState('ALL');
   const [whatsappLogs, setWhatsappLogs] = useState([]);
   const [loadingWA, startLoadingWA] = useTransition();
+
+  // --- Fee Tab States ---
+  const [selectedFeeClass, setSelectedFeeClass] = useState('ALL');
+  const [selectedFeeStudent, setSelectedFeeStudent] = useState('');
+  const [feeReport, setFeeReport] = useState(null);
+  const [loadingFee, startLoadingFee] = useTransition();
 
   // --- Warnings/Issues Tab States ---
   const [warningsSubTab, setWarningsSubTab] = useState('absentees'); // 'absentees' | 'low_attendance' | 'completeness'
@@ -135,6 +142,17 @@ export default function ReportsClient({ students, classes, teachers }) {
       try {
         const res = await getWhatsAppLog(dateFrom, dateTo, selectedClassWA);
         setWhatsappLogs(res);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  };
+
+  const fetchFeeReport = () => {
+    startLoadingFee(async () => {
+      try {
+        const res = await getFeeReport(dateFrom, dateTo, selectedFeeClass, selectedFeeStudent);
+        setFeeReport(res);
       } catch (err) {
         alert(err.message);
       }
@@ -352,6 +370,7 @@ export default function ReportsClient({ students, classes, teachers }) {
           { id: 'student', label: 'Student Report', icon: IconGraduationCap },
           { id: 'class', label: 'Class Attendance', icon: IconBuilding },
           { id: 'teacher', label: 'Teacher Logs', icon: IconUserTie },
+          { id: 'fee', label: 'Fee Reports', icon: IconDocumentText },
           { id: 'whatsapp', label: 'WhatsApp Logs', icon: IconChatBubble },
           { id: 'warnings', label: 'Issues & Warnings', icon: IconAlertTriangle },
         ].map(tab => (
@@ -879,6 +898,136 @@ export default function ReportsClient({ students, classes, teachers }) {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* --- FEE REPORTS --- */}
+        {activeTab === 'fee' && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d]">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Class Filter</label>
+                <select
+                  value={selectedFeeClass}
+                  onChange={e => setSelectedFeeClass(e.target.value)}
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:border-cyan-500 cursor-pointer"
+                >
+                  <option value="ALL">All Classes</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Student Filter (Optional)</label>
+                <select
+                  value={selectedFeeStudent}
+                  onChange={e => setSelectedFeeStudent(e.target.value)}
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:border-cyan-500 cursor-pointer"
+                >
+                  <option value="">All Students</option>
+                  {students
+                    .filter(s => selectedFeeClass === 'ALL' || s.class?.id === selectedFeeClass)
+                    .map(s => (
+                      <option key={s.id} value={s.id}>{s.name} ({s.rollNumber})</option>
+                    ))}
+                </select>
+              </div>
+              <button
+                onClick={fetchFeeReport}
+                disabled={loadingFee}
+                className="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all cursor-pointer whitespace-nowrap"
+              >
+                {loadingFee ? 'Generating...' : 'Load Fee Report'}
+              </button>
+            </div>
+
+            {feeReport && (
+              <div className="space-y-6">
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => handleExportPNG('Fee_Report.png')}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
+                  >
+                    <IconDownload className="w-3.5 h-3.5" /> Export PNG
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
+                  >
+                    <IconPrint className="w-3.5 h-3.5" /> Print Report
+                  </button>
+                </div>
+
+                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black">
+                  {/* Brand Header */}
+                  <div className="flex items-center justify-between pb-5 border-b border-[#1e233d] print:border-zinc-300">
+                    <div className="flex items-center gap-4">
+                      <img src="/logo.png" alt="Logo" className="h-14 w-auto object-contain" />
+                      <div>
+                        <h2 className="text-lg font-black text-white print:text-black">Fee Collection & Outstanding Report</h2>
+                        <p className="text-xs text-zinc-500">Date Range: {dateFrom} to {dateTo}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-zinc-500 font-bold uppercase">Total Billed</div>
+                      <div className="text-2xl font-black text-cyan-400">Rs {feeReport.reduce((sum, b) => sum + b.totalAmount, 0).toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto border border-[#1e233d] rounded-xl print:border-zinc-300">
+                    <table className="w-full text-left text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-zinc-200 print:text-black">
+                          <th className="px-4 py-3">Student Name</th>
+                          <th className="px-4 py-3">Roll No / Class</th>
+                          <th className="px-4 py-3">Billing Cycle</th>
+                          <th className="px-4 py-3 text-right">Total Billed</th>
+                          <th className="px-4 py-3 text-right">Paid Amount</th>
+                          <th className="px-4 py-3 text-right">Outstanding</th>
+                          <th className="px-4 py-3 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#1e233d] print:divide-zinc-300">
+                        {feeReport.map(b => {
+                          const outstanding = b.totalAmount - b.paidAmount;
+                          return (
+                            <tr key={b.id} className="hover:bg-[#16192b]/10 text-zinc-300 print:text-black">
+                              <td className="px-4 py-3 font-bold text-white print:text-black">{b.studentName}</td>
+                              <td className="px-4 py-3">
+                                <div>{b.rollNumber}</div>
+                                <div className="text-[10px] text-zinc-500 print:text-zinc-600">{b.className}</div>
+                              </td>
+                              <td className="px-4 py-3 font-semibold">{b.month}/{b.year}</td>
+                              <td className="px-4 py-3 text-right">Rs {b.totalAmount.toLocaleString()}</td>
+                              <td className="px-4 py-3 text-right text-emerald-400 print:text-emerald-700 font-bold">Rs {b.paidAmount.toLocaleString()}</td>
+                              <td className="px-4 py-3 text-right text-red-400 print:text-red-600 font-bold">
+                                {outstanding > 0 ? `Rs ${outstanding.toLocaleString()}` : '-'}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                  b.status === 'PAID' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' :
+                                  b.status === 'PARTIAL' ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20' :
+                                  b.status === 'WAIVED' ? 'bg-cyan-950/40 text-cyan-400 border border-cyan-500/20' :
+                                  'bg-red-950/40 text-red-400 border border-red-500/20'
+                                } print:text-black`}>
+                                  {b.status}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {feeReport.length === 0 && (
+                          <tr>
+                            <td colSpan={7} className="px-4 py-6 text-center text-zinc-500">No bills found for the selected criteria.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

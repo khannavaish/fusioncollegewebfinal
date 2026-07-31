@@ -1,7 +1,8 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import Link from 'next/link';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import {
   classDisplayNameFromSlot,
   findMatchingClassSubject,
@@ -153,128 +154,140 @@ export default async function TeacherDashboard() {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Teacher Dashboard</h1>
-          <p className="text-zinc-400 text-sm mt-1">Welcome back, {teacherName}</p>
+      <AnimatedSection delay={0.05}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Teacher Dashboard</h1>
+            <p className="text-zinc-400 text-sm mt-1">Welcome back, {teacherName}</p>
+          </div>
+          <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
+            <div className="font-bold text-white">{qualification}</div>
+            <div className="text-[10px] text-zinc-400 mt-0.5">Fusion Faculty</div>
+          </div>
         </div>
-        <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
-          <div className="font-bold text-white">{qualification}</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Fusion Faculty</div>
-        </div>
-      </div>
+      </AnimatedSection>
 
-      {classStatusCard ? (
-        <div className={`${colorMap[classStatusCard.color].bg} border ${colorMap[classStatusCard.color].border} rounded-xl p-5 flex items-center gap-4`}>
-          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${colorMap[classStatusCard.color].dot}`} />
-          <div className="flex-1">
-            <div className={`text-xs font-bold uppercase tracking-wider ${colorMap[classStatusCard.color].text}`}>
-              {classStatusCard.label}
+      <AnimatedSection delay={0.1}>
+        {classStatusCard ? (
+          <div className={`${colorMap[classStatusCard.color].bg} border ${colorMap[classStatusCard.color].border} rounded-xl p-5 flex items-center gap-4`}>
+            <div className={`w-3 h-3 rounded-full flex-shrink-0 ${colorMap[classStatusCard.color].dot}`} />
+            <div className="flex-1">
+              <div className={`text-xs font-bold uppercase tracking-wider ${colorMap[classStatusCard.color].text}`}>
+                {classStatusCard.label}
+              </div>
+              <div className="text-white font-bold text-base mt-0.5">{classStatusCard.detail}</div>
+              {classStatusCard.time && (
+                <div className="text-zinc-400 text-xs mt-0.5">{classStatusCard.time}</div>
+              )}
             </div>
-            <div className="text-white font-bold text-base mt-0.5">{classStatusCard.detail}</div>
-            {classStatusCard.time && (
-              <div className="text-zinc-400 text-xs mt-0.5">{classStatusCard.time}</div>
+            {classStatusCard.type === 'active' && (
+              <Link href="/teacher/attendance"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg uppercase tracking-wider transition-colors cursor-pointer">
+                Mark Attendance
+              </Link>
             )}
           </div>
-          {classStatusCard.type === 'active' && (
-            <Link href="/teacher/attendance"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg uppercase tracking-wider transition-colors cursor-pointer">
-              Mark Attendance
+        ) : (
+          <div className="bg-zinc-900/20 border border-zinc-700/20 rounded-xl p-4 text-xs text-zinc-500">
+            No class is scheduled right now. Check the timetable for upcoming slots.
+          </div>
+        )}
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.15}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Scheduled Classes</div>
+            <div className="text-3xl font-black text-cyan-400 mt-2">{classSubjects.length} Classes</div>
+            <p className="text-[10px] text-zinc-500 mt-1">Total enrolled students: {totalStudents}</p>
+          </div>
+          <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Attendance Today</div>
+            <Link href="/teacher/attendance" className="text-3xl font-black text-emerald-400 mt-2 block hover:text-emerald-300 transition-colors">
+              Mark Now
             </Link>
+            <p className="text-[10px] text-zinc-500 mt-1">Classes come directly from the saved timetable.</p>
+          </div>
+        </div>
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.2}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-white tracking-tight">Class Incharge</h2>
+            <span className="text-[10px] uppercase tracking-wider text-zinc-500">Based on the first saved lecture</span>
+          </div>
+          {classInchargeList.length === 0 ? (
+            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
+              You are not the first-period teacher for any class in the current timetable.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {classInchargeList.map((item) => (
+                <div key={item.id} className="bg-[#0d0f1a] border border-emerald-500/20 rounded-xl p-5 flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Class Incharge</div>
+                    <div className="mt-1 text-base font-bold text-white">{item.className}</div>
+                    <div className="text-sm text-cyan-400 mt-0.5">{item.subject}</div>
+                    <div className="text-[11px] text-zinc-500 mt-1">Time Slot: {item.timeSlot}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-black text-white">{item.students}</div>
+                    <div className="text-xs text-zinc-400">Students</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      ) : (
-        <div className="bg-zinc-900/20 border border-zinc-700/20 rounded-xl p-4 text-xs text-zinc-500">
-          No class is scheduled right now. Check the timetable for upcoming slots.
-        </div>
-      )}
+      </AnimatedSection>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Scheduled Classes</div>
-          <div className="text-3xl font-black text-cyan-400 mt-2">{classSubjects.length} Classes</div>
-          <p className="text-[10px] text-zinc-500 mt-1">Total enrolled students: {totalStudents}</p>
-        </div>
-        <div className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-6">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Attendance Today</div>
-          <Link href="/teacher/attendance" className="text-3xl font-black text-emerald-400 mt-2 block hover:text-emerald-300 transition-colors">
-            Mark Now
-          </Link>
-          <p className="text-[10px] text-zinc-500 mt-1">Classes come directly from the saved timetable.</p>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold text-white tracking-tight">Class Incharge</h2>
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500">Based on the first saved lecture</span>
-        </div>
-        {classInchargeList.length === 0 ? (
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 text-center text-zinc-500 text-sm">
-            You are not the first-period teacher for any class in the current timetable.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {classInchargeList.map((item) => (
-              <div key={item.id} className="bg-[#0d0f1a] border border-emerald-500/20 rounded-xl p-5 flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Class Incharge</div>
-                  <div className="mt-1 text-base font-bold text-white">{item.className}</div>
-                  <div className="text-sm text-cyan-400 mt-0.5">{item.subject}</div>
-                  <div className="text-[11px] text-zinc-500 mt-1">Time Slot: {item.timeSlot}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-white">{item.students}</div>
-                  <div className="text-xs text-zinc-400">Students</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white tracking-tight">My Classes</h2>
-        {classSubjects.length === 0 ? (
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-            No timetable slots are assigned to you yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {classSubjects.map((cs) => (
-              <div key={cs.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-[#2b3052] transition-colors">
-                <div>
-                  <div className="font-bold text-white text-base">{cs.class.name}</div>
-                  <div className="text-xs text-cyan-400 mt-0.5">{cs.subject.name}</div>
-                  <div className="text-[11px] text-zinc-500 mt-1">
-                    Time Slot: {cs.scheduledSlots?.map((slot) => slot.timeSlot).join(', ') || 'Not scheduled yet'}
+      <AnimatedSection delay={0.25}>
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-white tracking-tight">My Classes</h2>
+          {classSubjects.length === 0 ? (
+            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+              No timetable slots are assigned to you yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {classSubjects.map((cs) => (
+                <div key={cs.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-[#2b3052] transition-colors">
+                  <div>
+                    <div className="font-bold text-white text-base">{cs.class.name}</div>
+                    <div className="text-xs text-cyan-400 mt-0.5">{cs.subject.name}</div>
+                    <div className="text-[11px] text-zinc-500 mt-1">
+                      Time Slot: {cs.scheduledSlots?.map((slot) => slot.timeSlot).join(', ') || 'Not scheduled yet'}
+                    </div>
+                    <div className="text-[11px] text-zinc-500 mt-1">{cs.class._count?.students || 0} students</div>
                   </div>
-                  <div className="text-[11px] text-zinc-500 mt-1">{cs.class._count?.students || 0} students</div>
+                  <Link href={`/teacher/classes/${cs.id}/attendance`}
+                    className="px-4 py-2 bg-[#16192b] border border-[#2b3052] hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 font-bold text-xs rounded-lg transition-colors text-center cursor-pointer">
+                    Mark Attendance
+                  </Link>
                 </div>
-                <Link href={`/teacher/classes/${cs.id}/attendance`}
-                  className="px-4 py-2 bg-[#16192b] border border-[#2b3052] hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 font-bold text-xs rounded-lg transition-colors text-center cursor-pointer">
-                  Mark Attendance
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/teacher/attendance" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Attendance Center
-          </Link>
-          <Link href="/teacher/classes" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            View My Classes
-          </Link>
-          <Link href="/teacher/assignments" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
-            Manage Assignments
-          </Link>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.3}>
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/teacher/attendance" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              Attendance Center
+            </Link>
+            <Link href="/teacher/classes" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              View My Classes
+            </Link>
+            <Link href="/teacher/assignments" className="px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-lg text-sm font-medium text-white hover:bg-[#1e233d] transition-colors text-center">
+              Manage Assignments
+            </Link>
+          </div>
+        </div>
+      </AnimatedSection>
     </div>
   );
 }
