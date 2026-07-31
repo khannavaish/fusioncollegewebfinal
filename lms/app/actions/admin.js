@@ -218,17 +218,23 @@ export async function assignTeacherToSubject(formData) {
     });
 
     // ── Auto-sync to Timetable ─────────────────────────────────────────────
-    // Since TimetableSlot stores section and className separately, we must 
-    // reconstruct the name to match Class.name (e.g. "BOYS Medical").
+    // TimetableSlot stores: section="BOYS", className="Medical"
+    // Class stores:         name="BOYS Medical"
+    // We reconstruct the slot's full name inline to match.
     const allSlots = await prisma.timetableSlot.findMany();
+    const targetClassName = assigned.class.name.trim().toUpperCase();
+    const targetSubject = assigned.subject.name.trim().toLowerCase();
 
     const slotsToUpdate = allSlots.filter(s => {
-      const slotClassName = classDisplayNameFromSlot(s).toUpperCase();
-      const targetClassName = assigned.class.name.toUpperCase();
-      const subjectMatch = s.subject.trim().toLowerCase() === assigned.subject.name.trim().toLowerCase();
-      
-      return slotClassName === targetClassName && subjectMatch;
+      const sectionUpper = (s.section || '').trim().toUpperCase();
+      const reconstructed = (sectionUpper === 'OTHER' || !sectionUpper)
+        ? (s.className || '').trim().toUpperCase()
+        : `${sectionUpper} ${(s.className || '').trim().toUpperCase()}`;
+      return reconstructed === targetClassName &&
+             (s.subject || '').trim().toLowerCase() === targetSubject;
     });
+
+    console.log(`[Timetable Sync] Assign: class="${assigned.class.name}" subject="${assigned.subject.name}" teacher="${assigned.teacher?.name}" → ${slotsToUpdate.length} slot(s) updated`);
 
     if (slotsToUpdate.length > 0) {
       const slotIds = slotsToUpdate.map(s => s.id);
@@ -244,8 +250,10 @@ export async function assignTeacherToSubject(formData) {
     revalidatePath('/admin/classes');
     revalidatePath('/admin/timetable');
     revalidatePath('/timetable');
+    revalidatePath('/teacher');
     return { success: true };
-  } catch {
+  } catch (e) {
+    console.error('[assignTeacherToSubject error]', e);
     return { error: 'Failed to assign teacher to subject.' };
   }
 }

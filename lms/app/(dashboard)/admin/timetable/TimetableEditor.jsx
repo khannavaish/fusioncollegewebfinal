@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { saveTimetableSlots } from '@/app/actions/timetable';
 import { createClass } from '@/app/actions/admin';
 import { IconCheckCircle, IconAlertTriangle, IconDownload, IconPlus, IconHelpCircle, IconDocumentText, IconSchool, IconSettings, IconLoader } from '@/app/components/icons';
@@ -32,6 +33,11 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
   const [newClassSection, setNewClassSection] = useState('BOYS');
   const [newClassName, setNewClassName]       = useState('');
   const [exporting, setExporting] = useState('');
+  const router = useRouter();
+
+  // When the server re-renders (after router.refresh()), sync fresh props into local state
+  useEffect(() => { setSlots(initialSlots); },     [initialSlots]);
+  useEffect(() => { setTimeSlots(initialTimeSlots); }, [initialTimeSlots]);
 
   const boysRef   = useRef(null);
   const girlsRef  = useRef(null);
@@ -165,7 +171,13 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
     startTransition(async () => {
       const res = await saveTimetableSlots(slots, timeSlots);
       if (res?.error) setError(res.error);
-      else { setSuccess(true); setTimeout(() => setSuccess(false), 5000); }
+      else {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 5000);
+        // Refresh the page data so the timetable reflects the latest DB state
+        // (this also picks up any teacher assignments done via Manage Classes)
+        router.refresh();
+      }
     });
   };
 
