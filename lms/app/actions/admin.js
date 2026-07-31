@@ -209,12 +209,29 @@ export async function assignTeacherToSubject(formData) {
   const teacherId = formData.get('teacherId')?.toString();
   if (!classId || !subjectId || !teacherId) return { error: 'All fields are required.' };
   try {
-    await prisma.classSubject.upsert({
+    const assigned = await prisma.classSubject.upsert({
       where: { classId_subjectId: { classId, subjectId } },
       update: { teacherId },
       create: { classId, subjectId, teacherId },
+      include: { class: true, subject: true, teacher: true }
     });
+
+    // ── Auto-sync to Timetable ─────────────────────────────────────────────
+    // Update any existing timetable slots for this class + subject so they reflect the new teacher
+    await prisma.timetableSlot.updateMany({
+      where: {
+        className: assigned.class.name,
+        subject: assigned.subject.name,
+      },
+      data: {
+        teacherId: assigned.teacherId,
+        teacher: assigned.teacher?.name || '',
+      }
+    });
+
     revalidatePath('/admin/classes');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/timetable');
     return { success: true };
   } catch {
     return { error: 'Failed to assign teacher to subject.' };
@@ -226,11 +243,30 @@ export async function removeClassSubject(formData) {
   const id = formData.get('id')?.toString();
   if (!id) return { error: 'Assignment ID required.' };
   try {
-    await prisma.classSubject.delete({ where: { id } });
+    const unassigned = await prisma.classSubject.delete({ 
+      where: { id },
+      include: { class: true, subject: true } 
+    });
+
+    // ── Auto-sync to Timetable ─────────────────────────────────────────────
+    // If the subject is removed from the class, blank out the teacher in the timetable slots
+    await prisma.timetableSlot.updateMany({
+      where: {
+        className: unassigned.class.name,
+        subject: unassigned.subject.name,
+      },
+      data: {
+        teacherId: null,
+        teacher: '',
+      }
+    });
+
     revalidatePath('/admin/classes');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/timetable');
     return { success: true };
   } catch {
-    return { error: 'Failed to remove assignment.' };
+    return { error: 'Failed to remove subject.' };
   }
 }
 

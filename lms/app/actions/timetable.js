@@ -82,6 +82,29 @@ export async function saveTimetableSlots(slots, timeSlots) {
           data: { inchargeTeacherId: firstSlotWithTeacher?.teacherId || null },
         });
       }
+
+      // ── Auto-sync ClassSubject (Teacher Management) ───────────────────────
+      const allSubjects = await tx.subject.findMany();
+      const subjectNameToId = new Map(allSubjects.map(s => [s.name.toLowerCase(), s.id]));
+
+      for (const slot of cleanSlots) {
+        if (!slot.className || !slot.subject?.trim() || !slot.teacherId) continue;
+        const cls = allClasses.find(c => c.name === slot.className);
+        if (!cls) continue;
+
+        let subjId = subjectNameToId.get(slot.subject.trim().toLowerCase());
+        if (!subjId) {
+          const newSubj = await tx.subject.create({ data: { name: slot.subject.trim() } });
+          subjId = newSubj.id;
+          subjectNameToId.set(newSubj.name.toLowerCase(), subjId);
+        }
+
+        await tx.classSubject.upsert({
+          where: { classId_subjectId: { classId: cls.id, subjectId: subjId } },
+          update: { teacherId: slot.teacherId },
+          create: { classId: cls.id, subjectId: subjId, teacherId: slot.teacherId },
+        });
+      }
     });
 
     revalidatePath('/admin/timetable');
