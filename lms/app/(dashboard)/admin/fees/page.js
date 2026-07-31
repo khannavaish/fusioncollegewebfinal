@@ -8,6 +8,7 @@ import {
   IconChevronRight
 } from '@/app/components/icons';
 import AnimatedSection from '@/app/components/AnimatedSection';
+import { generateMonthlyBills } from '@/app/actions/fees';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
