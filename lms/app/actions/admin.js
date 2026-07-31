@@ -217,17 +217,25 @@ export async function assignTeacherToSubject(formData) {
     });
 
     // ── Auto-sync to Timetable ─────────────────────────────────────────────
-    // Update any existing timetable slots for this class + subject so they reflect the new teacher
-    await prisma.timetableSlot.updateMany({
-      where: {
-        className: assigned.class.name,
-        subject: assigned.subject.name,
-      },
-      data: {
-        teacherId: assigned.teacherId,
-        teacher: assigned.teacher?.name || '',
-      }
+    // Since TimetableSlot.subject is free-text, we need to match it case-insensitively
+    const classSlots = await prisma.timetableSlot.findMany({
+      where: { className: assigned.class.name }
     });
+
+    const slotsToUpdate = classSlots.filter(
+      s => s.subject.trim().toLowerCase() === assigned.subject.name.trim().toLowerCase()
+    );
+
+    if (slotsToUpdate.length > 0) {
+      const slotIds = slotsToUpdate.map(s => s.id);
+      await prisma.timetableSlot.updateMany({
+        where: { id: { in: slotIds } },
+        data: {
+          teacherId: assigned.teacherId,
+          teacher: assigned.teacher?.name || '',
+        }
+      });
+    }
 
     revalidatePath('/admin/classes');
     revalidatePath('/admin/timetable');
@@ -249,17 +257,24 @@ export async function removeClassSubject(formData) {
     });
 
     // ── Auto-sync to Timetable ─────────────────────────────────────────────
-    // If the subject is removed from the class, blank out the teacher in the timetable slots
-    await prisma.timetableSlot.updateMany({
-      where: {
-        className: unassigned.class.name,
-        subject: unassigned.subject.name,
-      },
-      data: {
-        teacherId: null,
-        teacher: '',
-      }
+    const classSlots = await prisma.timetableSlot.findMany({
+      where: { className: unassigned.class.name }
     });
+
+    const slotsToUpdate = classSlots.filter(
+      s => s.subject.trim().toLowerCase() === unassigned.subject.name.trim().toLowerCase()
+    );
+
+    if (slotsToUpdate.length > 0) {
+      const slotIds = slotsToUpdate.map(s => s.id);
+      await prisma.timetableSlot.updateMany({
+        where: { id: { in: slotIds } },
+        data: {
+          teacherId: null,
+          teacher: '',
+        }
+      });
+    }
 
     revalidatePath('/admin/classes');
     revalidatePath('/admin/timetable');
