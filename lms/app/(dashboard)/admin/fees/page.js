@@ -90,7 +90,8 @@ export default async function FeeHubPage() {
             View All Bills
           </Link>
         </div>
-      </AnimatedSection>
+      </div>
+    </AnimatedSection>
 
       {/* Warning: students without package */}
       {studentsWithoutPackage > 0 && (

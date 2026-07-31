@@ -61,7 +61,8 @@ export default async function AdminDashboard() {
           <Link href="/admin/students" className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Student</Link>
           <Link href="/admin/classes" className="px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Class</Link>
         </div>
-      </AnimatedSection>
+      </div>
+    </AnimatedSection>
 
       <AnimatedSection delay={0.1}>
         <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5">
@@ -185,7 +186,8 @@ export default async function AdminDashboard() {
             ))}
           </div>
         </div>
-      </AnimatedSection>
+      </div>
+    </AnimatedSection>
 
       {/* Enquiries */}
       <AnimatedSection delay={0.3}>
