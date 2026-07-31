@@ -42,7 +42,8 @@ export default async function AdminSessionPage() {
       <AnimatedSection delay={0.1}>
         <div className="border-b border-[#1e233d] pb-6">
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            ✨ Academic Sessions
+            <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Academic Sessions
           </h1>
           <p className="text-zinc-400 text-sm mt-2 max-w-2xl">
             Manage the global academic session, graduate final year students, and seamlessly promote 1st year batches to the next year.

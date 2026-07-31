@@ -302,7 +302,7 @@ model PasswordResetRequest {
 
 model WebsiteConfig {
   id          String   @id @default("default")
-  heroTagLine String   @default("Admissions Open · Session 2026")
+  heroTagLine String   @default("Admissions Open · Session 2026-2028")
   isBlinking  Boolean  @default(false)
   updatedAt   DateTime @updatedAt
 }
@@ -360,7 +360,7 @@ model FeeBillItem {
 
 model SystemSettings {
   id                String   @id @default("global")
-  activeSessionName String   @default("Session 2025-2026")
+  activeSessionName String   @default("Session 2026-2028")
   updatedAt         DateTime @updatedAt
 }
 

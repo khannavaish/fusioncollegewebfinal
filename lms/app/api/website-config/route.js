@@ -8,7 +8,7 @@ export async function GET() {
     });
 
     const settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
-    const sessionName = settings?.activeSessionName || 'Session 2026';
+    const sessionName = settings?.activeSessionName || 'Session 2026-2028';
 
     if (!config) {
       config = await prisma.websiteConfig.create({
@@ -49,7 +49,7 @@ export async function POST(req) {
     const { heroTagLine, isBlinking } = body;
 
     const settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
-    const sessionName = settings?.activeSessionName || 'Session 2026';
+    const sessionName = settings?.activeSessionName || 'Session 2026-2028';
 
     const config = await prisma.websiteConfig.upsert({
       where: { id: 'default' },

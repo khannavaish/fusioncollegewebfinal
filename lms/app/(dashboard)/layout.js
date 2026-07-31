@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let sessionName = 'Session 2025-2026';
+  let sessionName = 'Session 2026-2028';
   try {
     let settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
     if (!settings) {
