@@ -1684,26 +1684,31 @@ h1,h2,h3,h4,h5 {
   .lms-inner       { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
-  .hero-content   { padding: 7rem 1.5rem 2rem; }
-  .hero-scroll-hint { left: 1.5rem; }
+  .hero-content   { padding: 7rem 1.5rem 2rem; align-items: center; text-align: center; }
+  .hero-sub       { margin: 1.5rem auto 2.5rem; }
+  .hero-ctas      { flex-direction: column; width: 100%; align-items: stretch; gap: 1rem; }
+  .hero-ctas .btn { width: 100%; justify-content: center; text-align: center; }
+  .hero-scroll-hint { left: 50%; transform: translateX(-50%); display: none; }
   .navbar         { padding: 0.85rem 1.5rem; }
-  .nav-links      { display: none; flex-direction: column; position: fixed; inset: 0; top: 68px; background: rgba(255,255,255,0.97); padding: 2rem; gap: 0.5rem; z-index: 999; }
+  .nav-links      { display: none; flex-direction: column; position: fixed; inset: 0; top: 68px; background: rgba(255,255,255,0.97); padding: 2rem; gap: 1rem; z-index: 999; overflow-y: auto; }
+  .nav-links a    { padding: 1rem; font-size: 1.1rem; text-align: center; border-radius: 12px; }
   .nav-links.open { display: flex; }
   .hamburger      { display: flex; }
-  .academics-grid { grid-template-columns: 1fr 1fr; }
+  .academics-grid { grid-template-columns: 1fr; }
   .programs-grid  { grid-template-columns: 1fr; }
-  .faculty-grid   { grid-template-columns: 1fr 1fr; }
+  .faculty-grid   { grid-template-columns: 1fr; }
   .footer-top     { grid-template-columns: 1fr; }
   .stats-bar      { flex-direction: column; }
-  .stat-item      { border-right: none; border-bottom: 1.5px solid var(--border); }
+  .stat-item      { border-right: none; border-bottom: 1.5px solid var(--border); padding: 1.5rem 1rem; }
   .stat-item:last-child { border-bottom: none; }
   .form-row       { grid-template-columns: 1fr; }
+  .section-title  { font-size: 2.2rem; }
 }
 [data-theme="dark"] .section-shell--hero {
   background: transparent;
 }
 [data-theme="dark"] .nav-links.open {
-  background: rgba(18, 20, 59, 0.97);
+  background: rgba(18, 20, 59, 0.98);
 }
 @media (prefers-reduced-motion: reduce) {
   .site-atmosphere .orb {
@@ -1711,8 +1716,9 @@ h1,h2,h3,h4,h5 {
   }
 }
 @media (max-width: 480px) {
-  .academics-grid { grid-template-columns: 1fr; }
-  .faculty-grid   { grid-template-columns: 1fr 1fr; }
-  .hero-h1        { font-size: 2.6rem; }
-  .section-inner { padding: 4.5rem 1.25rem; }
+  .hero-h1        { font-size: 2.3rem; line-height: 1.1; }
+  .section-inner  { padding: 3.5rem 1.25rem; }
+  .section-title  { font-size: 1.8rem; }
+  .hero-tag       { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+  .hero-sub       { font-size: 1rem; }
 }

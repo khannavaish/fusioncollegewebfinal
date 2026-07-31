@@ -964,7 +964,7 @@ export default function ReportsClient({ students, classes, teachers }) {
 
                 <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black">
                   {/* Brand Header */}
-                  <div className="flex items-center justify-between pb-5 border-b border-[#1e233d] print:border-zinc-300">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#1e233d] print:border-zinc-300">
                     <div className="flex items-center gap-4">
                       <img src="/logo.png" alt="Logo" className="h-14 w-auto object-contain" />
                       <div>
