@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import ReportsClient from './ReportsClient';
 
@@ -54,18 +55,22 @@ export default async function AdminReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Reports & Analytics</h1>
-          <p className="text-zinc-400 text-sm mt-1">Export academic progress, attendance grids, and log records</p>
+      <AnimatedSection delay={0.1}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Reports & Analytics</h1>
+            <p className="text-zinc-400 text-sm mt-1">Export academic progress, attendance grids, and log records</p>
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
 
-      <ReportsClient
-        students={students}
-        classes={classes}
-        teachers={teachers}
-      />
+      <AnimatedSection delay={0.2}>
+        <ReportsClient
+          students={students}
+          classes={classes}
+          teachers={teachers}
+        />
+      </AnimatedSection>
     </div>
   );
 }

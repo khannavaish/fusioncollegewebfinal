@@ -4,6 +4,8 @@ import prisma from '@/utils/db';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -328,24 +330,100 @@ export async function markBillPaid(formData) {
   const billId = formData.get('billId')?.toString();
   const paidAmount = parseFloat(formData.get('paidAmount'));
   const remarks = formData.get('remarks')?.toString().trim() || null;
+  const receiptImage = formData.get('receiptImage'); // File object
 
   if (!billId || isNaN(paidAmount)) {
     return { error: 'Bill ID and paid amount required.' };
   }
 
+  let paymentReceipt = undefined;
+
   try {
+    if (receiptImage && receiptImage.size > 0) {
+      const bytes = await receiptImage.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const ext = receiptImage.name.split('.').pop() || 'png';
+      const filename = `receipt_${billId}_${Date.now()}.${ext}`;
+      const uploadDir = join(process.cwd(), 'public', 'uploads');
+      
+      await mkdir(uploadDir, { recursive: true }).catch(() => {});
+      await writeFile(join(uploadDir, filename), buffer);
+      paymentReceipt = `/uploads/${filename}`;
+    }
+
     const bill = await prisma.feeBill.findUnique({ where: { id: billId } });
     const status = paidAmount >= Number(bill.totalAmount) ? 'PAID' : 'PARTIAL';
     await prisma.feeBill.update({
       where: { id: billId },
-      data: { status, paidAmount, paidAt: new Date(), remarks },
+      data: { status, paidAmount, paidAt: new Date(), remarks, ...(paymentReceipt && { paymentReceipt }) },
     });
     revalidatePath(`/admin/fees/bills/${billId}`);
     revalidatePath('/admin/fees/bills');
     revalidatePath('/admin/fees');
     return { success: true };
   } catch (e) {
+    console.error(e);
     return { error: 'Failed to mark bill paid.' };
+  }
+}
+
+export async function updateBillAmount(formData) {
+  await verifyAdmin();
+  const billId = formData.get('billId')?.toString();
+  const baseAmount = parseFloat(formData.get('baseAmount'));
+
+  if (!billId || isNaN(baseAmount)) {
+    return { error: 'Bill ID and valid base amount required.' };
+  }
+
+  try {
+    await prisma.feeBill.update({
+      where: { id: billId },
+      data: { baseAmount },
+    });
+    
+    // We also need to update the base 'Monthly Tuition Fee' item if it exists
+    const baseItem = await prisma.feeBillItem.findFirst({
+      where: { billId, title: { contains: 'Monthly Tuition' } }
+    });
+    
+    if (baseItem) {
+      await prisma.feeBillItem.update({
+        where: { id: baseItem.id },
+        data: { amount: baseAmount }
+      });
+    }
+    
+    await recalculateBillTotal(billId);
+    revalidatePath(`/admin/fees/bills/${billId}`);
+    revalidatePath('/admin/fees/bills');
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to update bill amount.' };
+  }
+}
+
+export async function updateStudentFeeAccount(formData) {
+  await verifyAdmin();
+  const studentId = formData.get('studentId')?.toString();
+  const feePackageId = formData.get('feePackageId')?.toString() || null;
+  const feeMonthlyOverrideStr = formData.get('feeMonthlyOverride')?.toString();
+  const feeMonthlyOverride = feeMonthlyOverrideStr ? parseFloat(feeMonthlyOverrideStr) : null;
+  const admissionPercentageStr = formData.get('admissionPercentage')?.toString();
+  const admissionPercentage = admissionPercentageStr ? parseFloat(admissionPercentageStr) : null;
+
+  if (!studentId) return { error: 'Student ID required.' };
+
+  try {
+    await prisma.student.update({
+      where: { id: studentId },
+      data: { feePackageId: feePackageId === 'NONE' ? null : feePackageId, feeMonthlyOverride, admissionPercentage },
+    });
+    revalidatePath('/admin/fees/bills');
+    revalidatePath(`/admin/students/${studentId}`);
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to update student fee account.' };
   }
 }
 
@@ -438,5 +516,27 @@ export async function assignFeePackages(studentIds, feePackageId, customOverride
     return { success: true };
   } catch (e) {
     return { error: 'Failed to assign packages.' };
+  }
+}
+
+// ─── Bank Config ──────────────────────────────────────────────────────────────
+export async function updateBankConfig(formData) {
+  await verifyAdmin();
+  const accountTitle = formData.get('accountTitle')?.toString().trim() || '';
+  const accountNumber = formData.get('accountNumber')?.toString().trim() || '';
+  const bankName = formData.get('bankName')?.toString().trim() || '';
+  const branchCode = formData.get('branchCode')?.toString().trim() || '';
+
+  try {
+    await prisma.bankConfig.upsert({
+      where: { id: 'default' },
+      update: { accountTitle, accountNumber, bankName, branchCode },
+      create: { id: 'default', accountTitle, accountNumber, bankName, branchCode },
+    });
+    revalidatePath('/admin/fees');
+    revalidatePath('/admin/fees/bills');
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to update bank details.' };
   }
 }

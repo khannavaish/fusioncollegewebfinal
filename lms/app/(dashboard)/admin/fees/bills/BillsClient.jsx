@@ -3,8 +3,10 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { markBillPaid, waiveBill, addBillItem, resendBillWhatsApp } from '@/app/actions/fees';
+import { markBillPaid, waiveBill, addBillItem, resendBillWhatsApp, removeBillItem, updateBillAmount, updateStudentFeeAccount } from '@/app/actions/fees';
 import { generateBillPDF, getBillFilename } from '@/app/utils/billPdf';
+import { IconClipboardCheck, IconDownload, IconCheckCircle, IconXCircle, IconSchool, IconChart, IconDocumentText, IconBolt, IconPlus, IconChatBubble, IconAlertTriangle } from '@/app/components/icons';
+import AnimatedSection from '@/app/components/AnimatedSection';
 
 const STATUS_CONFIG = {
   UNPAID:  { label: 'Unpaid',  bg: 'bg-red-950/60 border-red-800/50',     text: 'text-red-400',     dot: 'bg-red-500'   },
@@ -74,6 +76,28 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
     else setMsg('❌ ' + (result?.error || 'Failed'));
   }
 
+  async function handleUpdateBill(e, billId) {
+    e.preventDefault();
+    setLoading(true);
+    const fd = new FormData(e.target);
+    fd.set('billId', billId);
+    const result = await updateBillAmount(fd);
+    setLoading(false);
+    if (result?.success) { setMsg('✅ Bill updated!'); setTimeout(() => { setActionBillId(null); router.refresh(); }, 1000); }
+    else setMsg('❌ ' + (result?.error || 'Failed'));
+  }
+
+  async function handleUpdateAccount(e, studentId) {
+    e.preventDefault();
+    setLoading(true);
+    const fd = new FormData(e.target);
+    fd.set('studentId', studentId);
+    const result = await updateStudentFeeAccount(fd);
+    setLoading(false);
+    if (result?.success) { setMsg('✅ Account updated!'); setTimeout(() => { setActionBillId(null); router.refresh(); }, 1000); }
+    else setMsg('❌ ' + (result?.error || 'Failed'));
+  }
+
   async function handleResendWA(billId) {
     setLoading(true);
     const fd = new FormData();
@@ -133,8 +157,8 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">📋 Fee Bills</h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2"><IconClipboardCheck className="w-6 h-6 text-cyan-400" /> Fee Bills</h1>
+          <p className="text-zinc-400 text-sm mt-1 flex items-center gap-1">
             {monthNames[filters.month - 1]} {filters.year} — {total} bills
             {total > 0 && <> · <span className="text-red-400">{unpaidCount} unpaid</span> · <span className="text-emerald-400">{paidCount} paid</span></>}
           </p>
@@ -145,7 +169,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             disabled={zipLoading || bills.length === 0}
             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-violet-600/40 bg-violet-950/30 text-violet-300 text-sm font-medium hover:bg-violet-950/60 transition-colors disabled:opacity-50"
           >
-            {zipLoading ? '⏳ Generating...' : '📦 Download ZIP'}
+            {zipLoading ? <><IconAlertTriangle className="w-4 h-4 animate-spin" /> Generating...</> : <><IconDownload className="w-4 h-4" /> Download ZIP</>}
           </button>
         </div>
       </div>
@@ -160,21 +184,21 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
       {/* Filters */}
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-4 flex flex-wrap gap-3 items-end">
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📅 Month</label>
+          <label className="block text-xs text-zinc-500 mb-1.5 font-medium flex items-center gap-1"><IconChart className="w-3 h-3" /> Month</label>
           <select value={filters.month} onChange={(e) => applyFilter('month', e.target.value)}
             className="bg-[#060810] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
             {monthNames.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📆 Year</label>
+          <label className="block text-xs text-zinc-500 mb-1.5 font-medium flex items-center gap-1"><IconChart className="w-3 h-3" /> Year</label>
           <select value={filters.year} onChange={(e) => applyFilter('year', e.target.value)}
             className="bg-[#060810] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
             {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5 font-medium">🎓 Class</label>
+          <label className="block text-xs text-zinc-500 mb-1.5 font-medium flex items-center gap-1"><IconSchool className="w-3 h-3" /> Class</label>
           <select value={filters.classId} onChange={(e) => applyFilter('classId', e.target.value)}
             className="bg-[#060810] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
             <option value="ALL">All Classes</option>
@@ -182,7 +206,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📊 Status</label>
+          <label className="block text-xs text-zinc-500 mb-1.5 font-medium flex items-center gap-1"><IconChart className="w-3 h-3" /> Status</label>
           <select value={filters.status} onChange={(e) => applyFilter('status', e.target.value)}
             className="bg-[#060810] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
             <option value="ALL">All Statuses</option>
@@ -198,7 +222,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
       {/* Bills Table */}
       {bills.length === 0 ? (
         <div className="bg-[#0d0f1a] border border-dashed border-[#1e233d] rounded-2xl p-12 text-center">
-          <div className="text-4xl mb-3">📄</div>
+          <div className="flex justify-center mb-3"><IconDocumentText className="w-10 h-10 text-zinc-600" /></div>
           <p className="text-zinc-400 font-medium">No bills found</p>
           <p className="text-zinc-600 text-sm mt-1">
             {total === 0 ? 'Generate bills from the Fee Hub →' : 'Try changing the filters above'}
@@ -208,10 +232,10 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
         <div className="space-y-2">
           {/* Quick total bar */}
           <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-5 py-3 flex flex-wrap gap-6 text-sm">
-            <span className="text-zinc-500">💰 Total Due: <span className="text-white font-bold">₨{totalDue.toLocaleString()}</span></span>
-            <span className="text-zinc-500">📄 Bills: <span className="text-white font-bold">{total}</span></span>
-            <span className="text-zinc-500">❌ Unpaid: <span className="text-red-400 font-bold">{unpaidCount}</span></span>
-            <span className="text-zinc-500">✅ Paid: <span className="text-emerald-400 font-bold">{paidCount}</span></span>
+            <span className="text-zinc-500 flex items-center gap-1"><IconBolt className="w-4 h-4" /> Total Due: <span className="text-white font-bold">₨{totalDue.toLocaleString()}</span></span>
+            <span className="text-zinc-500 flex items-center gap-1"><IconDocumentText className="w-4 h-4" /> Bills: <span className="text-white font-bold">{total}</span></span>
+            <span className="text-zinc-500 flex items-center gap-1"><IconXCircle className="w-4 h-4" /> Unpaid: <span className="text-red-400 font-bold">{unpaidCount}</span></span>
+            <span className="text-zinc-500 flex items-center gap-1"><IconCheckCircle className="w-4 h-4" /> Paid: <span className="text-emerald-400 font-bold">{paidCount}</span></span>
           </div>
 
           {bills.map((bill) => {
@@ -219,7 +243,8 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             const isOpen = actionBillId === bill.id;
 
             return (
-              <div key={bill.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
+              <AnimatedSection key={bill.id} delay={0.05 * (bills.indexOf(bill) % 20)}>
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
                 {/* Main row */}
                 <div className="flex flex-col md:flex-row md:items-center gap-3 p-4">
                   {/* Student info */}
@@ -237,10 +262,10 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                     <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
                       <span>Father: {bill.student?.fatherName}</span>
                       {bill.student?.admissionPercentage != null && (
-                        <span>📊 {bill.student.admissionPercentage}%</span>
+                        <span className="flex items-center gap-1"><IconChart className="w-3 h-3" /> {bill.student.admissionPercentage}%</span>
                       )}
-                      <span className={bill.whatsappSent ? 'text-emerald-500' : 'text-zinc-600'}>
-                        {bill.whatsappSent ? '✅ WA sent' : '📵 WA pending'}
+                      <span className={`flex items-center gap-1 ${bill.whatsappSent ? 'text-emerald-500' : 'text-zinc-600'}`}>
+                        {bill.whatsappSent ? <><IconCheckCircle className="w-3 h-3" /> WA sent</> : <><IconXCircle className="w-3 h-3" /> WA pending</>}
                       </span>
                     </div>
                   </div>
@@ -261,33 +286,41 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
 
                   {/* Actions */}
                   <div className="flex flex-wrap gap-1.5">
+                    <button onClick={() => openPanel(bill.id, 'edit-account')}
+                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'edit-account' ? 'border-amber-600/60 bg-amber-950/40 text-amber-300' : 'border-[#1e233d] text-zinc-400 hover:text-amber-400'}`} title="Edit Account">
+                      <IconSchool className="w-4 h-4" />
+                    </button>
                     <Link href={`/admin/fees/bills/${bill.id}`}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 text-xs hover:text-cyan-400 hover:border-cyan-600/40 transition-colors">
-                      👁️
+                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40 transition-colors" title="View Bill Details">
+                      <IconDocumentText className="w-4 h-4" />
                     </Link>
                     {bill.status !== 'PAID' && bill.status !== 'WAIVED' && (
                       <button onClick={() => openPanel(bill.id, 'pay')}
-                        className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${isOpen && panelType === 'pay' ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300' : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400'}`}>
-                        💳
+                        className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'pay' ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300' : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400'}`} title="Mark Paid">
+                        <IconBolt className="w-4 h-4" />
                       </button>
                     )}
                     <button onClick={() => openPanel(bill.id, 'charge')}
-                      className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${isOpen && panelType === 'charge' ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300' : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400'}`}>
-                      ➕
+                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'charge' ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300' : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400'}`} title="Add Charge">
+                      <IconPlus className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => openPanel(bill.id, 'edit-bill')}
+                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'edit-bill' ? 'border-amber-600/60 bg-amber-950/40 text-amber-300' : 'border-[#1e233d] text-zinc-400 hover:text-amber-400'}`} title="Edit Bill">
+                      <IconBolt className="w-4 h-4" />
                     </button>
                     {bill.status !== 'WAIVED' && (
                       <button onClick={() => openPanel(bill.id, 'waive')}
-                        className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${isOpen && panelType === 'waive' ? 'border-violet-600/60 bg-violet-950/40 text-violet-300' : 'border-[#1e233d] text-zinc-400 hover:text-violet-400'}`}>
-                        🚫
+                        className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'waive' ? 'border-violet-600/60 bg-violet-950/40 text-violet-300' : 'border-[#1e233d] text-zinc-400 hover:text-violet-400'}`} title="Waive Bill">
+                        <IconXCircle className="w-4 h-4" />
                       </button>
                     )}
                     <button onClick={() => handleResendWA(bill.id)} disabled={loading}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 text-xs hover:text-green-400 transition-colors disabled:opacity-50">
-                      📲
+                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-green-400 transition-colors disabled:opacity-50" title="Resend WhatsApp">
+                      <IconChatBubble className="w-4 h-4" />
                     </button>
                     <button onClick={() => downloadPDF(bill)}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 text-xs hover:text-violet-400 transition-colors">
-                      📄
+                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-violet-400 transition-colors" title="Download PDF">
+                      <IconDownload className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -303,17 +336,21 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                     {panelType === 'pay' && (
                       <form onSubmit={(e) => handleMarkPaid(e, bill.id)} className="flex flex-wrap gap-3 items-end">
                         <div>
-                          <label className="block text-xs text-zinc-500 mb-1">💳 Amount Paid (₨)</label>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconBolt className="w-3 h-3" /> Amount Paid (₨)</label>
                           <input name="paidAmount" type="number" step="1" min="0" defaultValue={bill.totalAmount}
-                            className={inputCls + ' w-40'} required />
+                            className={inputCls + ' w-32'} required />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconDocumentText className="w-3 h-3" /> Receipt (Img)</label>
+                          <input name="receiptImage" type="file" accept="image/*" className="w-48 text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-cyan-900/40 file:text-cyan-400 hover:file:bg-cyan-900/60 transition-colors" />
                         </div>
                         <div className="flex-1">
-                          <label className="block text-xs text-zinc-500 mb-1">📝 Remarks (optional)</label>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconDocumentText className="w-3 h-3" /> Remarks (optional)</label>
                           <input name="remarks" type="text" placeholder="e.g. Cash received" className={inputCls} />
                         </div>
                         <button type="submit" disabled={loading}
-                          className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-                          {loading ? '⏳' : '✅ Confirm Payment'}
+                          className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                          {loading ? <IconLoader className="w-4 h-4 animate-spin" /> : <><IconCheckCircle className="w-4 h-4" /> Confirm Payment</>}
                         </button>
                       </form>
                     )}
@@ -322,12 +359,12 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                     {panelType === 'waive' && (
                       <form onSubmit={(e) => handleWaive(e, bill.id)} className="flex flex-wrap gap-3 items-end">
                         <div className="flex-1">
-                          <label className="block text-xs text-zinc-500 mb-1">📝 Reason for Waiver</label>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconDocumentText className="w-3 h-3" /> Reason for Waiver</label>
                           <input name="remarks" type="text" placeholder="e.g. Scholarship / Hardship" className={inputCls} required />
                         </div>
                         <button type="submit" disabled={loading}
-                          className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-                          {loading ? '⏳' : '🚫 Waive Bill'}
+                          className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                          {loading ? <IconLoader className="w-4 h-4 animate-spin" /> : <><IconXCircle className="w-4 h-4" /> Waive Bill</>}
                         </button>
                       </form>
                     )}
@@ -345,24 +382,85 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                         </div>
                         <form onSubmit={(e) => handleAddCharge(e, bill.id)} className="flex flex-wrap gap-3 items-end">
                           <div className="flex-1">
-                            <label className="block text-xs text-zinc-500 mb-1">📋 Charge Title</label>
+                            <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconDocumentText className="w-3 h-3" /> Charge Title</label>
                             <input name="title" type="text" placeholder="e.g. Exam Fee" className={inputCls} required />
                           </div>
                           <div>
-                            <label className="block text-xs text-zinc-500 mb-1">💰 Amount (₨)</label>
+                            <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconBolt className="w-3 h-3" /> Amount (₨)</label>
                             <input name="amount" type="number" step="1" min="0" placeholder="500"
                               className={inputCls + ' w-32'} required />
                           </div>
                           <button type="submit" disabled={loading}
-                            className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-                            {loading ? '⏳' : '➕ Add Charge'}
+                            className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                            {loading ? <IconLoader className="w-4 h-4 animate-spin" /> : <><IconPlus className="w-4 h-4" /> Add Charge</>}
                           </button>
                         </form>
+                      </div>
+                    )}
+                    {/* Edit Account panel */}
+                    {panelType === 'edit-account' && (
+                      <form onSubmit={(e) => handleUpdateAccount(e, bill.student.id)} className="flex flex-wrap gap-3 items-end">
+                        <div>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconSchool className="w-3 h-3" /> Fee Package</label>
+                          <select name="feePackageId" defaultValue={bill.student.feePackageId || 'NONE'} className={inputCls + ' w-40'}>
+                            <option value="NONE">Custom / None</option>
+                            <option value={bill.student.feePackageId}>{bill.student.feePackage?.name || 'Current'}</option>
+                            {/* We don't have the full packages list here, so we let admin type override below */}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconBolt className="w-3 h-3" /> Monthly Override (₨)</label>
+                          <input name="feeMonthlyOverride" type="number" step="1" min="0" defaultValue={bill.student.feeMonthlyOverride} className={inputCls + ' w-40'} placeholder="Leave blank to use package" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconChart className="w-3 h-3" /> Admission %</label>
+                          <input name="admissionPercentage" type="number" step="0.01" min="0" max="100" defaultValue={bill.student.admissionPercentage} className={inputCls + ' w-32'} placeholder="e.g. 95.00" />
+                        </div>
+                        <button type="submit" disabled={loading}
+                          className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                          {loading ? <IconLoader className="w-4 h-4 animate-spin" /> : <><IconCheckCircle className="w-4 h-4" /> Update Account</>}
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Edit Bill panel */}
+                    {panelType === 'edit-bill' && (
+                      <div>
+                        <form onSubmit={(e) => handleUpdateBill(e, bill.id)} className="flex flex-wrap gap-3 items-end mb-4 pb-4 border-b border-[#1e233d]">
+                          <div>
+                            <label className="block text-xs text-zinc-500 mb-1 flex items-center gap-1"><IconBolt className="w-3 h-3" /> Base Amount (₨)</label>
+                            <input name="baseAmount" type="number" step="1" min="0" defaultValue={bill.baseAmount}
+                              className={inputCls + ' w-40'} required />
+                          </div>
+                          <button type="submit" disabled={loading}
+                            className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                            {loading ? <IconLoader className="w-4 h-4 animate-spin" /> : <><IconCheckCircle className="w-4 h-4" /> Update Base Fee</>}
+                          </button>
+                        </form>
+                        
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1"><IconDocumentText className="w-4 h-4" /> Extra Charges</p>
+                          {bill.items.filter(i => !i.title.includes('Monthly Tuition')).map((item) => (
+                            <form key={item.id} action={async (fd) => { fd.set('itemId', item.id); fd.set('billId', bill.id); await removeBillItem(fd); }} className="flex items-center justify-between bg-[#060810] border border-[#1e233d] p-3 rounded-lg">
+                              <div>
+                                <p className="text-sm text-white font-medium">{item.title}</p>
+                                <p className="text-xs text-zinc-500">₨{Number(item.amount).toLocaleString()}</p>
+                              </div>
+                              <button type="submit" className="w-8 h-8 rounded-lg bg-red-950/40 text-red-400 hover:bg-red-900/60 flex items-center justify-center transition-colors">
+                                <IconXCircle className="w-4 h-4" />
+                              </button>
+                            </form>
+                          ))}
+                          {bill.items.filter(i => !i.title.includes('Monthly Tuition')).length === 0 && (
+                            <p className="text-xs text-zinc-600">No extra charges on this bill.</p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
               </div>
+              </AnimatedSection>
             );
           })}
         </div>

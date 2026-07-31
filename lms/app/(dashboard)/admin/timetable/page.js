@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import AdminTimetableShell from './AdminTimetableShell';
@@ -45,21 +46,25 @@ export default async function AdminTimetablePage() {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">College Timetable</h1>
-          <p className="text-zinc-400 text-sm mt-1">Review the live timetable, then open edit mode when changes are needed</p>
+      <AnimatedSection delay={0.1}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">College Timetable</h1>
+            <p className="text-zinc-400 text-sm mt-1">Review the live timetable, then open edit mode when changes are needed</p>
+          </div>
+          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">
+            &larr; Back to Dashboard
+          </Link>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">
-          &larr; Back to Dashboard
-        </Link>
-      </div>
+      </AnimatedSection>
 
-      <AdminTimetableShell initialSlots={slots} 
-        dbClasses={dbClasses} 
-        initialTimeSlots={initialTimeSlots} 
-        dbTeachers={dbTeachers}
-      />
+      <AnimatedSection delay={0.2}>
+        <AdminTimetableShell initialSlots={slots} 
+          dbClasses={dbClasses} 
+          initialTimeSlots={initialTimeSlots} 
+          dbTeachers={dbTeachers}
+        />
+      </AnimatedSection>
     </div>
   );
 }

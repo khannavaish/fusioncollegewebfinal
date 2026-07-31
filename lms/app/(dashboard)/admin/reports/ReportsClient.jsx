@@ -82,6 +82,7 @@ export default function ReportsClient({ students, classes, teachers }) {
   // --- Fee Tab States ---
   const [selectedFeeClass, setSelectedFeeClass] = useState('ALL');
   const [selectedFeeStudent, setSelectedFeeStudent] = useState('');
+  const [selectedFeeStatus, setSelectedFeeStatus] = useState('ALL');
   const [feeReport, setFeeReport] = useState(null);
   const [loadingFee, startLoadingFee] = useTransition();
 
@@ -151,7 +152,7 @@ export default function ReportsClient({ students, classes, teachers }) {
   const fetchFeeReport = () => {
     startLoadingFee(async () => {
       try {
-        const res = await getFeeReport(dateFrom, dateTo, selectedFeeClass, selectedFeeStudent);
+        const res = await getFeeReport(dateFrom, dateTo, selectedFeeClass, selectedFeeStudent, selectedFeeStatus);
         setFeeReport(res);
       } catch (err) {
         alert(err.message);
@@ -936,6 +937,19 @@ export default function ReportsClient({ students, classes, teachers }) {
                     ))}
                 </select>
               </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Report Type</label>
+                <select
+                  value={selectedFeeStatus}
+                  onChange={e => setSelectedFeeStatus(e.target.value)}
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:border-cyan-500 cursor-pointer"
+                >
+                  <option value="ALL">All Bills (Collection Report)</option>
+                  <option value="DEFAULTERS">Fee Defaulters (Unpaid & Partial)</option>
+                  <option value="PAID">Paid Only</option>
+                  <option value="WAIVED">Waived Only</option>
+                </select>
+              </div>
               <button
                 onClick={fetchFeeReport}
                 disabled={loadingFee}
@@ -968,7 +982,9 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <div className="flex items-center gap-4">
                       <img src="/logo.png" alt="Logo" className="h-14 w-auto object-contain" />
                       <div>
-                        <h2 className="text-lg font-black text-white print:text-black">Fee Collection & Outstanding Report</h2>
+                        <h2 className="text-lg font-black text-white print:text-black">
+                          {selectedFeeStatus === 'DEFAULTERS' ? 'Fee Defaulters Report' : 'Fee Collection & Outstanding Report'}
+                        </h2>
                         <p className="text-xs text-zinc-500">Date Range: {dateFrom} to {dateTo}</p>
                       </div>
                     </div>

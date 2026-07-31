@@ -9,6 +9,8 @@ import {
 } from '@/app/components/icons';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import { generateMonthlyBills } from '@/app/actions/fees';
+import BillingExecutionForm from './BillingExecutionForm';
+import BankSettingsForm from './BankSettingsForm';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -29,13 +31,14 @@ export default async function FeeHubPage() {
   const year = now.getFullYear();
 
   // Aggregate stats for current month
-  const [bills, packages, totalStudents] = await Promise.all([
+  const [bills, packages, totalStudents, bankConfig] = await Promise.all([
     prisma.feeBill.findMany({
       where: { month, year },
       select: { status: true, totalAmount: true, paidAmount: true },
     }),
     prisma.feePackage.findMany({ orderBy: { monthlyFee: 'asc' } }),
     prisma.student.count({ where: { user: { status: 'ACTIVE' } } }),
+    prisma.bankConfig.findUnique({ where: { id: 'default' } }),
   ]);
 
   const stats = {
@@ -176,6 +179,11 @@ export default async function FeeHubPage() {
         </div>
       </AnimatedSection>
 
+      {/* Bank Config Settings */}
+      <AnimatedSection delay={0.3}>
+        <BankSettingsForm initialConfig={bankConfig || { accountTitle: 'Fusion College Narowal', accountNumber: '', bankName: '', branchCode: '' }} />
+      </AnimatedSection>
+
       {/* Generate Bills Section */}
       <AnimatedSection delay={0.25}>
         <div className="bg-gradient-to-r from-cyan-950/20 to-blue-950/20 border border-cyan-900/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.05)] relative overflow-hidden">
@@ -193,40 +201,7 @@ export default async function FeeHubPage() {
           Notifications will be dispatched automatically to parent WhatsApp numbers upon execution.
         </p>
         
-        <form action={generateMonthlyBills} className="flex flex-wrap gap-4 items-end">
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Billing Month</label>
-            <select name="month" defaultValue={month}
-              className="w-full sm:w-40 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
-              {MONTH_NAMES.map((m, i) => (
-                <option key={m} value={i + 1}>{m}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Fiscal Year</label>
-            <select name="year" defaultValue={year}
-              className="w-full sm:w-32 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
-              {[year - 1, year, year + 1].map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Due Date</label>
-            <select name="dueDay" defaultValue={10}
-              className="w-full sm:w-48 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
-              {[5, 7, 10, 12, 15, 20].map((d) => (
-                <option key={d} value={d}>{d}th of the month</option>
-              ))}
-            </select>
-          </div>
-          <button type="submit"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-cyan-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
-            <IconBolt className="w-4 h-4" />
-            Execute Billing Cycle
-          </button>
-        </form>
+        <BillingExecutionForm month={month} year={year} />
         </div>
       </AnimatedSection>
 

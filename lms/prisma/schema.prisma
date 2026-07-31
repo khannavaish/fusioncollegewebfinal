@@ -306,6 +306,15 @@ model WebsiteConfig {
   updatedAt   DateTime @updatedAt
 }
 
+model BankConfig {
+  id            String   @id @default("default")
+  accountTitle  String   @default("Fusion College Narowal")
+  accountNumber String   @default("")
+  bankName      String   @default("")
+  branchCode    String   @default("")
+  updatedAt     DateTime @updatedAt
+}
+
 // ─── Fee Management ───────────────────────────────────────────────────────────
 
 model FeePackage {
@@ -330,9 +339,10 @@ model FeeBill {
   status       String        @default("UNPAID")  // UNPAID | PAID | PARTIAL | WAIVED
   paidAmount   Decimal?      @db.Decimal(10, 2)
   paidAt       DateTime?
-  remarks      String?
-  whatsappSent Boolean       @default(false)
-  createdAt    DateTime      @default(now())
+  remarks        String?
+  whatsappSent   Boolean       @default(false)
+  paymentReceipt String?
+  createdAt      DateTime      @default(now())
   student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   items        FeeBillItem[]
 

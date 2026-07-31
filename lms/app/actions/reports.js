@@ -474,7 +474,7 @@ export async function getTeacherCompletenessReport(dateStr) {
 }
 
 // ─── Fee Report ──────────────────────────────────────────────────────────────
-export async function getFeeReport(dateFromStr, dateToStr, classId = '', studentId = '') {
+export async function getFeeReport(dateFromStr, dateToStr, classId = '', studentId = '', statusFilter = 'ALL') {
   await verifyAdminOrTeacher();
   const dateFrom = new Date(dateFromStr);
   const dateTo = new Date(dateToStr);
@@ -486,6 +486,12 @@ export async function getFeeReport(dateFromStr, dateToStr, classId = '', student
       lte: dateTo,
     }
   };
+
+  if (statusFilter === 'DEFAULTERS') {
+    where.status = { in: ['UNPAID', 'PARTIAL'] };
+  } else if (statusFilter !== 'ALL') {
+    where.status = statusFilter;
+  }
 
   if (studentId) {
     where.studentId = studentId;

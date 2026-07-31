@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
@@ -63,56 +64,62 @@ export default async function AdminParentsPage() {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Parents</h1>
-          <p className="text-zinc-400 text-sm mt-1">{parents.length} parent{parents.length !== 1 ? 's' : ''} registered</p>
+      <AnimatedSection delay={0.1}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Parents</h1>
+            <p className="text-zinc-400 text-sm mt-1">{parents.length} parent{parents.length !== 1 ? 's' : ''} registered</p>
+          </div>
+          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+          </Link>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-        </Link>
-      </div>
+      </AnimatedSection>
 
       {/* Add Parent Form */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
-        <h2 className="text-sm font-bold text-white mb-4">Register New Parent</h2>
-        <form action={createParent}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-            <input name="name" placeholder="Full Name *" className={inputCls} required />
-            <input name="phone" placeholder="Phone Number *" className={inputCls} required />
-            <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
-            <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
-          </div>
-          {serialisedStudents.length > 0 && (
-            <div className="mb-4">
-              <div className="text-xs font-semibold text-zinc-400 mb-2">Link to Children (optional)</div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
-                {serialisedStudents.map((s) => (
-                  <label key={s.id} className="flex items-center gap-2 bg-[#16192b]/50 border border-[#1e233d] rounded-lg px-3 py-2 cursor-pointer hover:border-[#2b3052] transition-colors">
-                    <input type="checkbox" name="studentIds" value={s.id} className={checkboxCls} />
-                    <div>
-                      <div className="text-xs font-medium text-white">{s.name}</div>
-                      <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
+      <AnimatedSection delay={0.2}>
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
+          <h2 className="text-sm font-bold text-white mb-4">Register New Parent</h2>
+          <form action={createParent}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              <input name="name" placeholder="Full Name *" className={inputCls} required />
+              <input name="phone" placeholder="Phone Number *" className={inputCls} required />
+              <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
+              <input name="password" type="password" placeholder="Password (min 6 chars) *" className={inputCls} required />
             </div>
-          )}
-          <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-            Register Parent
-          </button>
-        </form>
-      </div>
+            {serialisedStudents.length > 0 && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-zinc-400 mb-2">Link to Children (optional)</div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {serialisedStudents.map((s) => (
+                    <label key={s.id} className="flex items-center gap-2 bg-[#16192b]/50 border border-[#1e233d] rounded-lg px-3 py-2 cursor-pointer hover:border-[#2b3052] transition-colors">
+                      <input type="checkbox" name="studentIds" value={s.id} className={checkboxCls} />
+                      <div>
+                        <div className="text-xs font-medium text-white">{s.name}</div>
+                        <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            <button type="submit" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+              Register Parent
+            </button>
+          </form>
+        </div>
+      </AnimatedSection>
 
       {/* Parents List */}
-      {serialisedParents.length === 0 ? (
-        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-          No parents registered yet. Add your first parent above.
-        </div>
-      ) : (
-        <ParentsClient parents={serialisedParents} students={serialisedStudents} />
-      )}
+      <AnimatedSection delay={0.3}>
+        {serialisedParents.length === 0 ? (
+          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+            No parents registered yet. Add your first parent above.
+          </div>
+        ) : (
+          <ParentsClient parents={serialisedParents} students={serialisedStudents} />
+        )}
+      </AnimatedSection>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
@@ -48,111 +49,117 @@ export default async function AdminTeachersPage({ searchParams }) {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Teachers</h1>
-          <p className="text-zinc-400 text-sm mt-1">{teachers.length} teacher{teachers.length !== 1 ? 's' : ''} registered</p>
+      <AnimatedSection delay={0.1}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Teachers</h1>
+            <p className="text-zinc-400 text-sm mt-1">{teachers.length} teacher{teachers.length !== 1 ? 's' : ''} registered</p>
+          </div>
+          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+          </Link>
         </div>
-        <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-        </Link>
-      </div>
+      </AnimatedSection>
 
       {/* Client registration form (shows credential modal on success) */}
-      <TeacherCreateForm />
+      <AnimatedSection delay={0.2}>
+        <TeacherCreateForm />
+      </AnimatedSection>
 
       {/* Teachers Table */}
-      {teachers.length === 0 ? (
-        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-          No teachers yet. Register your first teacher above.
-        </div>
-      ) : (
-        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#1e233d] bg-[#16192b]/50">
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">#</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Password</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Qualification</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Phone</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Subjects</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teachers.map((t, i) => (
-                  <tr key={t.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
-                    <td className="px-5 py-4 text-xs text-zinc-600">{i + 1}</td>
-                    <td className="px-5 py-4 font-semibold text-sm text-white">{t.name}</td>
-                    <td className="px-5 py-4 text-xs font-mono text-zinc-400">{t.user?.email}</td>
-                    <td className="px-5 py-4 text-xs font-mono text-zinc-400">
-                      <div className="flex items-center gap-2">
-                        <PasswordShowHide password={t.user?.plainPassword} />
-                        <details className="relative">
-                          <summary className="p-1 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </summary>
-                          <div className="absolute left-0 top-6 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
-                            <form action={updateUserPassword} className="space-y-2">
-                              <input type="hidden" name="userId" value={t.userId} />
-                              <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
-                              <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
-                            </form>
-                          </div>
-                        </details>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '—'}</td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '—'}</td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">{t._count.subjects} assigned</td>
-                    <td className="px-5 py-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[t.user?.status] || statusColors.ACTIVE}`}>
-                        {t.user?.status || 'ACTIVE'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <details className="relative">
-                          <summary className="px-2 py-1 bg-[#1e233d] rounded text-cyan-400 text-[10px] hover:bg-cyan-950/30 cursor-pointer list-none">Edit</summary>
-                          <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-72 shadow-2xl">
-                            <h3 className="text-xs font-bold text-white mb-3">Edit Teacher</h3>
-                            <form action={updateTeacher} className="space-y-2">
-                              <input type="hidden" name="id" value={t.id} />
-                              <input name="name" defaultValue={t.name} className={`${inputCls} text-xs`} required />
-                              <input name="phone" defaultValue={t.phone || ''} placeholder="Phone" className={`${inputCls} text-xs`} />
-                              <input name="qualification" defaultValue={t.qualification || ''} placeholder="Qualification" className={`${inputCls} text-xs`} />
-                              <select name="status" defaultValue={t.user?.status || 'ACTIVE'} className={`${inputCls} text-xs`}>
-                                <option value="ACTIVE">Active</option>
-                                <option value="INACTIVE">Inactive</option>
-                              </select>
-                              <button type="submit" className="w-full py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
-                                Save Changes
-                              </button>
-                            </form>
-                          </div>
-                        </details>
-                        <form action={deleteTeacher}>
-                          <input type="hidden" name="id" value={t.id} />
-                          <button type="submit" className="px-2 py-1 bg-[#1e233d] rounded text-red-400 text-[10px] hover:bg-red-950/30 transition-colors cursor-pointer">
-                            Delete
-                          </button>
-                        </form>
-                      </div>
-                    </td>
+      <AnimatedSection delay={0.3}>
+        {teachers.length === 0 ? (
+          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+            No teachers yet. Register your first teacher above.
+          </div>
+        ) : (
+          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#1e233d] bg-[#16192b]/50">
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">#</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Name</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Email</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Password</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Qualification</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Phone</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Subjects</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {teachers.map((t, i) => (
+                    <tr key={t.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
+                      <td className="px-5 py-4 text-xs text-zinc-600">{i + 1}</td>
+                      <td className="px-5 py-4 font-semibold text-sm text-white">{t.name}</td>
+                      <td className="px-5 py-4 text-xs font-mono text-zinc-400">{t.user?.email}</td>
+                      <td className="px-5 py-4 text-xs font-mono text-zinc-400">
+                        <div className="flex items-center gap-2">
+                          <PasswordShowHide password={t.user?.plainPassword} />
+                          <details className="relative">
+                            <summary className="p-1 hover:bg-[#1e233d] rounded cursor-pointer list-none text-cyan-400">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </summary>
+                            <div className="absolute left-0 top-6 z-30 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-56 shadow-2xl">
+                              <form action={updateUserPassword} className="space-y-2">
+                                <input type="hidden" name="userId" value={t.userId} />
+                                <input name="newPassword" placeholder="New Password" minLength="6" className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
+                                <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider">Update</button>
+                              </form>
+                            </div>
+                          </details>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '—'}</td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '—'}</td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{t._count.subjects} assigned</td>
+                      <td className="px-5 py-4">
+                        <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[t.user?.status] || statusColors.ACTIVE}`}>
+                          {t.user?.status || 'ACTIVE'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          <details className="relative">
+                            <summary className="px-2 py-1 bg-[#1e233d] rounded text-cyan-400 text-[10px] hover:bg-cyan-950/30 cursor-pointer list-none">Edit</summary>
+                            <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-72 shadow-2xl">
+                              <h3 className="text-xs font-bold text-white mb-3">Edit Teacher</h3>
+                              <form action={updateTeacher} className="space-y-2">
+                                <input type="hidden" name="id" value={t.id} />
+                                <input name="name" defaultValue={t.name} className={`${inputCls} text-xs`} required />
+                                <input name="phone" defaultValue={t.phone || ''} placeholder="Phone" className={`${inputCls} text-xs`} />
+                                <input name="qualification" defaultValue={t.qualification || ''} placeholder="Qualification" className={`${inputCls} text-xs`} />
+                                <select name="status" defaultValue={t.user?.status || 'ACTIVE'} className={`${inputCls} text-xs`}>
+                                  <option value="ACTIVE">Active</option>
+                                  <option value="INACTIVE">Inactive</option>
+                                </select>
+                                <button type="submit" className="w-full py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                                  Save Changes
+                                </button>
+                              </form>
+                            </div>
+                          </details>
+                          <form action={deleteTeacher}>
+                            <input type="hidden" name="id" value={t.id} />
+                            <button type="submit" className="px-2 py-1 bg-[#1e233d] rounded text-red-400 text-[10px] hover:bg-red-950/30 transition-colors cursor-pointer">
+                              Delete
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-5 pb-5">
+              <Pagination page={page} total={total} pageSize={PAGE_SIZE} basePath="/admin/teachers" />
+            </div>
           </div>
-          <div className="px-5 pb-5">
-            <Pagination page={page} total={total} pageSize={PAGE_SIZE} basePath="/admin/teachers" />
-          </div>
-        </div>
-      )}
+        )}
+      </AnimatedSection>
     </div>
   );
 }

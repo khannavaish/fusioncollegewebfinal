@@ -1,6 +1,7 @@
 import prisma from '@/utils/db';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import StudentFeesClient from './StudentFeesClient';
 
 export const metadata = { title: '💰 My Fee Bills — Fusion LMS' };
@@ -52,5 +53,9 @@ export default async function StudentFeesPage() {
     })),
   };
 
-  return <StudentFeesClient student={serialized} />;
+  return (
+    <AnimatedSection delay={0.1}>
+      <StudentFeesClient student={serialized} />
+    </AnimatedSection>
+  );
 }

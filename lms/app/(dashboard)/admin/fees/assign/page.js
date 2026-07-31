@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import { redirect } from 'next/navigation';
 import AssignClient from './AssignClient';
 
@@ -42,7 +43,9 @@ export default async function AssignFeePackagesPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <AssignClient students={students} packages={packages} classes={classes} />
+      <AnimatedSection delay={0.1}>
+        <AssignClient students={students} packages={packages} classes={classes} />
+      </AnimatedSection>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import prisma from '@/utils/db';
 import { createClient } from '@/utils/supabase/server';
+import AnimatedSection from '@/app/components/AnimatedSection';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import BillDetailClient from './BillDetailClient';
@@ -29,6 +30,8 @@ export default async function BillDetailPage({ params }) {
     },
   });
 
+  const bankConfig = await prisma.bankConfig.findUnique({ where: { id: 'default' } });
+
   if (!bill) notFound();
 
   const serialized = {
@@ -42,6 +45,7 @@ export default async function BillDetailPage({ params }) {
     paidAmount: bill.paidAmount ? Number(bill.paidAmount) : null,
     paidAt: bill.paidAt ? bill.paidAt.toISOString() : null,
     remarks: bill.remarks,
+    paymentReceipt: bill.paymentReceipt || null,
     whatsappSent: bill.whatsappSent,
     createdAt: bill.createdAt.toISOString(),
     items: bill.items.map((i) => ({ id: i.id, title: i.title, amount: Number(i.amount) })),
@@ -59,16 +63,20 @@ export default async function BillDetailPage({ params }) {
 
   return (
     <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8">
-      <div className="flex items-center gap-2 text-zinc-500 text-xs mb-6">
-        <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
-        <span>/</span>
-        <Link href="/admin/fees" className="hover:text-cyan-400 transition-colors">Fee Management</Link>
-        <span>/</span>
-        <Link href="/admin/fees/bills" className="hover:text-cyan-400 transition-colors">Bills</Link>
-        <span>/</span>
-        <span className="text-zinc-300">{bill.student.name}</span>
-      </div>
-      <BillDetailClient bill={serialized} />
+      <AnimatedSection delay={0.1}>
+        <div className="flex items-center gap-2 text-zinc-500 text-xs mb-6">
+          <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
+          <span>/</span>
+          <Link href="/admin/fees" className="hover:text-cyan-400 transition-colors">Fee Management</Link>
+          <span>/</span>
+          <Link href="/admin/fees/bills" className="hover:text-cyan-400 transition-colors">Bills</Link>
+          <span>/</span>
+          <span className="text-zinc-300">{bill.student.name}</span>
+        </div>
+      </AnimatedSection>
+      <AnimatedSection delay={0.2}>
+        <BillDetailClient bill={serialized} bankConfig={bankConfig} />
+      </AnimatedSection>
     </div>
   );
 }
