@@ -346,9 +346,10 @@ const Navbar = ({ theme, toggleTheme, lmsUrl }) => {
           target="_blank"
           rel="noreferrer"
           className="nav-lms"
+          onClick={() => setMenuOpen(false)}
         >LMS Portal ↗</a>
         <button
-          onClick={toggleTheme}
+          onClick={() => { toggleTheme(); setMenuOpen(false); }}
           className="theme-toggle"
           aria-label="Toggle dark mode"
         >
