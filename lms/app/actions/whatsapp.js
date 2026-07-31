@@ -276,75 +276,63 @@ export async function sendEndOfDaySummary(formData) {
       return { error: 'No lectures found for the selected date.' };
     }
 
-    // Group attendance by student
-    const studentMap = {};
+    // Group lectures by classId
+    const classLecturesMap = {};
     for (const lec of lectures) {
-      for (const att of lec.attendance) {
-        if (!studentMap[att.studentId]) {
-          studentMap[att.studentId] = {
-            student: att.student,
-            entries: [],
-          };
-        }
-        studentMap[att.studentId].entries.push({
-          subject: lec.classSubject.subject.name,
-          teacher: lec.classSubject.teacher.name,
-          status: att.status,
-          topic: lec.topic && !lec.topic.startsWith('Pending') ? lec.topic : 'No topic logged.',
-        });
+      const cId = lec.classSubject.class.id;
+      if (!classLecturesMap[cId]) {
+        classLecturesMap[cId] = {
+          classData: lec.classSubject.class,
+          lectures: []
+        };
       }
+      classLecturesMap[cId].lectures.push({
+        subject: lec.classSubject.subject.name,
+        teacher: lec.classSubject.teacher.name,
+        topic: lec.topic && !lec.topic.startsWith('Pending') ? lec.topic : 'No topic logged.',
+      });
     }
 
     const formattedDate = targetDate.toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     let sent = 0;
     let skipped = 0;
 
-    for (const [studentId, data] of Object.entries(studentMap)) {
-      const student = await prisma.student.findUnique({
-        where: { id: studentId },
-        include: { parents: { include: { parent: true } } }
-      });
-      if (!student || student.parents.length === 0) { skipped++; continue; }
+    // Helper to delay executions (anti-spam block measure)
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      const totalClasses = data.entries.length;
-      const presentCount = data.entries.filter(e => e.status === 'PRESENT' || e.status === 'LATE').length;
-      const absentCount = data.entries.filter(e => e.status === 'ABSENT').length;
-
+    for (const [cId, data] of Object.entries(classLecturesMap)) {
+      const students = data.classData.students;
+      
       let summaryLinesEn = [];
       let summaryLinesUr = [];
 
-      data.entries.forEach(e => {
-        const isPresent = e.status === 'PRESENT' || e.status === 'LATE';
-        const sign = isPresent ? '✅' : '❌';
-        
-        // English line
-        summaryLinesEn.push(`${sign} *${e.subject}* (by ${e.teacher}): ${isPresent ? 'Attended' : 'Absent'}\n   Topic: ${e.topic}`);
-        
-        // Urdu line
-        const statusUrdu = isPresent ? 'حاضر (حاضری ریکارڈ کے گئے)' : 'غیر حاضر';
-        summaryLinesUr.push(`${sign} *${e.subject}* (بذریعہ ${e.teacher}): ${statusUrdu}\n   موضوع: ${e.topic}`);
+      data.lectures.forEach(lec => {
+        summaryLinesEn.push(`📖 *${lec.subject}* (by ${lec.teacher}):\n   Topic: ${lec.topic}`);
+        summaryLinesUr.push(`📖 *${lec.subject}* (بذریعہ ${lec.teacher}):\n   موضوع: ${lec.topic}`);
       });
 
-      const message = `*FUSION COLLEGE NAROWAL - END-OF-DAY ACADEMIC REPORT* 🏫
+      const joinedEn = summaryLinesEn.join('\n\n');
+      const joinedUr = summaryLinesUr.join('\n\n');
+
+      for (const student of students) {
+        if (!student.parents || student.parents.length === 0) { skipped++; continue; }
+
+        const message = `*FUSION COLLEGE NAROWAL - END-OF-DAY ACADEMIC REPORT* 🏫
 ----------------------------------------
-*Student:* ${data.student.name} (${data.student.rollNumber})
+*Student:* ${student.name} (${student.rollNumber})
 *Date:* ${formattedDate}
 
 *English:*
 Assalamu Alaikum,
-Here is the daily performance and attendance summary of your child:
+Here is the daily academic summary of topics taught in your child's class today:
 
-📊 *Summary:* Present in ${presentCount}/${totalClasses} lectures.
-📖 *Subject Details & Topics Taught:*
-${summaryLinesEn.join('\n\n')}
+${joinedEn}
 
 *اردو:*
 السلام علیکم
-آپ کے بچے کی روزانہ تعلیمی اور حاضری کی رپورٹ درج ذیل ہے:
+آپ کے بچے کی کلاس میں آج پڑھائے گئے موضوعات کی تعلیمی رپورٹ درج ذیل ہے:
 
-📊 *خلاصہ:* حاضری ${presentCount}/${totalClasses} لیکچرز
-📖 *مضامین کی تفصیلات اور پڑھائی گئے موضوع:*
-${summaryLinesUr.join('\n\n')}
+${joinedUr}
 ----------------------------------------
 JazakAllah Khair,
 Fusion College Narowal Administration`;
@@ -377,6 +365,7 @@ Fusion College Narowal Administration`;
           });
         }
       }
+    }
     }
 
     revalidatePath('/admin/whatsapp');

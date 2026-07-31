@@ -4,7 +4,7 @@ import { useState, useRef, useTransition } from 'react';
 import { saveLectureNotes } from '@/app/actions/teacher';
 import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
 
-export default function LectureNotesForm({ lecture }) {
+export default function LectureNotesForm({ lecture, isNew }) {
   const [topic, setTopic]   = useState(lecture.topic && lecture.topic !== 'Pending - lecture notes to be added after class.' ? lecture.topic : '');
   const [pictureBase64, setPictureBase64] = useState('');
   const [previewUrl, setPreviewUrl]       = useState(lecture.pictureUrl || '');
@@ -40,7 +40,9 @@ export default function LectureNotesForm({ lecture }) {
     setError(null); setSuccess(false);
     startTransition(async () => {
       const fd = new FormData();
-      fd.append('lectureId', lecture.id);
+      fd.append('lectureId', lecture.id || '');
+      fd.append('classSubjectId', lecture.classSubjectId || '');
+      fd.append('isNew', isNew ? 'true' : 'false');
       fd.append('topic', topic.trim());
       fd.append('pictureBase64', pictureBase64);
       const res = await saveLectureNotes(fd);

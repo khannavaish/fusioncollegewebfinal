@@ -182,11 +182,55 @@ export async function markAttendanceOnly(formData) {
 export async function saveLectureNotes(formData) {
   try {
     const teacher = await verifyTeacher();
-    const lectureId = formData.get('lectureId')?.toString();
+    let lectureId = formData.get('lectureId')?.toString();
+    const classSubjectId = formData.get('classSubjectId')?.toString();
+    const isNew = formData.get('isNew') === 'true';
     const topic = formData.get('topic')?.toString().trim();
     const pictureBase64 = formData.get('pictureBase64')?.toString() || '';
 
-    if (!lectureId || !topic) return { error: 'Lecture ID and topic are required.' };
+    if (!topic) return { error: 'Topic is required.' };
+
+    const { timetableSlots, timeSlots } = await getTimetableContext();
+
+    if (isNew && classSubjectId) {
+      const classSubject = await prisma.classSubject.findUnique({
+        where: { id: classSubjectId },
+        include: { class: true, subject: true, teacher: true },
+      });
+      if (!classSubject) return { error: 'Class subject not found.' };
+
+      const isAllowed = await canTeacherTakeClassSubject(classSubject, teacher, timetableSlots, timeSlots);
+      if (!isAllowed) return { error: 'Unauthorized.' };
+
+      const today = new Date();
+      const startOfDay = new Date(today); startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(today); endOfDay.setHours(23, 59, 59, 999);
+
+      let lecture = await prisma.lecture.findFirst({
+        where: { classSubjectId, date: { gte: startOfDay, lte: endOfDay } },
+      });
+
+      if (!lecture) {
+        lecture = await prisma.lecture.create({
+          data: {
+            classSubjectId,
+            topic,
+            pictureUrl: pictureBase64,
+          },
+        });
+      } else {
+        await prisma.lecture.update({
+          where: { id: lecture.id },
+          data: { topic, pictureUrl: pictureBase64 },
+        });
+      }
+      
+      revalidatePath(`/teacher/classes/${classSubjectId}/attendance`);
+      revalidatePath('/teacher/attendance');
+      return { success: true };
+    }
+
+    if (!lectureId) return { error: 'Lecture ID and topic are required.' };
 
     const lecture = await prisma.lecture.findUnique({
       where: { id: lectureId },
@@ -198,7 +242,6 @@ export async function saveLectureNotes(formData) {
     });
     if (!lecture) return { error: 'Lecture not found.' };
 
-    const { timetableSlots, timeSlots } = await getTimetableContext();
     const isAllowed = await canTeacherTakeClassSubject(lecture.classSubject, teacher, timetableSlots, timeSlots);
     if (!isAllowed) return { error: 'Unauthorized.' };
 
@@ -208,6 +251,7 @@ export async function saveLectureNotes(formData) {
     });
 
     revalidatePath(`/teacher/classes/${lecture.classSubjectId}/attendance`);
+    revalidatePath('/teacher/attendance');
     return { success: true };
   } catch (e) {
     console.error('Error saving lecture notes:', e);

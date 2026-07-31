@@ -78,6 +78,8 @@ export default async function TeacherAttendancePage({ params }) {
     return lectureDate >= startOfDay && lectureDate <= endOfDay;
   });
 
+  const isIncharge = classSubject?.class?.inchargeTeacherId === dbUser?.teacher?.id;
+
   return (
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
@@ -113,38 +115,40 @@ export default async function TeacherAttendancePage({ params }) {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
-            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-              <div className="px-6 py-4 bg-emerald-950/20 border-b border-emerald-500/20 flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-black">1</div>
-                <div>
-                  <h2 className="text-sm font-bold text-white">Mark Attendance</h2>
-                  <p className="text-[11px] text-zinc-500">Do this at the beginning of the class</p>
+            {isIncharge && (
+              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
+                <div className="px-6 py-4 bg-emerald-950/20 border-b border-emerald-500/20 flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-black">1</div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Mark Attendance</h2>
+                    <p className="text-[11px] text-zinc-500">Do this at the beginning of the class</p>
+                  </div>
+                  {todaysLecture && (
+                    <span className="ml-auto px-2 py-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-wider">
+                      Already Marked Today
+                    </span>
+                  )}
                 </div>
-                {todaysLecture && (
-                  <span className="ml-auto px-2 py-1 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded uppercase tracking-wider">
-                    Already Marked Today
-                  </span>
-                )}
+                <div className="p-6">
+                  <MarkAttendanceForm classSubjectId={id} students={students} />
+                </div>
               </div>
-              <div className="p-6">
-                <MarkAttendanceForm classSubjectId={id} students={students} />
-              </div>
-            </div>
+            )}
 
-            <div className={`bg-[#0d0f1a] border rounded-xl overflow-hidden ${todaysLecture ? 'border-[#1e233d]' : 'border-[#1e233d] opacity-60'}`}>
+            <div className={`bg-[#0d0f1a] border rounded-xl overflow-hidden ${(!isIncharge || todaysLecture) ? 'border-[#1e233d]' : 'border-[#1e233d] opacity-60'}`}>
               <div className="px-6 py-4 bg-indigo-950/20 border-b border-indigo-500/20 flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-black">2</div>
+                <div className={`w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-black ${!isIncharge && 'hidden'}`}>2</div>
                 <div>
-                  <h2 className="text-sm font-bold text-white">Log Lecture Notes</h2>
-                  <p className="text-[11px] text-zinc-500">Do this after the class ends - topics covered, optional photo</p>
+                  <h2 className="text-sm font-bold text-white">Log Lesson Topic</h2>
+                  <p className="text-[11px] text-zinc-500">What did you teach today? (Optional photo)</p>
                 </div>
               </div>
               <div className="p-6">
-                {todaysLecture ? (
-                  <LectureNotesForm lecture={todaysLecture} />
+                {(!isIncharge || todaysLecture) ? (
+                  <LectureNotesForm lecture={todaysLecture || { classSubjectId: id, topic: '' }} isNew={!todaysLecture} />
                 ) : (
                   <div className="text-center py-6 text-zinc-500 text-sm">
-                    Mark attendance first (Step 1) to unlock lecture notes for today.
+                    Mark attendance first (Step 1) to unlock lesson topic logging for today.
                   </div>
                 )}
               </div>
