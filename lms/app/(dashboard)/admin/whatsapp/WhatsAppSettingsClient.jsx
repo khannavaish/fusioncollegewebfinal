@@ -215,22 +215,12 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
           </div>
 
           <div className="space-y-4 pt-2">
-            <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-500/20 rounded-xl text-xs text-indigo-700 dark:text-indigo-300 space-y-2">
+            <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-500/20 rounded-xl text-xs text-indigo-700 dark:text-indigo-300 flex items-center justify-between">
               <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <IconSparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
                 Free &amp; Unlimited WhatsApp Sending
               </p>
-              <p>
-                We have generated a custom microservice script for you in this codebase under:
-                <code className="text-gray-900 dark:text-white bg-gray-200 dark:bg-black/40 px-1 py-0.5 rounded ml-1 font-mono">scratch/whatsapp-gateway.js</code>
-              </p>
-              <p className="font-semibold text-gray-900 dark:text-white mt-1">To run it on your local server/machine:</p>
-              <ol className="list-decimal pl-4 space-y-1">
-                <li>Open a terminal in the project directory.</li>
-                <li>Install dependencies: <code className="text-cyan-700 dark:text-cyan-300">npm install express whatsapp-web.js qrcode-terminal</code></li>
-                <li>Start the gateway service: <code className="text-cyan-700 dark:text-cyan-300">node scratch/whatsapp-gateway.js</code></li>
-                <li>Scan the terminal's QR code with your phone's WhatsApp Linked Devices to log in.</li>
-              </ol>
+              <p className="font-medium text-indigo-600 dark:text-indigo-400">by Navaish Khan</p>
             </div>
 
             <div>
