@@ -73,9 +73,14 @@ export async function saveTimetableSlots(slots, timeSlots) {
       
       for (const cls of allClasses) {
         // Find the first slot for this class that has a valid teacherId
-        const firstSlotWithTeacher = cleanSlots.find(
-          s => s.className === cls.name && s.teacherId && s.subject?.trim()
-        );
+        const firstSlotWithTeacher = cleanSlots.find(s => {
+          if (!s.teacherId || !s.subject?.trim()) return false;
+          const sectionStr = (s.section || '').trim().toUpperCase();
+          const constructedName = sectionStr === 'OTHER' || !sectionStr 
+            ? s.className.trim() 
+            : `${sectionStr} ${s.className.trim()}`;
+          return constructedName.toUpperCase() === cls.name.toUpperCase();
+        });
         
         await tx.class.update({
           where: { id: cls.id },
@@ -89,7 +94,15 @@ export async function saveTimetableSlots(slots, timeSlots) {
 
       for (const slot of cleanSlots) {
         if (!slot.className || !slot.subject?.trim() || !slot.teacherId) continue;
-        const cls = allClasses.find(c => c.name === slot.className);
+        
+        // TimetableSlot stores section ("BOYS") and className ("Medical") separately.
+        // Class table stores name as "BOYS Medical". We need to reconstruct it to match.
+        const sectionStr = (slot.section || '').trim().toUpperCase();
+        const constructedName = sectionStr === 'OTHER' || !sectionStr 
+          ? slot.className.trim() 
+          : `${sectionStr} ${slot.className.trim()}`;
+          
+        const cls = allClasses.find(c => c.name.toUpperCase() === constructedName.toUpperCase());
         if (!cls) continue;
 
         let subjId = subjectNameToId.get(slot.subject.trim().toLowerCase());

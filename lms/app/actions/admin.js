@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import prisma from '@/utils/db';
+import { classDisplayNameFromSlot } from '@/utils/timetable';
 
 // Auth helper
 async function verifyAdmin() {
@@ -217,14 +218,17 @@ export async function assignTeacherToSubject(formData) {
     });
 
     // ── Auto-sync to Timetable ─────────────────────────────────────────────
-    // Since TimetableSlot.subject is free-text, we need to match it case-insensitively
-    const classSlots = await prisma.timetableSlot.findMany({
-      where: { className: assigned.class.name }
-    });
+    // Since TimetableSlot stores section and className separately, we must 
+    // reconstruct the name to match Class.name (e.g. "BOYS Medical").
+    const allSlots = await prisma.timetableSlot.findMany();
 
-    const slotsToUpdate = classSlots.filter(
-      s => s.subject.trim().toLowerCase() === assigned.subject.name.trim().toLowerCase()
-    );
+    const slotsToUpdate = allSlots.filter(s => {
+      const slotClassName = classDisplayNameFromSlot(s).toUpperCase();
+      const targetClassName = assigned.class.name.toUpperCase();
+      const subjectMatch = s.subject.trim().toLowerCase() === assigned.subject.name.trim().toLowerCase();
+      
+      return slotClassName === targetClassName && subjectMatch;
+    });
 
     if (slotsToUpdate.length > 0) {
       const slotIds = slotsToUpdate.map(s => s.id);
@@ -257,13 +261,15 @@ export async function removeClassSubject(formData) {
     });
 
     // ── Auto-sync to Timetable ─────────────────────────────────────────────
-    const classSlots = await prisma.timetableSlot.findMany({
-      where: { className: unassigned.class.name }
-    });
+    const allSlots = await prisma.timetableSlot.findMany();
 
-    const slotsToUpdate = classSlots.filter(
-      s => s.subject.trim().toLowerCase() === unassigned.subject.name.trim().toLowerCase()
-    );
+    const slotsToUpdate = allSlots.filter(s => {
+      const slotClassName = classDisplayNameFromSlot(s).toUpperCase();
+      const targetClassName = unassigned.class.name.toUpperCase();
+      const subjectMatch = s.subject.trim().toLowerCase() === unassigned.subject.name.trim().toLowerCase();
+      
+      return slotClassName === targetClassName && subjectMatch;
+    });
 
     if (slotsToUpdate.length > 0) {
       const slotIds = slotsToUpdate.map(s => s.id);
