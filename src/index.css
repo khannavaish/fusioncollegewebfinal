@@ -579,8 +579,6 @@ h1,h2,h3,h4,h5 {
 .navbar {
   position: fixed;
   top: 0; left: 0; right: 0;
-  width: 100%;
-  max-width: 100vw;
   box-sizing: border-box;
   z-index: 1000;
   display: flex;
