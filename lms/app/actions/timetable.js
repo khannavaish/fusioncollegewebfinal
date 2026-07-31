@@ -36,7 +36,8 @@ export async function saveTimetableSlots(slots, timeSlots) {
 
     const cleanSlots = slots.map((slot) => {
       const teacherName = slot.teacher?.toString() || '';
-      const teacherId = teacherName ? teacherNameToId.get(teacherName.toLowerCase()) : null;
+      // Prefer explicit teacherId passed from client, fallback to name-lookup
+      const teacherId = slot.teacherId || (teacherName ? teacherNameToId.get(teacherName.toLowerCase()) : null) || null;
       
       return {
         section: slot.section?.toString() || 'BOYS',
@@ -62,6 +63,23 @@ export async function saveTimetableSlots(slots, timeSlots) {
           where: { id: 'default' },
           update: { slots: timeSlots },
           create: { id: 'default', slots: timeSlots },
+        });
+      }
+
+      // ── Auto-assign Class Incharge ────────────────────────────────────────
+      // For each class, find the first non-empty period and assign its teacher
+      // as the Class Incharge so they can take attendance.
+      const allClasses = await tx.class.findMany({ select: { id: true, name: true } });
+      
+      for (const cls of allClasses) {
+        // Find the first slot for this class that has a valid teacherId
+        const firstSlotWithTeacher = cleanSlots.find(
+          s => s.className === cls.name && s.teacherId && s.subject?.trim()
+        );
+        
+        await tx.class.update({
+          where: { id: cls.id },
+          data: { inchargeTeacherId: firstSlotWithTeacher?.teacherId || null },
         });
       }
     });

@@ -47,8 +47,17 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
   // ─── swap (click) ──────────────────────────────────────────────────────────
   const handleTileClick = (section, className, timeSlot) => {
     const clickedKey = getSlotKey(section, className, timeSlot);
+    const slot = getSlot(section, className, timeSlot);
+
+    // If the slot has a subject but is missing a teacher, open the modal directly
+    // to let the admin assign one, instead of entering swap mode.
+    if (slot?.subject?.trim() && !slot?.teacher?.trim() && !selectedSlotKey) {
+      setEditingSlot(slot);
+      return;
+    }
+
     if (!selectedSlotKey) { setSelectedSlotKey(clickedKey); return; }
-    if (selectedSlotKey === clickedKey) { setSelectedSlotKey(null); return; }
+    if (selectedSlotKey === clickedKey) { setSelectedSlotKey(null); return; };
 
     const [selSection, selClassName, selTimeSlot] = selectedSlotKey.split('|');
     const ns = [...slots];
@@ -332,7 +341,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                             ) : (
                               <>
                                 <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>{slot?.subject || '-'}</span>
-                                <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '-'}</span>
+                                <span className={`text-[11px] mt-1 select-none leading-tight ${slot?.subject && !slot?.teacher ? 'text-amber-400 font-bold' : 'text-zinc-400'}`}>
+                                  {slot?.subject && !slot?.teacher?.trim() ? '⚠ No teacher' : (slot?.teacher || '-')}
+                                </span>
                               </>
                             )}
                             <button
@@ -409,6 +420,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             <li>Click two tiles sequentially to swap them.</li>
             <li>Drag & drop to reschedule.</li>
             <li>Hover column headers to edit or remove time slots.</li>
+            <li className="text-amber-400 font-semibold">Click a <span className="font-bold">⚠ No teacher</span> slot to instantly assign one.</li>
           </ul>
         </div>
         <div className="flex flex-wrap gap-2.5">
@@ -462,7 +474,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 w-full max-w-sm shadow-2xl"
             >
-              <h3 className="text-base font-bold text-white mb-1">Edit Timetable Slot</h3>
+              <h3 className="text-base font-bold text-white mb-1">
+                {editingSlot.subject && !editingSlot.teacher?.trim() ? '⚠ Assign Missing Teacher' : 'Edit Timetable Slot'}
+              </h3>
               <p className="text-xs text-zinc-500 mb-5 uppercase tracking-wider">
                 {editingSlot.section} / {editingSlot.className} - {editingSlot.timeSlot}
               </p>

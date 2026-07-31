@@ -311,7 +311,17 @@ export async function deleteTeacher(formData) {
       await tx.classSubject.deleteMany({
         where: { teacherId: id }
       });
-      // 2. Set the User status to INACTIVE
+      // 2. Blank out all timetable slots that referenced this teacher
+      await tx.timetableSlot.updateMany({
+        where: { teacherId: id },
+        data: { teacher: '', teacherId: null },
+      });
+      // 3. Remove teacher as Class Incharge from any class they were assigned to
+      await tx.class.updateMany({
+        where: { inchargeTeacherId: id },
+        data: { inchargeTeacherId: null },
+      });
+      // 4. Set the User status to INACTIVE
       await tx.user.update({
         where: { id: teacher.userId },
         data: { status: 'INACTIVE' }
@@ -319,12 +329,16 @@ export async function deleteTeacher(formData) {
     });
 
     revalidatePath('/admin/teachers');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/timetable');
+    revalidatePath('/teacher');
     return { success: true };
   } catch (e) {
     console.error('Failed to delete teacher:', e);
     return { error: 'Failed to deactivate teacher.' };
   }
 }
+
 
 // STUDENTS
 export async function createStudent(_prev, formData) {
