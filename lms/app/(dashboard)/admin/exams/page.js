@@ -7,7 +7,7 @@ import { IconChevronLeft } from '@/app/components/icons';
 import { adminCreateExam, adminDeleteExam } from '@/app/actions/adminReports';
 
 export const metadata = {
-  title: 'Manage Exams — Fusion College LMS',
+  title: 'Manage Exams | Fusion College LMS',
 };
 
 export const dynamic = 'force-dynamic';
@@ -84,7 +84,7 @@ export default async function AdminExamsPage() {
                   <option value="">Select Class / Subject *</option>
                   {classSubjects.map((cs) => (
                     <option key={cs.id} value={cs.id}>
-                      {cs.class.name} — {cs.subject.name}
+                      {cs.class.name} - {cs.subject.name}
                     </option>
                   ))}
                 </select>

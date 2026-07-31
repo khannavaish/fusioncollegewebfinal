@@ -33,7 +33,7 @@ export async function sendWhatsAppMessage(to, message) {
       const statusRes = await fetch(`${baseUrl}/status`, { method: 'GET' });
       const contentType = statusRes.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
-        // Gateway is sleeping / returning HTML — Render cold start
+        // Gateway is sleeping / returning HTML - Render cold start
         return { error: 'Gateway is starting up. Please try again in 30 seconds.' };
       }
       const statusData = await statusRes.json();
@@ -41,7 +41,7 @@ export async function sendWhatsAppMessage(to, message) {
         return { error: 'WhatsApp not connected. Admin must scan the QR code at /admin/whatsapp.' };
       }
 
-      // Socket is connected — send the message
+      // Socket is connected - send the message
       const res = await fetch(`${baseUrl}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -193,7 +193,7 @@ export async function sendArrivalWhatsApp(studentId, status = 'PRESENT') {
       urduStatus = `آج مورخہ ${today} کو رخصت پر ہے۔`;
     }
 
-    const message = `*FUSION COLLEGE NAROWAL — ARRIVAL NOTIFICATION* 🏫
+    const message = `*FUSION COLLEGE NAROWAL - ARRIVAL NOTIFICATION* 🏫
 
 ${statusBlock}
 
@@ -325,7 +325,7 @@ export async function sendEndOfDaySummary(formData) {
         summaryLinesUr.push(`${sign} *${e.subject}* (بذریعہ ${e.teacher}): ${statusUrdu}\n   موضوع: ${e.topic}`);
       });
 
-      const message = `*FUSION COLLEGE NAROWAL — END-OF-DAY ACADEMIC REPORT* 🏫
+      const message = `*FUSION COLLEGE NAROWAL - END-OF-DAY ACADEMIC REPORT* 🏫
 ----------------------------------------
 *Student:* ${data.student.name} (${data.student.rollNumber})
 *Date:* ${formattedDate}

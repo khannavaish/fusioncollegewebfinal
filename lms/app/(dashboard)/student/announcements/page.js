@@ -5,7 +5,7 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Announcements — Fusion College LMS',
+  title: 'Announcements | Fusion College LMS',
 };
 
 export const dynamic = 'force-dynamic';

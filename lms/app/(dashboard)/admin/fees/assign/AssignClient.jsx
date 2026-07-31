@@ -184,7 +184,7 @@ export default function AssignClient({ students, packages, classes }) {
                             <div className="font-bold text-white">{s.name}</div>
                             <div className="text-xs text-zinc-500 font-mono mt-0.5">{s.rollNumber}</div>
                           </td>
-                          <td className="px-4 py-3 text-zinc-300">{s.class?.name || '—'}</td>
+                          <td className="px-4 py-3 text-zinc-300">{s.class?.name || '-'}</td>
                           <td className="px-4 py-3 text-right">
                             {s.feePackage ? (
                               <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-950/30 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold uppercase tracking-wider">

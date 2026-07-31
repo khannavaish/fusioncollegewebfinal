@@ -5,7 +5,7 @@ import prisma from '@/utils/db';
 import ReportsClient from './ReportsClient';
 
 export const metadata = {
-  title: 'Reports Center — Fusion College LMS',
+  title: 'Reports Center | Fusion College LMS',
   description: 'View and manage student progress, class attendance, and teacher logs.',
 };
 

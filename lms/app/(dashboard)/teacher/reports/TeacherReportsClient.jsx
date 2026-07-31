@@ -129,7 +129,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
 
   // Grade Boundaries Helper
   const calculateGrade = (marksObt, totalMarks) => {
-    if (!totalMarks || totalMarks <= 0 || marksObt === '') return '—';
+    if (!totalMarks || totalMarks <= 0 || marksObt === '') return '-';
     const percentage = (Number(marksObt) / Number(totalMarks)) * 100;
     if (percentage >= 95) return 'A+';
     if (percentage >= 90) return 'A';
@@ -323,7 +323,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                               {s.name}
                             </td>
                             {attendanceReport.dates.map(d => {
-                              const status = s.attendance[d] || '—';
+                              const status = s.attendance[d] || '-';
                               return (
                                 <td key={d} className="p-1 border-r border-[#1e233d]">
                                   <span className={`inline-block w-8 py-1 rounded text-xs font-bold border ${getStatusColor(status)}`}>
@@ -366,7 +366,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                   <option value="">-- Choose Class --</option>
                   {classSubjects.map(cs => (
                     <option key={cs.id} value={cs.id}>
-                      {cs.class.name} — {cs.subject.name}
+                      {cs.class.name} - {cs.subject.name}
                     </option>
                   ))}
                 </select>
@@ -383,7 +383,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                   <option value="">-- Choose Test --</option>
                   {currentClassSub?.exams.map(e => (
                     <option key={e.id} value={e.id}>
-                      {e.title} ({new Date(e.date).toLocaleDateString('en-PK')}) — / {e.totalMarks} Marks
+                      {e.title} ({new Date(e.date).toLocaleDateString('en-PK')}) - / {e.totalMarks} Marks
                     </option>
                   ))}
                 </select>
@@ -457,7 +457,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                               </div>
                             </td>
                             <td className="px-4 py-3 text-center font-bold text-zinc-400">
-                              {marksValue !== '' ? `${pct}%` : '—'}
+                              {marksValue !== '' ? `${pct}%` : '-'}
                             </td>
                             <td className="px-4 py-3 text-right font-black">
                               {marksValue !== '' ? (
@@ -501,7 +501,7 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
                 <input
                   type="text"
                   disabled
-                  value={`${currentClassSub?.class.name} — ${currentClassSub?.subject.name}`}
+                  value={`${currentClassSub?.class.name} - ${currentClassSub?.subject.name}`}
                   className="w-full bg-[#0a0c14] border border-[#1e233d] text-zinc-500 px-3 py-2 rounded-lg text-sm"
                 />
               </div>

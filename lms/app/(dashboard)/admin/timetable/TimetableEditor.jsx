@@ -234,9 +234,9 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                 <tr key={ts} className={`bg-gradient-to-r ${color.bg}`}>
                   <td className="px-4 py-3 text-sm font-bold text-zinc-300 border-r border-[#1e233d] text-left">{ts}</td>
                   <td className={`px-4 py-3 text-base font-extrabold border-r border-[#1e233d] ${color.text}`}>
-                    {showBreak ? 'Break' : (slot?.subject || '—')}
+                    {showBreak ? 'Break' : (slot?.subject || '-')}
                   </td>
-                  <td className="px-4 py-3 text-sm text-zinc-300">{showBreak ? '—' : (slot?.teacher || '—')}</td>
+                  <td className="px-4 py-3 text-sm text-zinc-300">{showBreak ? '-' : (slot?.teacher || '-')}</td>
                 </tr>
               );
             })}
@@ -267,7 +267,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
         {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
         <div className="overflow-x-auto overflow-y-visible border border-[#1e233d] rounded-xl">
           <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
-            <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
+            <ExportHeader subtitle={`${sectionTitle} - Master Timetable`} />
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
@@ -327,12 +327,12 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
                             {showBreak ? (
                               <>
                                 <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>Break</span>
-                                <span className="text-[11px] text-zinc-500 mt-1 select-none leading-tight">—</span>
+                                <span className="text-[11px] text-zinc-500 mt-1 select-none leading-tight">-</span>
                               </>
                             ) : (
                               <>
-                                <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>{slot?.subject || '—'}</span>
-                                <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '—'}</span>
+                                <span className={`text-[15px] font-extrabold select-none leading-tight ${color.text}`}>{slot?.subject || '-'}</span>
+                                <span className="text-[11px] text-zinc-400 mt-1 select-none leading-tight">{slot?.teacher || '-'}</span>
                               </>
                             )}
                             <button
@@ -373,7 +373,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
           </div>
         </div>
 
-        {/* Per-class hidden export containers — fixed so off-screen refs don't widen the page */}
+        {/* Per-class hidden export containers - fixed so off-screen refs don't widen the page */}
         <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none" aria-hidden="true">
           <div className="space-y-4 w-[900px]">
             {classesList.map(cls => renderClassCard(cls, sectionCode))}
@@ -464,7 +464,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
             >
               <h3 className="text-base font-bold text-white mb-1">Edit Timetable Slot</h3>
               <p className="text-xs text-zinc-500 mb-5 uppercase tracking-wider">
-                {editingSlot.section} / {editingSlot.className} — {editingSlot.timeSlot}
+                {editingSlot.section} / {editingSlot.className} - {editingSlot.timeSlot}
               </p>
               <form onSubmit={saveEdit} className="space-y-4">
                 <div>

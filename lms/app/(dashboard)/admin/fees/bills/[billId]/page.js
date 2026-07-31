@@ -5,7 +5,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import BillDetailClient from './BillDetailClient';
 
-export const metadata = { title: '📄 Fee Bill Detail — Fusion LMS' };
+export const metadata = { title: '📄 Fee Bill Detail | Fusion LMS' };
 
 export default async function BillDetailPage({ params }) {
   const supabase = await createClient();

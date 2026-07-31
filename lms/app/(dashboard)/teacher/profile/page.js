@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { updateTeacherProfile } from '@/app/actions/teacher';
 
 export const metadata = {
-  title: 'My Profile — Fusion College LMS',
+  title: 'My Profile | Fusion College LMS',
 };
 
 export const dynamic = 'force-dynamic';
@@ -65,7 +65,7 @@ export default async function TeacherProfilePage() {
         ].map(({ label, value }) => (
           <div key={label} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{label}</div>
-            <div className="text-sm font-semibold text-white mt-1">{value || '—'}</div>
+            <div className="text-sm font-semibold text-white mt-1">{value || '-'}</div>
           </div>
         ))}
       </div>

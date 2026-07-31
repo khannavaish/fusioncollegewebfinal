@@ -4,7 +4,7 @@ import prisma from '@/utils/db';
 import TeacherReportsClient from './TeacherReportsClient';
 
 export const metadata = {
-  title: 'Reports & Marks Entry — Fusion College LMS',
+  title: 'Reports & Marks Entry | Fusion College LMS',
   description: 'View class attendance reports and record student exam marks.',
 };
 

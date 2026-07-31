@@ -6,7 +6,7 @@ import Link from 'next/link';
 import WhatsAppSettingsClient from './WhatsAppSettingsClient';
 
 export const metadata = {
-  title: 'WhatsApp Settings — Fusion College LMS',
+  title: 'WhatsApp Settings | Fusion College LMS',
   description: 'Configure WhatsApp parent notification system',
 };
 

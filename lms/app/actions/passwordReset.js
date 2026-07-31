@@ -154,7 +154,7 @@ export async function resolvePasswordResetAction(formData) {
 
     // Send WhatsApp notification directly with new credentials
     if (phone) {
-      const message = `*FUSION COLLEGE NAROWAL — PASSWORD RESET* 🔑
+      const message = `*FUSION COLLEGE NAROWAL - PASSWORD RESET* 🔑
 ----------------------------------------
 Assalamu Alaikum,
 

@@ -152,7 +152,7 @@ export default function BillDetailClient({ bill, bankConfig }) {
           </div>
           <div className="flex-1">
             <h2 className="text-white font-bold text-lg tracking-wide">FUSION COLLEGE NAROWAL</h2>
-            <p className="text-cyan-300 text-xs mt-0.5">Official Fee Challan — {monthName} {bill.year}</p>
+            <p className="text-cyan-300 text-xs mt-0.5">Official Fee Challan - {monthName} {bill.year}</p>
           </div>
           <div className="text-right">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold ${sc.cls}`}>
@@ -178,16 +178,16 @@ export default function BillDetailClient({ bill, bankConfig }) {
             {[
               ['Student Name',  bill.student?.name],
               ['Roll Number',   bill.student?.rollNumber],
-              ['Class',         bill.student?.class?.name || '—'],
+              ['Class',         bill.student?.class?.name || '-'],
               ["Father's Name", bill.student?.fatherName],
               ['Fee Package',   bill.student?.feePackage?.name || 'Custom Override'],
-              ['Admission %',   bill.student?.admissionPercentage != null ? `${bill.student.admissionPercentage}%` : '—'],
+              ['Admission %',   bill.student?.admissionPercentage != null ? `${bill.student.admissionPercentage}%` : '-'],
               ['Due Date',      new Date(bill.dueDate).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' })],
               ['Issue Date',    new Date(bill.createdAt).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' })],
             ].map(([label, value]) => (
               <div key={label}>
                 <span className="text-xs text-gray-400 block">{label}</span>
-                <span className="text-sm font-semibold text-gray-800">{value || '—'}</span>
+                <span className="text-sm font-semibold text-gray-800">{value || '-'}</span>
               </div>
             ))}
           </div>

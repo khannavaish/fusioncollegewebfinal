@@ -63,7 +63,7 @@ export default function TeacherCreateForm() {
 
           <p className="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-500/20 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
             <IconAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-            Save these credentials now — the password cannot be recovered later.
+            Save these credentials now - the password cannot be recovered later.
           </p>
 
           <button
@@ -79,7 +79,7 @@ export default function TeacherCreateForm() {
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6">
         <div className="mb-5">
           <h2 className="text-sm font-bold text-white">Register New Teacher</h2>
-          <p className="text-[11px] text-zinc-500 mt-0.5">A secure password is auto-generated — no need to set one manually</p>
+          <p className="text-[11px] text-zinc-500 mt-0.5">A secure password is auto-generated - no need to set one manually</p>
         </div>
 
         <form ref={formRef} action={action}>

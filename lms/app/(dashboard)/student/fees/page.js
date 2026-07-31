@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import StudentFeesClient from './StudentFeesClient';
 
-export const metadata = { title: '💰 My Fee Bills — Fusion LMS' };
+export const metadata = { title: '💰 My Fee Bills | Fusion LMS' };
 
 export default async function StudentFeesPage() {
   const supabase = await createClient();
@@ -24,7 +24,7 @@ export default async function StudentFeesPage() {
     name: student.name,
     rollNumber: student.rollNumber,
     fatherName: student.fatherName,
-    class: student.class?.name || '—',
+    class: student.class?.name || '-',
     admissionPercentage: student.admissionPercentage ? Number(student.admissionPercentage) : null,
     feePackage: student.feePackage ? { name: student.feePackage.name, monthlyFee: Number(student.feePackage.monthlyFee) } : null,
     feeMonthlyOverride: student.feeMonthlyOverride ? Number(student.feeMonthlyOverride) : null,

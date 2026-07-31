@@ -106,7 +106,7 @@ export default async function AdminStudentsPage({ searchParams }) {
                           {s.rollNumber}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-xs text-zinc-400">{s.class?.name || '—'}</td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{s.class?.name || '-'}</td>
                       <td className="px-5 py-4 text-xs text-zinc-400">{s.fatherName}</td>
                       <td className="px-5 py-4 text-xs text-zinc-500 font-mono">{s.user?.email}</td>
                       <td className="px-5 py-4 text-xs font-mono text-zinc-400">

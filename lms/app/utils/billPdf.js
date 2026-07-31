@@ -99,14 +99,14 @@ export async function generateBillPDF(bill, bankConfig = null) {
     doc.text('Student Name:', M + 3, sy + 6);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text(bill.student?.name || '—', M + 25, sy + 6);
+    doc.text(bill.student?.name || '-', M + 25, sy + 6);
 
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
     doc.text('Roll No:', M + CW / 2, sy + 6);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text(bill.student?.rollNumber || '—', M + CW / 2 + 15, sy + 6);
+    doc.text(bill.student?.rollNumber || '-', M + CW / 2 + 15, sy + 6);
 
     // Line 2
     doc.setFont('helvetica', 'normal');
@@ -114,14 +114,14 @@ export async function generateBillPDF(bill, bankConfig = null) {
     doc.text('Father Name:', M + 3, sy + 13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text(bill.student?.fatherName || '—', M + 25, sy + 13);
+    doc.text(bill.student?.fatherName || '-', M + 25, sy + 13);
 
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
     doc.text('Class:', M + CW / 2, sy + 13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text(bill.student?.class?.name || '—', M + CW / 2 + 15, sy + 13);
+    doc.text(bill.student?.class?.name || '-', M + CW / 2 + 15, sy + 13);
 
     sy += 22; // Move below the box
 

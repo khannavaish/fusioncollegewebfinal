@@ -21,7 +21,7 @@ async function verifyAdminOrTeacher() {
 
 // Helper to calculate grade
 function calculateGrade(marksObt, totalMarks) {
-  if (!totalMarks || totalMarks <= 0) return '—';
+  if (!totalMarks || totalMarks <= 0) return '-';
   const percentage = (Number(marksObt) / Number(totalMarks)) * 100;
   if (percentage >= 95) return 'A+';
   if (percentage >= 90) return 'A';
@@ -195,7 +195,7 @@ export async function getClassAttendanceReport(classId, dateFromStr, dateToStr) 
 
       // Summarize day's attendance
       if (statuses.length === 0) {
-        dateMap[d] = '—';
+        dateMap[d] = '-';
       } else if (statuses.includes('ABSENT')) {
         dateMap[d] = 'A';
       } else if (statuses.includes('LATE')) {
@@ -381,8 +381,8 @@ export async function getDailyAbsenteeReport(dateStr) {
     className: a.student.class.name,
     subject: a.lecture.classSubject.subject.name,
     teacher: a.lecture.classSubject.teacher.name,
-    parentName: a.student.parents[0]?.parent?.name || '—',
-    parentPhone: a.student.parents[0]?.parent?.phone || '—'
+    parentName: a.student.parents[0]?.parent?.name || '-',
+    parentPhone: a.student.parents[0]?.parent?.phone || '-'
   }));
 }
 
@@ -408,8 +408,8 @@ export async function getLowAttendanceWarningList(threshold = 75) {
       name: s.name,
       rollNumber: s.rollNumber,
       className: s.class.name,
-      parentName: s.parents[0]?.parent?.name || '—',
-      parentPhone: s.parents[0]?.parent?.phone || '—',
+      parentName: s.parents[0]?.parent?.name || '-',
+      parentPhone: s.parents[0]?.parent?.phone || '-',
       presentCount: present,
       totalCount: total,
       percentage: Number(percentage.toFixed(1))
@@ -449,7 +449,7 @@ export async function getTeacherCompletenessReport(dateStr) {
   const completeness = [];
 
   slots.forEach(slot => {
-    if (!slot.subject || slot.subject.trim() === '' || slot.subject.trim() === '—') return;
+    if (!slot.subject || slot.subject.trim() === '' || slot.subject.trim() === '-') return;
 
     const fullClassName = classDisplayNameFromSlot(slot) || `${slot.section} ${slot.className}`.trim();
     const slotKey = getClassSubjectKey(fullClassName, slot.subject);

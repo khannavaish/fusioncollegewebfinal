@@ -168,7 +168,7 @@ export default async function AdminDashboard() {
                   <div className="font-semibold text-sm text-white">{s.name}</div>
                   <div className="text-[10px] text-zinc-500">{s.rollNumber} · {s.class?.name || 'No class'}</div>
                 </div>
-                <div className="text-[10px] text-zinc-500">{s.user?.createdAt ? new Date(s.user.createdAt).toLocaleDateString() : '—'}</div>
+                <div className="text-[10px] text-zinc-500">{s.user?.createdAt ? new Date(s.user.createdAt).toLocaleDateString() : '-'}</div>
               </div>
             ))}
           </div>
@@ -191,7 +191,7 @@ export default async function AdminDashboard() {
                   <div className="font-semibold text-sm text-white">{t.name}</div>
                   <div className="text-[10px] text-zinc-500">{t.qualification || 'No qualification'} · {t.user?.email}</div>
                 </div>
-                <div className="text-[10px] text-zinc-500">{t.user?.createdAt ? new Date(t.user.createdAt).toLocaleDateString() : '—'}</div>
+                <div className="text-[10px] text-zinc-500">{t.user?.createdAt ? new Date(t.user.createdAt).toLocaleDateString() : '-'}</div>
               </div>
             ))}
           </div>

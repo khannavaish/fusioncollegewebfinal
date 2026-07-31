@@ -69,7 +69,7 @@ export default function StudentFeesClient({ student }) {
             {monthlyFee ? (
               <span className="text-2xl font-bold text-white">₨{monthlyFee.toLocaleString()}</span>
             ) : (
-              <span className="text-sm text-zinc-500">—</span>
+              <span className="text-sm text-zinc-500">-</span>
             )}
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function StudentFeesClient({ student }) {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base font-bold text-white">
-                  📅 {MONTH_NAMES[currentBill.month - 1]} {currentBill.year} — Current Month
+                  📅 {MONTH_NAMES[currentBill.month - 1]} {currentBill.year} - Current Month
                 </span>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${STATUS_CONFIG[currentBill.status]?.cls}`}>
                   {STATUS_CONFIG[currentBill.status]?.label}

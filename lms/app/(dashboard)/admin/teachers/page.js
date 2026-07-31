@@ -112,8 +112,8 @@ export default async function AdminTeachersPage({ searchParams }) {
                           </details>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '—'}</td>
-                      <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '—'}</td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{t.qualification || '-'}</td>
+                      <td className="px-5 py-4 text-xs text-zinc-400">{t.phone || '-'}</td>
                       <td className="px-5 py-4 text-xs text-zinc-400">{t._count.subjects} assigned</td>
                       <td className="px-5 py-4">
                         <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase tracking-wider ${statusColors[t.user?.status] || statusColors.ACTIVE}`}>

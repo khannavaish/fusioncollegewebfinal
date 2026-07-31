@@ -91,7 +91,7 @@ export async function deleteFeePackage(formData) {
       include: { _count: { select: { students: true } } },
     });
     if (pkg?._count?.students > 0) {
-      return { error: `Cannot delete — ${pkg._count.students} student(s) are on this package.` };
+      return { error: `Cannot delete - ${pkg._count.students} student(s) are on this package.` };
     }
     await prisma.feePackage.delete({ where: { id } });
     revalidatePath('/admin/fees/packages');
@@ -222,7 +222,7 @@ function buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bank
   A/C No: *${bankConfig.accountNumber}*`
     : '';
 
-  return `💼 *FUSION COLLEGE NAROWAL — FEE NOTICE*
+  return `💼 *FUSION COLLEGE NAROWAL - FEE NOTICE*
 
 📅 *${monthName} ${year}*
 

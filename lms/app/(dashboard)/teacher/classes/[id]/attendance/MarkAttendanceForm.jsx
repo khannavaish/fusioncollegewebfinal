@@ -83,7 +83,7 @@ export default function MarkAttendanceForm({ classSubjectId, students }) {
       {/* Student list */}
       <div className="border border-[#1e233d] rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-[#1e233d] bg-[#16192b]/50">
-          <h3 className="text-sm font-bold text-white">Student Roll Call — {students.length} Students</h3>
+          <h3 className="text-sm font-bold text-white">Student Roll Call - {students.length} Students</h3>
         </div>
         {students.length === 0 ? (
           <p className="p-6 text-sm text-zinc-500 text-center">No students enrolled in this class.</p>

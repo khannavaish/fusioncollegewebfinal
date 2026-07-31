@@ -111,7 +111,7 @@ export default async function DashboardLayout({ children }) {
   const name = dbUser?.student?.name || dbUser?.teacher?.name || dbUser?.admin?.name || dbUser?.parent?.name || user.email;
   const role = dbUser?.role || 'STUDENT';
 
-  // Pending password reset count — only loaded for admins (cheap, single count query)
+  // Pending password reset count - only loaded for admins (cheap, single count query)
   let pendingResetCount = 0;
   if (role === 'ADMIN') {
     try {

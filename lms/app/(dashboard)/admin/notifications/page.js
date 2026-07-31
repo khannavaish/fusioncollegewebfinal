@@ -8,7 +8,7 @@ import { resolvePasswordResetAction } from '@/app/actions/passwordReset';
 import { IconChatBubble, IconChevronLeft } from '@/app/components/icons';
 
 export const metadata = {
-  title: 'Notifications — Fusion College LMS',
+  title: 'Notifications | Fusion College LMS',
 };
 
 export const dynamic = 'force-dynamic';
@@ -112,7 +112,7 @@ export default async function AdminNotificationsPage() {
                       <span className="px-2 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-full uppercase">
                         Pending
                       </span>
-                      {/* Resolve button — generates password + sends WhatsApp */}
+                      {/* Resolve button - generates password + sends WhatsApp */}
                       <form action={resolvePasswordResetAction}>
                         <input type="hidden" name="requestId" value={req.id} />
                         <button

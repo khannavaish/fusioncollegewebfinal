@@ -406,7 +406,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                   <option value="">-- Choose Student --</option>
                   {students.map(s => (
                     <option key={s.id} value={s.id}>
-                      {s.name} ({s.rollNumber}) — {s.class.name}
+                      {s.name} ({s.rollNumber}) - {s.class.name}
                     </option>
                   ))}
                 </select>
@@ -444,7 +444,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
                     <div>
                       <h2 className="text-xl font-black text-white print:text-black">Fusion College Narowal</h2>
-                      <p className="text-xs text-cyan-400 font-bold print:text-zinc-600">Student Progress Report — Academic Year 2025-26</p>
+                      <p className="text-xs text-cyan-400 font-bold print:text-zinc-600">Student Progress Report - Academic Year 2025-26</p>
                       <p className="text-[10px] text-zinc-500 print:text-zinc-500">Date Range: {dateFrom} to {dateTo}</p>
                     </div>
                   </div>
@@ -470,7 +470,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <div className="space-y-1 mt-2">
                       <div className="text-xs text-zinc-500 font-bold uppercase">Parent Phone</div>
                       <div className="text-sm font-bold text-zinc-300 print:text-black">
-                        {studentReport.student.parents[0]?.parent?.phone || '—'}
+                        {studentReport.student.parents[0]?.parent?.phone || '-'}
                       </div>
                     </div>
                     <div className="space-y-1 mt-2">
@@ -487,7 +487,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                               </span>
                             );
                           })()
-                        ) : '—'}
+                        ) : '-'}
                       </div>
                     </div>
                   </div>
@@ -724,7 +724,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                               {s.name}
                             </td>
                             {classReport.dates.map(d => {
-                              const status = s.attendance[d] || '—';
+                              const status = s.attendance[d] || '-';
                               return (
                                 <td key={d} className="p-1 border-r border-[#1e233d]">
                                   <span className={`inline-block w-8 py-1 rounded text-xs font-bold border ${getStatusColor(status)}`}>
@@ -1197,7 +1197,7 @@ export default function ReportsClient({ students, classes, teachers }) {
             {/* SUBTAB CONTENT 1: DAILY ABSENTEES */}
             {warningsSubTab === 'absentees' && absenteesList.length > 0 && (
               <div className="bg-[#070810] p-5 rounded-xl border border-[#1e233d] space-y-4">
-                <h3 className="text-sm font-black text-red-400 uppercase tracking-wider">Absentee Record — {selectedDateIssues}</h3>
+                <h3 className="text-sm font-black text-red-400 uppercase tracking-wider">Absentee Record - {selectedDateIssues}</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>

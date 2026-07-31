@@ -153,7 +153,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
           <p className="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-500/20 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
             <IconAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-            Save these credentials now — passwords cannot be recovered later.
+            Save these credentials now - passwords cannot be recovered later.
           </p>
 
           <button
@@ -213,7 +213,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                     />
                     {suggestedPkg && (
                       <p className="text-[10px] text-cyan-400 mt-1.5 flex items-center gap-1">
-                        ✅ Auto-assigned: <span className="font-bold">{suggestedPkg.name}</span> — ₨{suggestedPkg.monthlyFee.toLocaleString()}/month
+                        ✅ Auto-assigned: <span className="font-bold">{suggestedPkg.name}</span> - ₨{suggestedPkg.monthlyFee.toLocaleString()}/month
                       </p>
                     )}
                     {admissionPct && !suggestedPkg && (
@@ -230,7 +230,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                       <option value="">📦 Select Package (override)</option>
                       {feePackages.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} — ₨{p.monthlyFee.toLocaleString()}/mo ({p.minPercentage}–{p.maxPercentage}%)
+                          {p.name} - ₨{p.monthlyFee.toLocaleString()}/mo ({p.minPercentage}–{p.maxPercentage}%)
                         </option>
                       ))}
                     </select>

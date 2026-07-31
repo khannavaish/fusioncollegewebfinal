@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { submitAssignment } from '@/app/actions/assignments';
 
 export const metadata = {
-  title: 'Assignments — Fusion College LMS',
+  title: 'Assignments | Fusion College LMS',
   description: 'View and submit your assignments',
 };
 
@@ -127,7 +127,7 @@ export default async function StudentAssignmentsPage() {
                           placeholder="File / Google Drive link (e.g. https://drive.google.com/...)"
                           className={inputCls}
                         />
-                        <div className="text-[10px] text-zinc-500 text-center">— or write your answer below —</div>
+                        <div className="text-[10px] text-zinc-500 text-center">- or write your answer below -</div>
                         <textarea
                           name="textAnswer"
                           placeholder="Type your written answer here..."

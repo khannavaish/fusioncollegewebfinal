@@ -17,7 +17,7 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-export const metadata = { title: 'Fee Management — Fusion LMS' };
+export const metadata = { title: 'Fee Management | Fusion LMS' };
 
 export default async function FeeHubPage() {
   const supabase = await createClient();

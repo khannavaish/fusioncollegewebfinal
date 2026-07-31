@@ -96,7 +96,7 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
         {/* Outer scroll container wrapper, inner ref element at min-w-max ensures export captures the full unclipped width */}
         <div className="overflow-x-auto overflow-y-visible border border-[#1e233d] rounded-xl">
           <div ref={sectionRef} className="bg-[#070810] p-5 min-w-max">
-            <ExportHeader subtitle={`${sectionTitle} — Master Timetable`} />
+            <ExportHeader subtitle={`${sectionTitle} - Master Timetable`} />
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="border-b border-[#1e233d] bg-[#16192b]/60 text-[13px] font-bold text-zinc-300 uppercase tracking-wider">
@@ -138,15 +138,15 @@ export default function TimetableClientView({ initialSlots, dbClasses, initialTi
                               {showBreak ? (
                                 <>
                                   <span className={`text-[15px] font-extrabold leading-tight ${color.text}`}>Break</span>
-                                  <span className="text-[11px] text-zinc-500 mt-1 leading-tight">—</span>
+                                  <span className="text-[11px] text-zinc-500 mt-1 leading-tight">-</span>
                                 </>
                               ) : (
                                 <>
                                   <span className={`text-[15px] font-extrabold leading-tight ${isTeacher ? 'text-cyan-300' : color.text}`}>
-                                    {slot?.subject || '—'}
+                                    {slot?.subject || '-'}
                                   </span>
                                   <span className="text-[11px] text-zinc-400 mt-1 leading-tight">
-                                    {slot?.teacher || '—'}
+                                    {slot?.teacher || '-'}
                                   </span>
                                 </>
                               )}

@@ -1,4 +1,4 @@
-// Professional SVG icon components — all 20×20 viewBox, stroke-based
+// Professional SVG icon components - all 20×20 viewBox, stroke-based
 // Use with className prop for sizing/color e.g. className="w-4 h-4 text-cyan-400"
 
 export function IconHome({ className = 'w-4 h-4' }) {

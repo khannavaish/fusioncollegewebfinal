@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { createAssignment, deleteAssignment, gradeSubmission } from '@/app/actions/assignments';
 
 export const metadata = {
-  title: 'Assignments — Fusion College LMS',
+  title: 'Assignments | Fusion College LMS',
   description: 'Create and manage assignments for your classes',
 };
 
@@ -87,7 +87,7 @@ export default async function TeacherAssignmentsPage() {
                   <option value="">Select Class / Subject *</option>
                   {classSubjects.map((cs) => (
                     <option key={cs.id} value={cs.id}>
-                      {cs.class.name} — {cs.subject.name}
+                      {cs.class.name} - {cs.subject.name}
                     </option>
                   ))}
                 </select>
@@ -142,7 +142,7 @@ export default async function TeacherAssignmentsPage() {
                             {isOverdue ? 'Closed' : 'Active'}
                           </span>
                         </div>
-                        <div className="text-xs text-zinc-400 mt-1">{assignment.classSubject.class.name} — {assignment.classSubject.subject.name}</div>
+                        <div className="text-xs text-zinc-400 mt-1">{assignment.classSubject.class.name} - {assignment.classSubject.subject.name}</div>
                         <div className="text-[11px] text-zinc-500 mt-0.5">
                           Deadline: {new Date(assignment.deadline).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
                         </div>

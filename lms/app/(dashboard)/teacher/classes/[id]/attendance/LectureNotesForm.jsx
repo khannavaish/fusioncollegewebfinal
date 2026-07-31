@@ -5,7 +5,7 @@ import { saveLectureNotes } from '@/app/actions/teacher';
 import { IconCheckCircle, IconAlertTriangle } from '@/app/components/icons';
 
 export default function LectureNotesForm({ lecture }) {
-  const [topic, setTopic]   = useState(lecture.topic && lecture.topic !== 'Pending — lecture notes to be added after class.' ? lecture.topic : '');
+  const [topic, setTopic]   = useState(lecture.topic && lecture.topic !== 'Pending - lecture notes to be added after class.' ? lecture.topic : '');
   const [pictureBase64, setPictureBase64] = useState('');
   const [previewUrl, setPreviewUrl]       = useState(lecture.pictureUrl || '');
   const [success, setSuccess] = useState(false);
