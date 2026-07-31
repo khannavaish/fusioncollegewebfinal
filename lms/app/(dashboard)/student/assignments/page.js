@@ -32,6 +32,7 @@ export default async function StudentAssignmentsPage() {
   }
 
   const student = dbUser.student;
+  const isAlumni = dbUser.status === 'ALUMNI';
 
   let pending = [];
   let submissions = [];
@@ -118,30 +119,38 @@ export default async function StudentAssignmentsPage() {
                       </div>
                     </div>
                     {/* Submit Form */}
-                    <div className="p-5 bg-[#16192b]/20">
-                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Submit Your Work</h4>
-                      <form action={submitAssignment} className="space-y-2">
-                        <input type="hidden" name="assignmentId" value={assignment.id} />
-                        <input
-                          name="fileUrl"
-                          placeholder="File / Google Drive link (e.g. https://drive.google.com/...)"
-                          className={inputCls}
-                        />
-                        <div className="text-[10px] text-zinc-500 text-center">- or write your answer below -</div>
-                        <textarea
-                          name="textAnswer"
-                          placeholder="Type your written answer here..."
-                          rows={3}
-                          className={`${inputCls} resize-none`}
-                        />
-                        <button
-                          type="submit"
-                          className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
-                        >
-                          Submit Assignment
-                        </button>
-                      </form>
-                    </div>
+                    {isAlumni ? (
+                      <div className="p-5 bg-[#16192b]/20 flex flex-col items-center justify-center text-center">
+                        <span className="text-2xl mb-2">🎓</span>
+                        <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Alumni Mode</h4>
+                        <p className="text-[10px] text-zinc-500">You can view past assignments, but submissions are disabled.</p>
+                      </div>
+                    ) : (
+                      <div className="p-5 bg-[#16192b]/20">
+                        <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Submit Your Work</h4>
+                        <form action={submitAssignment} className="space-y-2">
+                          <input type="hidden" name="assignmentId" value={assignment.id} />
+                          <input
+                            name="fileUrl"
+                            placeholder="File / Google Drive link (e.g. https://drive.google.com/...)"
+                            className={inputCls}
+                          />
+                          <div className="text-[10px] text-zinc-500 text-center">- or write your answer below -</div>
+                          <textarea
+                            name="textAnswer"
+                            placeholder="Type your written answer here..."
+                            rows={3}
+                            className={`${inputCls} resize-none`}
+                          />
+                          <button
+                            type="submit"
+                            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                          >
+                            Submit Assignment
+                          </button>
+                        </form>
+                      </div>
+                    )}
                   </div>
                 );
               })}

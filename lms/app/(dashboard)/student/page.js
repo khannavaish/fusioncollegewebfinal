@@ -71,6 +71,7 @@ export default async function StudentDashboard() {
   let totalAssignments = 0;
   let submittedCount = 0;
   let upcomingDeadlines = [];
+  let isAlumni = false;
 
   try {
     const dbFullUser = await prisma.user.findUnique({
@@ -84,6 +85,7 @@ export default async function StudentDashboard() {
       },
     });
     student = dbFullUser?.student;
+    isAlumni = dbFullUser?.status === 'ALUMNI';
 
     if (student) {
       // 1. Fetch active courses (ClassSubject mappings)
@@ -182,7 +184,10 @@ export default async function StudentDashboard() {
       <AnimatedSection delay={0.05}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Student Dashboard</h1>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              Student Dashboard
+              {isAlumni && <span className="text-[10px] px-2 py-1 bg-purple-950/50 text-purple-400 border border-purple-500/30 rounded font-bold uppercase tracking-widest align-middle shadow-lg shadow-purple-900/20">🎓 ALUMNI (READ-ONLY)</span>}
+            </h1>
             <p className="text-zinc-400 text-sm mt-1">Welcome back, {student?.name || user.email}</p>
           </div>
           <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">

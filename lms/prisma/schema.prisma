@@ -243,6 +243,7 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   PENDING
+  ALUMNI
 }
 
 enum AttendanceStatus {
@@ -356,3 +357,10 @@ model FeeBillItem {
   amount Decimal @db.Decimal(10, 2)
   bill   FeeBill @relation(fields: [billId], references: [id], onDelete: Cascade)
 }
+
+model SystemSettings {
+  id                String   @id @default("global")
+  activeSessionName String   @default("Session 2025-2026")
+  updatedAt         DateTime @updatedAt
+}
+

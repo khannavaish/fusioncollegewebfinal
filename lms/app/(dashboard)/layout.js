@@ -13,6 +13,18 @@ export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let sessionName = 'Session 2025-2026';
+  try {
+    let settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
+    if (!settings) {
+      settings = await prisma.systemSettings.create({ data: { id: 'global', activeSessionName: sessionName } });
+    }
+    sessionName = settings.activeSessionName;
+  } catch (e) {
+    console.error("Error fetching system settings:", e);
+  }
+
+
   if (!user) {
     redirect('/login');
   }
@@ -170,6 +182,7 @@ export default async function DashboardLayout({ children }) {
               attendance: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
               grades:    'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14m-6 0a2 2 0 002 2h2a2 2 0 002-2',
               profile:   'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+              session:   'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
             };
 
             return (
@@ -182,7 +195,8 @@ export default async function DashboardLayout({ children }) {
                   <NavLink href="/admin/students"      label="Students"             d={ICONS.students}   hoverColor="group-hover:text-indigo-400" />
                   <NavLink href="/admin/teachers"      label="Teachers"             d={ICONS.teachers}   hoverColor="group-hover:text-cyan-400" />
                   <NavLink href="/admin/parents"       label="Parents"              d={ICONS.parents}    hoverColor="group-hover:text-violet-400" />
-                  <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Academic</p>
+                  <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Academic & Settings</p>
+                  <NavLink href="/admin/session"       label="Session & Promotion"  d={ICONS.session}    hoverColor="group-hover:text-purple-400" />
                   <NavLink href="/admin/classes"       label="Classes"              d={ICONS.classes}    hoverColor="group-hover:text-blue-400" />
                   <NavLink href="/admin/subjects"      label="Subjects"             d={ICONS.subjects}   hoverColor="group-hover:text-emerald-400" />
                   <NavLink href="/admin/timetable"     label="Edit Timetable"       d={ICONS.timetable}  hoverColor="group-hover:text-cyan-400" />
@@ -268,7 +282,7 @@ export default async function DashboardLayout({ children }) {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <span className="text-xs px-2.5 py-1 rounded bg-[#1e233d] border border-[#2b3052] font-semibold text-zinc-300">
-              Session 2026
+              {sessionName}
             </span>
           </div>
         </header>

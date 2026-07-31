@@ -7,11 +7,14 @@ export async function GET() {
       where: { id: 'default' }
     });
 
+    const settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
+    const sessionName = settings?.activeSessionName || 'Session 2026';
+
     if (!config) {
       config = await prisma.websiteConfig.create({
         data: {
           id: 'default',
-          heroTagLine: 'Admissions Open · Session 2026',
+          heroTagLine: `Admissions Open · ${sessionName}`,
           isBlinking: false
         }
       });
@@ -45,6 +48,9 @@ export async function POST(req) {
     const body = await req.json();
     const { heroTagLine, isBlinking } = body;
 
+    const settings = await prisma.systemSettings.findUnique({ where: { id: 'global' } });
+    const sessionName = settings?.activeSessionName || 'Session 2026';
+
     const config = await prisma.websiteConfig.upsert({
       where: { id: 'default' },
       update: {
@@ -53,7 +59,7 @@ export async function POST(req) {
       },
       create: {
         id: 'default',
-        heroTagLine: heroTagLine || 'Admissions Open · Session 2026',
+        heroTagLine: heroTagLine || `Admissions Open · ${sessionName}`,
         isBlinking: isBlinking || false,
       }
     });
