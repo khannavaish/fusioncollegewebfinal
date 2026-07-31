@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary, logoutWhatsAppGateway } from '@/app/actions/whatsapp';
+import { saveWhatsAppConfig, sendTestWhatsApp, sendEndOfDaySummary, logoutWhatsAppGateway, sendBroadcastMessage } from '@/app/actions/whatsapp';
 import { IconCheckCircle, IconAlertTriangle, IconSparkles } from '@/app/components/icons';
 
 export default function WhatsAppSettingsClient({ config, classes = [] }) {
@@ -23,6 +23,33 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
   const [isTesting, startTest]  = useTransition();
   const [isEod, startEod]       = useTransition();
   const [isLoggingOut, startLogout] = useTransition();
+  const [isBroadcasting, startBroadcast] = useTransition();
+
+  const [broadcastMsg, setBroadcastMsg] = useState(null);
+  const [broadcastClass, setBroadcastClass] = useState('ALL');
+  const [broadcastText, setBroadcastText] = useState('');
+
+  const TEMPLATES = [
+    { label: '🏫 Institute Off', text: '*FUSION COLLEGE NAROWAL* 🏫\n\nAssalamu Alaikum,\n\nPlease be informed that the college will remain *CLOSED* tomorrow due to an administrative decision.\n\nالسلام علیکم\nکالج انتظامیہ کی طرف سے اطلاع دی جاتی ہے کہ کالج کل *بند* رہے گا۔\n\nJazakAllah Khair,\nFusion College Narowal Administration' },
+    { label: '🌧️ Rain Holiday', text: '*FUSION COLLEGE NAROWAL* 🏫\n\nAssalamu Alaikum,\n\nDue to heavy rainfall and adverse weather conditions, the college will remain *CLOSED* tomorrow. Students are advised to stay safe.\n\nالسلام علیکم\nشدید بارش اور موسمی حالات کے پیش نظر کالج کل *بند* رہے گا۔ تمام طلبہ گھروں میں محفوظ رہیں۔\n\nJazakAllah Khair,\nFusion College Narowal Administration' },
+    { label: '🎉 Vacations', text: '*FUSION COLLEGE NAROWAL* 🏫\n\nAssalamu Alaikum,\n\nPlease be informed that college *VACATIONS* will commence from tomorrow. College will reopen as per the announced schedule.\n\nالسلام علیکم\nآپ کو اطلاع دی جاتی ہے کہ کالج کی *تعطیلات* کا آغاز کل سے ہوگا۔ اعلان کردہ شیڈول کے مطابق کالج دوبارہ کھلے گا۔\n\nJazakAllah Khair,\nFusion College Narowal Administration' },
+  ];
+
+  const handleBroadcast = (e) => {
+    e.preventDefault();
+    if (!broadcastText.trim()) return;
+    const targetLabel = broadcastClass === 'ALL' ? 'ALL parents' : 'selected class parents';
+    if (!confirm(`Send this broadcast to ${targetLabel}? This will send WhatsApp messages.`)) return;
+    setBroadcastMsg(null);
+    startBroadcast(async () => {
+      const fd = new FormData();
+      fd.append('classId', broadcastClass);
+      fd.append('message', broadcastText.trim());
+      const res = await sendBroadcastMessage(fd);
+      if (res?.error) setBroadcastMsg({ type: 'error', text: res.error });
+      else setBroadcastMsg({ type: 'success', text: `Sent to ${res.sent} parents. ${res.skipped} skipped.` });
+    });
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -244,6 +271,51 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
             <button type="submit" disabled={isEod}
               className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
               {isEod ? 'Sending Reports...' : 'Send End-of-Day Reports'}
+            </button>
+          </div>
+        </form>
+      </div>
+      {/* Quick Broadcast */}
+      <div className="bg-[#0d0f1a] border border-indigo-500/20 rounded-xl overflow-hidden">
+        <div className="px-6 py-4 bg-indigo-950/10 border-b border-indigo-500/20">
+          <h2 className="text-sm font-bold text-white">Quick Broadcast Message</h2>
+          <p className="text-[11px] text-zinc-500 mt-1">Send a custom notice to all parents — use templates or write your own.</p>
+        </div>
+        <form onSubmit={handleBroadcast} className="p-6 space-y-4">
+          {broadcastMsg && <AlertMsg msg={broadcastMsg} />}
+
+          <div className="flex flex-wrap gap-2">
+            {TEMPLATES.map(t => (
+              <button key={t.label} type="button"
+                onClick={() => setBroadcastText(t.text)}
+                className="px-3 py-1.5 bg-indigo-950/50 border border-indigo-500/30 hover:border-indigo-400 text-indigo-300 hover:text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <textarea
+            value={broadcastText}
+            onChange={e => setBroadcastText(e.target.value)}
+            rows={6}
+            placeholder="Type your message here, or click a template above to prefill..."
+            className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 placeholder-zinc-600 resize-y"
+          />
+
+          <div className="flex flex-wrap gap-4 items-end">
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
+              <select value={broadcastClass} onChange={e => setBroadcastClass(e.target.value)}
+                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 min-w-[200px] cursor-pointer">
+                <option value="ALL">All Classes</option>
+                {classes.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" disabled={isBroadcasting || !broadcastText.trim()}
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
+              {isBroadcasting ? 'Sending Broadcast...' : 'Send Broadcast'}
             </button>
           </div>
         </form>

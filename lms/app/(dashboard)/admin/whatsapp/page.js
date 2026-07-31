@@ -5,6 +5,8 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import WhatsAppSettingsClient from './WhatsAppSettingsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'WhatsApp Settings | Fusion College LMS',
   description: 'Configure WhatsApp parent notification system',
@@ -23,9 +25,43 @@ export default async function WhatsAppSettingsPage() {
 
   let config = null;
   let classes = [];
+  let loggingStatus = [];
   try {
     config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
     classes = await prisma.class.findMany({ orderBy: { name: 'asc' } });
+
+    const today = new Date();
+    const startOfDay = new Date(today); startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(today); endOfDay.setHours(23, 59, 59, 999);
+
+    const allClassSubjects = await prisma.classSubject.findMany({
+      include: {
+        class: true,
+        subject: true,
+        teacher: true,
+        lectures: {
+          where: { date: { gte: startOfDay, lte: endOfDay } },
+          take: 1,
+        },
+      },
+      orderBy: [{ class: { name: 'asc' } }, { subject: { name: 'asc' } }],
+    });
+
+    const classMap = {};
+    for (const cs of allClassSubjects) {
+      if (!classMap[cs.class.id]) {
+        classMap[cs.class.id] = { className: cs.class.name, subjects: [] };
+      }
+      const lecture = cs.lectures[0];
+      const topicLogged = lecture && lecture.topic && !lecture.topic.startsWith('Pending');
+      classMap[cs.class.id].subjects.push({
+        subjectName: cs.subject.name,
+        teacherName: cs.teacher?.name || 'Unassigned',
+        logged: topicLogged,
+        topic: topicLogged ? lecture.topic : null,
+      });
+    }
+    loggingStatus = Object.values(classMap);
   } catch {}
  
   return (
@@ -54,6 +90,60 @@ export default async function WhatsAppSettingsPage() {
           </div>
         </div>
       </AnimatedSection>
+
+      {/* Today's Logging Status Panel */}
+      <AnimatedSection delay={0.15}>
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
+          <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d] flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-white">Today&apos;s Topic Logging Status</h2>
+              <p className="text-[11px] text-zinc-500 mt-1">
+                {new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-[11px]">
+              <span className="flex items-center gap-1.5 text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Logged</span>
+              <span className="flex items-center gap-1.5 text-amber-400"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
+            </div>
+          </div>
+          <div className="p-4">
+            {loggingStatus.length === 0 ? (
+              <p className="text-zinc-500 text-sm text-center py-4">No classes with assigned subjects found.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {loggingStatus.map((cls) => {
+                  const loggedCount = cls.subjects.filter(s => s.logged).length;
+                  const total = cls.subjects.length;
+                  const allDone = loggedCount === total;
+                  return (
+                    <div key={cls.className} className={`rounded-xl border p-4 ${allDone ? 'border-emerald-500/20 bg-emerald-950/10' : 'border-amber-500/20 bg-amber-950/10'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-bold text-white">{cls.className}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${allDone ? 'bg-emerald-950/50 text-emerald-400' : 'bg-amber-950/50 text-amber-400'}`}>
+                          {loggedCount}/{total} Logged
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {cls.subjects.map((s) => (
+                          <div key={s.subjectName} className="flex items-start gap-2">
+                            <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${s.logged ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                            <div className="min-w-0">
+                              <span className="text-xs text-zinc-300 font-semibold">{s.subjectName}</span>
+                              <span className="text-[10px] text-zinc-500 ml-1">({s.teacherName})</span>
+                              {s.topic && <p className="text-[10px] text-zinc-500 truncate mt-0.5">{s.topic}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </AnimatedSection>
+
       <AnimatedSection delay={0.2}>
         <WhatsAppSettingsClient config={config} classes={classes} />
       </AnimatedSection>

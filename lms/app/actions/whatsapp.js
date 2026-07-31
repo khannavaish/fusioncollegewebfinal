@@ -376,3 +376,47 @@ Fusion College Narowal Administration`;
   }
 }
 
+// ─── Send Broadcast Message to All Parents ─────────────────────────────────
+export async function sendBroadcastMessage(formData) {
+  await verifyAdmin();
+  const classId   = formData.get('classId')?.toString();
+  const message   = formData.get('message')?.toString()?.trim();
+
+  if (!message) return { error: 'Message cannot be empty.' };
+
+  try {
+    const whereClause = classId && classId !== 'ALL' ? { classId } : {};
+    const students = await prisma.student.findMany({
+      where: whereClause,
+      include: { parents: { include: { parent: true } } },
+    });
+
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    let sent = 0, skipped = 0;
+
+    for (const student of students) {
+      for (const ps of student.parents) {
+        if (!ps.parent?.phone) { skipped++; continue; }
+        const randomDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
+        await delay(randomDelay);
+        const result = await sendWhatsAppMessage(ps.parent.phone, message);
+        if (result.skipped) { skipped++; } else if (result.success) { sent++; }
+        await prisma.whatsAppLog.create({
+          data: {
+            studentId: student.id,
+            parentPhone: ps.parent.phone,
+            messageType: 'BROADCAST',
+            success: !!result.success,
+            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null),
+          }
+        });
+      }
+    }
+
+    revalidatePath('/admin/whatsapp');
+    return { success: true, sent, skipped };
+  } catch (e) {
+    console.error('[WhatsApp] Broadcast error:', e);
+    return { error: e.message || 'Failed to send broadcast.' };
+  }
+}
