@@ -99,7 +99,8 @@ export default async function AdminDashboard() {
             </div>
           </details>
         </div>
-      </AnimatedSection>
+      </div>
+    </AnimatedSection>
 
       {/* Stats */}
       <AnimatedSection delay={0.15}>
@@ -109,18 +110,13 @@ export default async function AdminDashboard() {
           { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
           { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
           { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
-          {[
-            { label: 'Students', value: studentCount, color: 'text-cyan-400', href: '/admin/students' },
-            { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
-            { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
-            { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
-            { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
-          ].map((stat) => (
-            <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
-              <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>
-              <div className={`text-3xl font-black mt-2 ${stat.color}`}>{stat.value}</div>
-            </Link>
-          ))}
+          { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
+        ].map((stat) => (
+          <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
+            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>
+            <div className={`text-3xl font-black mt-2 ${stat.color}`}>{stat.value}</div>
+          </Link>
+        ))}
         </div>
       </AnimatedSection>
 
@@ -147,6 +143,14 @@ export default async function AdminDashboard() {
       </AnimatedSection>
 
       {/* Recent Data */}
+      <AnimatedSection delay={0.25}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Students */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base font-bold text-white">Recent Students</h2>
+            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+              View All <IconChevronRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="space-y-2">
@@ -232,6 +236,7 @@ export default async function AdminDashboard() {
               <div className="text-[10px] text-zinc-600 mt-1">{new Date(enq.createdAt).toLocaleString()}</div>
             </div>
           ))}
+        </div>
         </div>
       </AnimatedSection>
     </div>

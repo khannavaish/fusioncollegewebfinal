@@ -95,7 +95,8 @@ export default async function FeeHubPage() {
 
       {/* Warning: students without package */}
       {studentsWithoutPackage > 0 && (
-        <div className="flex items-start gap-4 bg-amber-950/20 border border-amber-900/50 rounded-2xl p-5 relative overflow-hidden group">
+        <AnimatedSection delay={0.1}>
+          <div className="flex items-start gap-4 bg-amber-950/20 border border-amber-900/50 rounded-2xl p-5 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
           <div className="w-10 h-10 rounded-full bg-amber-900/30 flex items-center justify-center flex-shrink-0">
             <IconAlertTriangle className="w-5 h-5 text-amber-500" />
@@ -134,6 +135,7 @@ export default async function FeeHubPage() {
             <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-1">{s.label}</div>
           </div>
         ))}
+        </div>
       </AnimatedSection>
 
       {/* Revenue Cards */}
@@ -169,6 +171,7 @@ export default async function FeeHubPage() {
               ? `${Math.round((stats.totalCollected / stats.totalDue) * 100)}% collection rate achieved`
               : 'Awaiting bill generation'}
           </div>
+        </div>
         </div>
       </AnimatedSection>
 
@@ -223,42 +226,12 @@ export default async function FeeHubPage() {
             Execute Billing Cycle
           </button>
         </form>
+        </div>
       </AnimatedSection>
 
       {/* Fee Packages Overview */}
       <AnimatedSection delay={0.3}>
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
-              <IconSettings className="w-4 h-4 text-violet-400" />
-            </div>
-            <h2 className="text-base font-bold text-white tracking-tight">Configured Fee Packages</h2>
-          </div>
-          <Link href="/admin/fees/packages" className="inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
-            Manage Configuration <IconChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-        
-        {packages.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-[#1e233d] rounded-xl">
-            <IconSettings className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-zinc-400 text-sm font-medium">No fee packages configured.</p>
-            <Link href="/admin/fees/packages" className="text-cyan-400 text-sm font-medium hover:underline mt-1 inline-block">
-              Create your first package
-            </Link>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {packages.map((pkg) => (
-              <div key={pkg.id} className="bg-[#060810] border border-[#1e233d] rounded-xl p-5 hover:border-violet-500/30 transition-colors group">
-                <div className="text-sm font-bold text-white mb-2">{pkg.name}</div>
-                <div className="text-3xl font-black text-cyan-400 tracking-tight group-hover:scale-105 transition-transform origin-left">
-                  <span className="text-cyan-700 text-lg mr-1 font-light">₨</span>
-                  {Number(pkg.monthlyFee).toLocaleString()}
-                </div>
-                <div className="inline-block px-2 py-1 bg-white/5 rounded text-xs text-zinc-400 font-medium mt-3 border border-white/5">
-                  Criteria: {Number(pkg.minPercentage)}% – {Number(pkg.maxPercentage)}%
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
