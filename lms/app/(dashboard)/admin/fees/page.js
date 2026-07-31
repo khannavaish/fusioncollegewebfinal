@@ -3,20 +3,18 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { generateMonthlyBills } from '@/app/actions/fees';
+import {
+  IconChart, IconSettings, IconDocumentText, IconAlertTriangle,
+  IconCheckCircle, IconXCircle, IconClock, IconDownload, IconBolt,
+  IconChevronRight
+} from '@/app/components/icons';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const statusConfig = {
-  UNPAID: { label: 'Unpaid', color: 'text-red-400', bg: 'bg-red-950/40 border-red-800/40', dot: 'bg-red-500' },
-  PAID:   { label: 'Paid',   color: 'text-emerald-400', bg: 'bg-emerald-950/40 border-emerald-800/40', dot: 'bg-emerald-500' },
-  PARTIAL:{ label: 'Partial',color: 'text-amber-400', bg: 'bg-amber-950/40 border-amber-800/40', dot: 'bg-amber-500' },
-  WAIVED: { label: 'Waived', color: 'text-violet-400', bg: 'bg-violet-950/40 border-violet-800/40', dot: 'bg-violet-500' },
-};
-
-export const metadata = { title: '💼 Fee Management — Fusion LMS' };
+export const metadata = { title: 'Fee Management — Fusion LMS' };
 
 export default async function FeeHubPage() {
   const supabase = await createClient();
@@ -56,48 +54,60 @@ export default async function FeeHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8 space-y-8">
+    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8 space-y-8 font-sans">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-zinc-500 text-xs mb-2">
             <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
-            <span>/</span>
+            <IconChevronRight className="w-3 h-3" />
             <span className="text-zinc-300">Fee Management</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">💼 Fee Management</h1>
-          <p className="text-zinc-400 text-sm mt-1">
-            {MONTH_NAMES[month - 1]} {year} — {stats.total} bills generated
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <IconChart className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Fee Management</h1>
+          </div>
+          <p className="text-zinc-400 text-sm mt-2 font-medium">
+            {MONTH_NAMES[month - 1]} {year} Overview • {stats.total} bills generated
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/fees/packages"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-violet-600/40 bg-violet-950/30 text-violet-300 text-sm font-medium hover:bg-violet-950/60 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1e233d] bg-[#0d0f1a] text-zinc-300 text-sm font-medium hover:bg-[#1e233d] hover:text-white transition-all shadow-sm"
           >
-            📦 Manage Packages
+            <IconSettings className="w-4 h-4 text-violet-400" />
+            Manage Packages
           </Link>
           <Link
             href="/admin/fees/bills"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cyan-600/40 bg-cyan-950/30 text-cyan-300 text-sm font-medium hover:bg-cyan-950/60 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1e233d] bg-[#0d0f1a] text-zinc-300 text-sm font-medium hover:bg-[#1e233d] hover:text-white transition-all shadow-sm"
           >
-            📋 View All Bills
+            <IconDocumentText className="w-4 h-4 text-cyan-400" />
+            View All Bills
           </Link>
         </div>
       </div>
 
       {/* Warning: students without package */}
       {studentsWithoutPackage > 0 && (
-        <div className="flex items-start gap-3 bg-amber-950/30 border border-amber-700/40 rounded-2xl p-4">
-          <span className="text-xl">⚠️</span>
+        <div className="flex items-start gap-4 bg-amber-950/20 border border-amber-900/50 rounded-2xl p-5 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
+          <div className="w-10 h-10 rounded-full bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+            <IconAlertTriangle className="w-5 h-5 text-amber-500" />
+          </div>
           <div>
-            <p className="text-amber-300 font-semibold text-sm">
-              {studentsWithoutPackage} active student(s) have no fee package assigned
+            <p className="text-amber-400 font-semibold text-sm">
+              Action Required: {studentsWithoutPackage} active student(s) lack a fee package
             </p>
-            <p className="text-amber-400/70 text-xs mt-0.5">
-              These students will be skipped during bill generation.{' '}
-              <Link href="/admin/students" className="underline hover:text-amber-300">Assign packages →</Link>
+            <p className="text-zinc-400 text-sm mt-1">
+              These students will be excluded from the automated billing cycle.
             </p>
+            <Link href="/admin/students" className="inline-flex items-center gap-1 text-amber-500 hover:text-amber-400 text-sm font-medium mt-2 transition-colors">
+              Assign packages now <IconChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       )}
@@ -105,109 +115,146 @@ export default async function FeeHubPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Bills', value: stats.total, icon: '📄', color: 'cyan' },
-          { label: 'Unpaid', value: stats.unpaid, icon: '❌', color: 'red' },
-          { label: 'Paid', value: stats.paid, icon: '✅', color: 'emerald' },
-          { label: 'Partial / Waived', value: `${stats.partial} / ${stats.waived}`, icon: '⏳', color: 'amber' },
-        ].map((s) => (
-          <div key={s.label} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-5">
-            <div className="text-2xl mb-2">{s.icon}</div>
-            <div className="text-2xl font-bold text-white">{s.value}</div>
-            <div className="text-xs text-zinc-500 mt-1">{s.label}</div>
+          { label: 'Total Bills', value: stats.total, icon: <IconDocumentText className="w-5 h-5 text-cyan-400" />, bg: 'bg-cyan-500/10' },
+          { label: 'Unpaid', value: stats.unpaid, icon: <IconXCircle className="w-5 h-5 text-red-400" />, bg: 'bg-red-500/10' },
+          { label: 'Paid', value: stats.paid, icon: <IconCheckCircle className="w-5 h-5 text-emerald-400" />, bg: 'bg-emerald-500/10' },
+          { label: 'Partial / Waived', value: `${stats.partial} / ${stats.waived}`, icon: <IconClock className="w-5 h-5 text-amber-400" />, bg: 'bg-amber-500/10' },
+        ].map((s, idx) => (
+          <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-5 hover:border-[#2a304e] transition-colors group">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
+                {s.icon}
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-white group-hover:text-cyan-50 transition-colors">{s.value}</div>
+            <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-1">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Revenue Cards */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-zinc-400 text-sm">💰 Total Due This Month</span>
+        <div className="bg-gradient-to-br from-[#0d0f1a] to-[#111322] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            <span className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Total Due This Month</span>
           </div>
-          <div className="text-3xl font-bold text-white mt-2">
-            ₨{stats.totalDue.toLocaleString()}
+          <div className="text-4xl font-black text-white mt-3">
+            <span className="text-zinc-500 font-light text-2xl mr-1">₨</span>
+            {stats.totalDue.toLocaleString()}
           </div>
-          <div className="text-xs text-zinc-600 mt-1">Across {stats.total} bills</div>
+          <div className="text-xs font-medium text-zinc-500 mt-2 bg-black/20 inline-block px-2.5 py-1 rounded-md border border-white/5">
+            Across {stats.total} generated bills
+          </div>
         </div>
-        <div className="bg-[#0d0f1a] border border-emerald-800/30 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-zinc-400 text-sm">📥 Collected So Far</span>
+
+        <div className="bg-gradient-to-br from-[#0d0f1a] to-[#0a1614] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            <span className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Collected So Far</span>
           </div>
-          <div className="text-3xl font-bold text-emerald-400 mt-2">
-            ₨{stats.totalCollected.toLocaleString()}
+          <div className="text-4xl font-black text-emerald-400 mt-3 drop-shadow-[0_2px_10px_rgba(16,185,129,0.2)]">
+            <span className="text-emerald-700 font-light text-2xl mr-1">₨</span>
+            {stats.totalCollected.toLocaleString()}
           </div>
-          <div className="text-xs text-zinc-600 mt-1">
+          <div className="text-xs font-medium text-zinc-500 mt-2 bg-black/20 inline-block px-2.5 py-1 rounded-md border border-white/5">
             {stats.totalDue > 0
-              ? `${Math.round((stats.totalCollected / stats.totalDue) * 100)}% collection rate`
-              : 'No bills generated yet'}
+              ? `${Math.round((stats.totalCollected / stats.totalDue) * 100)}% collection rate achieved`
+              : 'Awaiting bill generation'}
           </div>
         </div>
       </div>
 
       {/* Generate Bills Section */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6 shadow-[0_0_15px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/20">
-        <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-          🚀 Generate Monthly Bills (Admin Control)
-        </h2>
-        <p className="text-cyan-400/80 text-sm mb-5 font-medium">
-          Select the month and year to instantly generate fee vouchers for all enrolled students.
+      <div className="bg-gradient-to-r from-cyan-950/20 to-blue-950/20 border border-cyan-900/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.05)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+            <IconBolt className="w-4 h-4 text-cyan-400" />
+          </div>
+          <h2 className="text-lg font-bold text-white tracking-tight">Manual Billing Execution</h2>
+        </div>
+        
+        <p className="text-zinc-400 text-sm mb-6 max-w-2xl leading-relaxed">
+          Select the billing cycle and due date to instantly generate fee vouchers for all enrolled students. 
+          Notifications will be dispatched automatically to parent WhatsApp numbers upon execution.
         </p>
-        <form action={generateMonthlyBills} className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📅 Month</label>
+        
+        <form action={generateMonthlyBills} className="flex flex-wrap gap-4 items-end">
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Billing Month</label>
             <select name="month" defaultValue={month}
-              className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+              className="w-full sm:w-40 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
               {MONTH_NAMES.map((m, i) => (
                 <option key={m} value={i + 1}>{m}</option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📆 Year</label>
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Fiscal Year</label>
             <select name="year" defaultValue={year}
-              className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+              className="w-full sm:w-32 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
               {[year - 1, year, year + 1].map((y) => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">📌 Due Day</label>
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Due Date</label>
             <select name="dueDay" defaultValue={10}
-              className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+              className="w-full sm:w-48 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
               {[5, 7, 10, 12, 15, 20].map((d) => (
-                <option key={d} value={d}>{d}th of month</option>
+                <option key={d} value={d}>{d}th of the month</option>
               ))}
             </select>
           </div>
           <button type="submit"
-            className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold transition-colors">
-            ⚡ Generate Bills + Send WhatsApp
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-bold shadow-lg shadow-cyan-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+            <IconBolt className="w-4 h-4" />
+            Execute Billing Cycle
           </button>
         </form>
       </div>
 
       {/* Fee Packages Overview */}
       <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-bold text-white">📦 Active Fee Packages</h2>
-          <Link href="/admin/fees/packages" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
-            Manage →
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
+              <IconSettings className="w-4 h-4 text-violet-400" />
+            </div>
+            <h2 className="text-base font-bold text-white tracking-tight">Configured Fee Packages</h2>
+          </div>
+          <Link href="/admin/fees/packages" className="inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
+            Manage Configuration <IconChevronRight className="w-4 h-4" />
           </Link>
         </div>
+        
         {packages.length === 0 ? (
-          <p className="text-zinc-500 text-sm">No packages yet. <Link href="/admin/fees/packages" className="text-cyan-400 underline">Create one →</Link></p>
+          <div className="text-center py-8 border-2 border-dashed border-[#1e233d] rounded-xl">
+            <IconSettings className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+            <p className="text-zinc-400 text-sm font-medium">No fee packages configured.</p>
+            <Link href="/admin/fees/packages" className="text-cyan-400 text-sm font-medium hover:underline mt-1 inline-block">
+              Create your first package
+            </Link>
+          </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {packages.map((pkg) => (
-              <div key={pkg.id} className="bg-[#0a0c14] border border-[#1e233d] rounded-xl p-4">
-                <div className="text-sm font-bold text-white mb-1">{pkg.name}</div>
-                <div className="text-2xl font-bold text-cyan-400">₨{Number(pkg.monthlyFee).toLocaleString()}</div>
-                <div className="text-xs text-zinc-500 mt-1">
-                  {Number(pkg.minPercentage)}% – {Number(pkg.maxPercentage)}%
+              <div key={pkg.id} className="bg-[#060810] border border-[#1e233d] rounded-xl p-5 hover:border-violet-500/30 transition-colors group">
+                <div className="text-sm font-bold text-white mb-2">{pkg.name}</div>
+                <div className="text-3xl font-black text-cyan-400 tracking-tight group-hover:scale-105 transition-transform origin-left">
+                  <span className="text-cyan-700 text-lg mr-1 font-light">₨</span>
+                  {Number(pkg.monthlyFee).toLocaleString()}
+                </div>
+                <div className="inline-block px-2 py-1 bg-white/5 rounded text-xs text-zinc-400 font-medium mt-3 border border-white/5">
+                  Criteria: {Number(pkg.minPercentage)}% – {Number(pkg.maxPercentage)}%
                 </div>
                 {pkg.description && (
-                  <div className="text-xs text-zinc-600 mt-2">{pkg.description}</div>
+                  <div className="text-xs text-zinc-500 mt-3 leading-relaxed">{pkg.description}</div>
                 )}
               </div>
             ))}
@@ -217,3 +264,4 @@ export default async function FeeHubPage() {
     </div>
   );
 }
+
