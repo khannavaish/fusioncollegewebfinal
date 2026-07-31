@@ -84,9 +84,5 @@ export default async function BillsPage({ searchParams }) {
 
   const filters = { month, year, status, classId };
 
-  return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8">
-      <BillsClient bills={serializedBills} classes={classes} filters={filters} monthNames={MONTH_NAMES} />
-    </div>
-  );
+  return <BillsClient bills={serializedBills} classes={classes} filters={filters} monthNames={MONTH_NAMES} />;
 }

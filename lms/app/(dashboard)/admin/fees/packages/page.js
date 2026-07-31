@@ -29,9 +29,5 @@ export default async function PackagesPage() {
     createdAt: p.createdAt.toISOString(),
   }));
 
-  return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8">
-      <PackagesClient packages={serialized} />
-    </div>
-  );
+  return <PackagesClient packages={serialized} />;
 }
