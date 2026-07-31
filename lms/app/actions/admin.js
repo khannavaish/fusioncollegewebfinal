@@ -98,12 +98,19 @@ export async function updateClass(formData) {
 
     await prisma.$transaction(async (tx) => {
       await tx.class.update({ where: { id }, data: { name, academicYr } });
+      
       // Cascade the rename to any timetable slots that reference the old class name
       if (oldName && oldName !== name) {
-        await tx.timetableSlot.updateMany({
-          where: { className: oldName },
-          data:  { className: name },
-        });
+        // TimetableSlot stores the class name WITHOUT the 'BOYS ' or 'GIRLS ' prefix
+        const oldDisplayName = oldName.replace(/^(boys|girls)\s+/i, '').trim();
+        const newDisplayName = name.replace(/^(boys|girls)\s+/i, '').trim();
+        
+        if (oldDisplayName !== newDisplayName) {
+          await tx.timetableSlot.updateMany({
+            where: { className: oldDisplayName },
+            data:  { className: newDisplayName },
+          });
+        }
       }
     });
 
