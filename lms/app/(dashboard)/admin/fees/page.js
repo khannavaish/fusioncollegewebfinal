@@ -2,12 +2,12 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { generateMonthlyBills } from '@/app/actions/fees';
 import {
   IconChart, IconSettings, IconDocumentText, IconAlertTriangle,
   IconCheckCircle, IconXCircle, IconClock, IconDownload, IconBolt,
   IconChevronRight
 } from '@/app/components/icons';
+import AnimatedSection from '@/app/components/AnimatedSection';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -54,9 +54,10 @@ export default async function FeeHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8 space-y-8 font-sans">
+    <div className="space-y-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <AnimatedSection delay={0.05}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-zinc-500 text-xs mb-2">
             <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
@@ -89,7 +90,7 @@ export default async function FeeHubPage() {
             View All Bills
           </Link>
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* Warning: students without package */}
       {studentsWithoutPackage > 0 && (
@@ -110,10 +111,12 @@ export default async function FeeHubPage() {
             </Link>
           </div>
         </div>
+        </AnimatedSection>
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <AnimatedSection delay={0.15}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Bills', value: stats.total, icon: <IconDocumentText className="w-5 h-5 text-cyan-400" />, bg: 'bg-cyan-500/10' },
           { label: 'Unpaid', value: stats.unpaid, icon: <IconXCircle className="w-5 h-5 text-red-400" />, bg: 'bg-red-500/10' },
@@ -130,10 +133,11 @@ export default async function FeeHubPage() {
             <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-1">{s.label}</div>
           </div>
         ))}
-      </div>
+      </AnimatedSection>
 
       {/* Revenue Cards */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <AnimatedSection delay={0.2}>
+        <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-[#0d0f1a] to-[#111322] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
           <div className="flex items-center gap-2 mb-2">
@@ -165,10 +169,11 @@ export default async function FeeHubPage() {
               : 'Awaiting bill generation'}
           </div>
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* Generate Bills Section */}
-      <div className="bg-gradient-to-r from-cyan-950/20 to-blue-950/20 border border-cyan-900/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.05)] relative overflow-hidden">
+      <AnimatedSection delay={0.25}>
+        <div className="bg-gradient-to-r from-cyan-950/20 to-blue-950/20 border border-cyan-900/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.05)] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
         
         <div className="flex items-center gap-3 mb-2">
@@ -217,10 +222,11 @@ export default async function FeeHubPage() {
             Execute Billing Cycle
           </button>
         </form>
-      </div>
+      </AnimatedSection>
 
       {/* Fee Packages Overview */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
+      <AnimatedSection delay={0.3}>
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
@@ -252,16 +258,47 @@ export default async function FeeHubPage() {
                 </div>
                 <div className="inline-block px-2 py-1 bg-white/5 rounded text-xs text-zinc-400 font-medium mt-3 border border-white/5">
                   Criteria: {Number(pkg.minPercentage)}% – {Number(pkg.maxPercentage)}%
-                </div>
-                {pkg.description && (
-                  <div className="text-xs text-zinc-500 mt-3 leading-relaxed">{pkg.description}</div>
-                )}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
+                <IconSettings className="w-4 h-4 text-violet-400" />
               </div>
-            ))}
+              <h2 className="text-base font-bold text-white tracking-tight">Configured Fee Packages</h2>
+            </div>
+            <Link href="/admin/fees/packages" className="inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
+              Manage Configuration <IconChevronRight className="w-4 h-4" />
+            </Link>
           </div>
-        )}
-      </div>
+          
+          {packages.length === 0 ? (
+            <div className="text-center py-8 border-2 border-dashed border-[#1e233d] rounded-xl">
+              <IconSettings className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+              <p className="text-zinc-400 text-sm font-medium">No fee packages configured.</p>
+              <Link href="/admin/fees/packages" className="text-cyan-400 text-sm font-medium hover:underline mt-1 inline-block">
+                Create your first package
+              </Link>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {packages.map((pkg) => (
+                <div key={pkg.id} className="bg-[#060810] border border-[#1e233d] rounded-xl p-5 hover:border-violet-500/30 transition-colors group">
+                  <div className="text-sm font-bold text-white mb-2">{pkg.name}</div>
+                  <div className="text-3xl font-black text-cyan-400 tracking-tight group-hover:scale-105 transition-transform origin-left">
+                    <span className="text-cyan-700 text-lg mr-1 font-light">₨</span>
+                    {Number(pkg.monthlyFee).toLocaleString()}
+                  </div>
+                  <div className="inline-block px-2 py-1 bg-white/5 rounded text-xs text-zinc-400 font-medium mt-3 border border-white/5">
+                    Criteria: {Number(pkg.minPercentage)}% – {Number(pkg.maxPercentage)}%
+                  </div>
+                  {pkg.description && (
+                    <div className="text-xs text-zinc-500 mt-3 leading-relaxed">{pkg.description}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </AnimatedSection>
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { updateEnquiryStatus, resetSchoolData } from '@/app/actions/admin';
 import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight, IconChatBubble, IconTrash } from '@/app/components/icons';
+import AnimatedSection from '@/app/components/AnimatedSection';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -49,7 +50,8 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+      <AnimatedSection delay={0.05}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">System Admin</h1>
           <p className="text-zinc-400 text-sm mt-1">Welcome back, {adminName}</p>
@@ -59,9 +61,10 @@ export default async function AdminDashboard() {
           <Link href="/admin/students" className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Student</Link>
           <Link href="/admin/classes" className="px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors">+ Add Class</Link>
         </div>
-      </div>
+      </AnimatedSection>
 
-      <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5">
+      <AnimatedSection delay={0.1}>
+        <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="text-xs font-bold uppercase tracking-wider text-red-400">Danger Zone</div>
@@ -95,52 +98,54 @@ export default async function AdminDashboard() {
             </div>
           </details>
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <AnimatedSection delay={0.15}>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           { label: 'Students', value: studentCount, color: 'text-cyan-400', href: '/admin/students' },
           { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
           { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
           { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
-          { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
-        ].map((stat) => (
-          <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
-            <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>
-            <div className={`text-3xl font-black mt-2 ${stat.color}`}>{stat.value}</div>
-          </Link>
-        ))}
-      </div>
+          {[
+            { label: 'Students', value: studentCount, color: 'text-cyan-400', href: '/admin/students' },
+            { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
+            { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
+            { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
+            { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
+          ].map((stat) => (
+            <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
+              <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>
+              <div className={`text-3xl font-black mt-2 ${stat.color}`}>{stat.value}</div>
+            </Link>
+          ))}
+        </div>
+      </AnimatedSection>
 
       {/* Quick Nav */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        {[
-          { label: 'Students', href: '/admin/students', Icon: IconGraduationCap, color: 'text-indigo-400', bg: 'bg-indigo-950/30 border-indigo-500/20' },
-          { label: 'Teachers', href: '/admin/teachers', Icon: IconUserTie, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
-          { label: 'Classes', href: '/admin/classes', Icon: IconBuilding, color: 'text-blue-400', bg: 'bg-blue-950/30 border-blue-500/20' },
-          { label: 'Subjects', href: '/admin/subjects', Icon: IconBookOpen, color: 'text-emerald-400', bg: 'bg-emerald-950/30 border-emerald-500/20' },
-          { label: 'Announcements', href: '/admin/announcements', Icon: IconChatBubble, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
-          { label: 'Parents', href: '/admin/parents', Icon: IconUsers, color: 'text-violet-400', bg: 'bg-violet-950/30 border-violet-500/20' },
-        ].map(({ label, href, Icon, color, bg }) => (
-          <Link key={href} href={href}
-            className="flex items-center gap-3 px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-[#13162b] hover:border-[#2b3052] transition-all group">
-            <span className={`w-7 h-7 rounded-lg ${bg} border flex items-center justify-center flex-shrink-0`}>
-              <Icon className={`w-4 h-4 ${color}`} />
-            </span>
-            <span>Manage {label}</span>
-          </Link>
-        ))}
-      </div>
+      <AnimatedSection delay={0.2}>
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          {[
+            { label: 'Students', href: '/admin/students', Icon: IconGraduationCap, color: 'text-indigo-400', bg: 'bg-indigo-950/30 border-indigo-500/20' },
+            { label: 'Teachers', href: '/admin/teachers', Icon: IconUserTie, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
+            { label: 'Classes', href: '/admin/classes', Icon: IconBuilding, color: 'text-blue-400', bg: 'bg-blue-950/30 border-blue-500/20' },
+            { label: 'Subjects', href: '/admin/subjects', Icon: IconBookOpen, color: 'text-emerald-400', bg: 'bg-emerald-950/30 border-emerald-500/20' },
+            { label: 'Announcements', href: '/admin/announcements', Icon: IconChatBubble, color: 'text-cyan-400', bg: 'bg-cyan-950/30 border-cyan-500/20' },
+            { label: 'Parents', href: '/admin/parents', Icon: IconUsers, color: 'text-violet-400', bg: 'bg-violet-950/30 border-violet-500/20' },
+          ].map(({ label, href, Icon, color, bg }) => (
+            <Link key={href} href={href}
+              className="flex items-center gap-3 px-4 py-3 bg-[#0d0f1a] border border-[#1e233d] rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-[#13162b] hover:border-[#2b3052] transition-all group">
+              <span className={`w-7 h-7 rounded-lg ${bg} border flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-4 h-4 ${color}`} />
+              </span>
+              <span>Manage {label}</span>
+            </Link>
+          ))}
+        </div>
+      </AnimatedSection>
 
       {/* Recent Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Students */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base font-bold text-white">Recent Students</h2>
-            <Link href="/admin/students" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-              View All <IconChevronRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="space-y-2">
@@ -180,10 +185,11 @@ export default async function AdminDashboard() {
             ))}
           </div>
         </div>
-      </div>
+      </AnimatedSection>
 
       {/* Enquiries */}
-      <div>
+      <AnimatedSection delay={0.3}>
+        <div>
         <h2 className="text-base font-bold text-white mb-4">Contact Enquiries</h2>
         <div className="space-y-3">
           {enquiries.length === 0 ? (
@@ -225,7 +231,7 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
-      </div>
+      </AnimatedSection>
     </div>
   );
 }
