@@ -92,8 +92,23 @@ export async function updateClass(formData) {
   const academicYr = formData.get('academicYr')?.toString().trim();
   if (!id || !name || !academicYr) return { error: 'All fields are required.' };
   try {
-    await prisma.class.update({ where: { id }, data: { name, academicYr } });
+    // Get the old name before updating so we can cascade it to timetable slots
+    const existing = await prisma.class.findUnique({ where: { id }, select: { name: true } });
+    const oldName = existing?.name;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.class.update({ where: { id }, data: { name, academicYr } });
+      // Cascade the rename to any timetable slots that reference the old class name
+      if (oldName && oldName !== name) {
+        await tx.timetableSlot.updateMany({
+          where: { className: oldName },
+          data:  { className: name },
+        });
+      }
+    });
+
     revalidatePath('/admin/classes');
+    revalidatePath('/admin/timetable');
     return { success: true };
   } catch (e) {
     if (e.code === 'P2002') return { error: 'A class with that name already exists.' };

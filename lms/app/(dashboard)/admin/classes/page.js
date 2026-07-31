@@ -81,9 +81,9 @@ export default async function AdminClassesPage({ searchParams }) {
         ) : (
           <div className="space-y-6">
             {classes.map((cls) => (
-              <div key={cls.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
+              <div key={cls.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl">
                 {/* Class Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-5 border-b border-[#1e233d] bg-[#16192b]/30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-5 border-b border-[#1e233d] bg-[#16192b]/30 rounded-t-xl">
                   <div>
                     <div className="font-bold text-white">{cls.name}</div>
                     <div className="text-xs text-zinc-400 mt-0.5">{cls.academicYr} · {cls._count.students} students</div>
