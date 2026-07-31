@@ -41,9 +41,10 @@ export default async function TeacherAttendanceIndexPage() {
 
   let classSubjects = [];
   let classStatusCard = null;
+  let teacher = null;
   try {
     const fullUser = await prisma.user.findUnique({ where: { authId: user.id }, include: { teacher: true } });
-    const teacher = fullUser?.teacher;
+    teacher = fullUser?.teacher;
     if (teacher) {
       const today = new Date();
       const startOfDay = new Date(today); startOfDay.setHours(0, 0, 0, 0);
