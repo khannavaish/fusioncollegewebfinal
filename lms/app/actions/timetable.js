@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
+import { sortSlotsByTime } from '@/utils/timetable';
 
 async function verifyAdmin() {
   const supabase = await createClient();
@@ -72,8 +73,8 @@ export async function saveTimetableSlots(slots, timeSlots) {
       const allClasses = await tx.class.findMany({ select: { id: true, name: true } });
       
       for (const cls of allClasses) {
-        // Find the first slot for this class that has a valid teacherId
-        const firstSlotWithTeacher = cleanSlots.find(s => {
+        // Filter slots for this specific class
+        const thisClassSlots = cleanSlots.filter(s => {
           if (!s.teacherId || !s.subject?.trim()) return false;
           const sectionStr = (s.section || '').trim().toUpperCase();
           const constructedName = sectionStr === 'OTHER' || !sectionStr 
@@ -81,6 +82,10 @@ export async function saveTimetableSlots(slots, timeSlots) {
             : `${sectionStr} ${s.className.trim()}`;
           return constructedName.toUpperCase() === cls.name.toUpperCase();
         });
+
+        // Sort them chronologically by time so we get the true first period of the day
+        const sortedClassSlots = sortSlotsByTime(thisClassSlots, timeSlots);
+        const firstSlotWithTeacher = sortedClassSlots[0];
         
         await tx.class.update({
           where: { id: cls.id },
