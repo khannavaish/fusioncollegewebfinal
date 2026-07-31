@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { markBillPaid, waiveBill, addBillItem, resendBillWhatsApp, removeBillItem, updateBillAmount, updateStudentFeeAccount } from '@/app/actions/fees';
 import { generateBillPDF, getBillFilename } from '@/app/utils/billPdf';
-import { IconClipboardCheck, IconDownload, IconCheckCircle, IconXCircle, IconSchool, IconChart, IconDocumentText, IconBolt, IconPlus, IconChatBubble, IconAlertTriangle } from '@/app/components/icons';
-import AnimatedSection from '@/app/components/AnimatedSection';
+import { IconClipboardCheck, IconDownload, IconCheckCircle, IconXCircle, IconSchool, IconChart, IconDocumentText, IconBolt, IconPlus, IconChatBubble, IconAlertTriangle, IconEdit, IconLoader } from '@/app/components/icons';
 
 const STATUS_CONFIG = {
   UNPAID:  { label: 'Unpaid',  bg: 'bg-red-950/60 border-red-800/50',     text: 'text-red-400',     dot: 'bg-red-500'   },
@@ -154,9 +153,13 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      {/* Back + Header */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
+          <Link href="/admin/fees" className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-cyan-400 transition-colors mb-3 group">
+            <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            Back to Fee Management
+          </Link>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2"><IconClipboardCheck className="w-6 h-6 text-cyan-400" /> Fee Bills</h1>
           <p className="text-zinc-400 text-sm mt-1 flex items-center gap-1">
             {monthNames[filters.month - 1]} {filters.year} — {total} bills
@@ -169,7 +172,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             disabled={zipLoading || bills.length === 0}
             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-violet-600/40 bg-violet-950/30 text-violet-300 text-sm font-medium hover:bg-violet-950/60 transition-colors disabled:opacity-50"
           >
-            {zipLoading ? <><IconAlertTriangle className="w-4 h-4 animate-spin" /> Generating...</> : <><IconDownload className="w-4 h-4" /> Download ZIP</>}
+            {zipLoading ? <><IconAlertTriangle className="w-4 h-4 animate-spin" /> Generating...</> : <><IconDownload className="w-4 h-4" /> Download All PDFs (ZIP)</>}
           </button>
         </div>
       </div>
@@ -283,43 +286,78 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                     {sc.label}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-1.5">
+                  {/* Actions row */}
+                  <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                    {/* Edit Fee Account */}
                     <button onClick={() => openPanel(bill.id, 'edit-account')}
-                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'edit-account' ? 'border-amber-600/60 bg-amber-950/40 text-amber-300' : 'border-[#1e233d] text-zinc-400 hover:text-amber-400'}`} title="Edit Account">
-                      <IconSchool className="w-4 h-4" />
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                        isOpen && panelType === 'edit-account'
+                          ? 'border-amber-600/60 bg-amber-950/40 text-amber-300'
+                          : 'border-[#1e233d] text-zinc-400 hover:text-amber-400 hover:border-amber-600/40'
+                      }`}>
+                      <IconSchool className="w-3.5 h-3.5" /> Fee Account
                     </button>
+
+                    {/* View Full Bill */}
                     <Link href={`/admin/fees/bills/${bill.id}`}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40 transition-colors" title="View Bill Details">
-                      <IconDocumentText className="w-4 h-4" />
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40 text-xs font-medium transition-colors">
+                      <IconDocumentText className="w-3.5 h-3.5" /> View Bill
                     </Link>
+
+                    {/* Mark Paid */}
                     {bill.status !== 'PAID' && bill.status !== 'WAIVED' && (
                       <button onClick={() => openPanel(bill.id, 'pay')}
-                        className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'pay' ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300' : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400'}`} title="Mark Paid">
-                        <IconBolt className="w-4 h-4" />
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                          isOpen && panelType === 'pay'
+                            ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300'
+                            : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400 hover:border-emerald-600/40'
+                        }`}>
+                        <IconCheckCircle className="w-3.5 h-3.5" /> Mark Paid
                       </button>
                     )}
+
+                    {/* Add Extra Charge */}
                     <button onClick={() => openPanel(bill.id, 'charge')}
-                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'charge' ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300' : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400'}`} title="Add Charge">
-                      <IconPlus className="w-4 h-4" />
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                        isOpen && panelType === 'charge'
+                          ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300'
+                          : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40'
+                      }`}>
+                      <IconPlus className="w-3.5 h-3.5" /> Add Charge
                     </button>
+
+                    {/* Edit Base Fee */}
                     <button onClick={() => openPanel(bill.id, 'edit-bill')}
-                      className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'edit-bill' ? 'border-amber-600/60 bg-amber-950/40 text-amber-300' : 'border-[#1e233d] text-zinc-400 hover:text-amber-400'}`} title="Edit Bill">
-                      <IconBolt className="w-4 h-4" />
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                        isOpen && panelType === 'edit-bill'
+                          ? 'border-amber-600/60 bg-amber-950/40 text-amber-300'
+                          : 'border-[#1e233d] text-zinc-400 hover:text-amber-400 hover:border-amber-600/40'
+                      }`}>
+                      <IconEdit className="w-3.5 h-3.5" /> Edit Amount
                     </button>
+
+                    {/* Waive Bill */}
                     {bill.status !== 'WAIVED' && (
                       <button onClick={() => openPanel(bill.id, 'waive')}
-                        className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors ${isOpen && panelType === 'waive' ? 'border-violet-600/60 bg-violet-950/40 text-violet-300' : 'border-[#1e233d] text-zinc-400 hover:text-violet-400'}`} title="Waive Bill">
-                        <IconXCircle className="w-4 h-4" />
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                          isOpen && panelType === 'waive'
+                            ? 'border-violet-600/60 bg-violet-950/40 text-violet-300'
+                            : 'border-[#1e233d] text-zinc-400 hover:text-violet-400 hover:border-violet-600/40'
+                        }`}>
+                        <IconXCircle className="w-3.5 h-3.5" /> Waive Fee
                       </button>
                     )}
+
+                    {/* Resend WhatsApp */}
                     <button onClick={() => handleResendWA(bill.id)} disabled={loading}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-green-400 transition-colors disabled:opacity-50" title="Resend WhatsApp">
-                      <IconChatBubble className="w-4 h-4" />
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-green-400 hover:border-green-600/40 text-xs font-medium transition-colors disabled:opacity-50">
+                      <IconChatBubble className="w-3.5 h-3.5" /> Send WhatsApp
                     </button>
+
+                    {/* Download PDF */}
                     <button onClick={() => downloadPDF(bill)}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-violet-400 transition-colors" title="Download PDF">
-                      <IconDownload className="w-4 h-4" />
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e233d] text-zinc-400 hover:text-violet-400 hover:border-violet-600/40 text-xs font-medium transition-colors">
+                      <IconDownload className="w-3.5 h-3.5" /> Download PDF
                     </button>
                   </div>
                 </div>

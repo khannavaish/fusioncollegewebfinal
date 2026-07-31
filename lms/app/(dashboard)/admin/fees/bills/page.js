@@ -1,6 +1,5 @@
 import prisma from '@/utils/db';
 import { createClient } from '@/utils/supabase/server';
-import AnimatedSection from '@/app/components/AnimatedSection';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import BillsClient from './BillsClient';
@@ -87,18 +86,7 @@ export default async function BillsPage({ searchParams }) {
 
   return (
     <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8">
-      <AnimatedSection delay={0.1}>
-        <div className="flex items-center gap-2 text-zinc-500 text-xs mb-6">
-          <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
-          <span>/</span>
-          <Link href="/admin/fees" className="hover:text-cyan-400 transition-colors">Fee Management</Link>
-          <span>/</span>
-          <span className="text-zinc-300">Bills</span>
-        </div>
-      </AnimatedSection>
-      <AnimatedSection delay={0.2}>
-        <BillsClient bills={serializedBills} classes={classes} filters={filters} monthNames={MONTH_NAMES} />
-      </AnimatedSection>
+      <BillsClient bills={serializedBills} classes={classes} filters={filters} monthNames={MONTH_NAMES} />
     </div>
   );
 }

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useActionState } from 'react';
+import Link from 'next/link';
 import { createFeePackage, updateFeePackage, deleteFeePackage } from '@/app/actions/fees';
 
 import { IconPlus, IconChart, IconAlertTriangle, IconSave, IconTrash, IconXCircle, IconCheckCircle, IconEdit, IconLoader, IconSettings } from '@/app/components/icons';
-import AnimatedSection from '@/app/components/AnimatedSection';
 
 const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors";
 
@@ -24,8 +24,13 @@ export default function PackagesClient({ packages }) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+      {/* Back + Header */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
+          <Link href="/admin/fees" className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-cyan-400 transition-colors mb-3 group">
+            <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            Back to Fee Management
+          </Link>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2"><IconSettings className="w-6 h-6 text-cyan-400" /> Fee Packages</h1>
           <p className="text-zinc-400 text-sm mt-1">
             Define percentage-based fee tiers. Students are auto-assigned during enrollment.
