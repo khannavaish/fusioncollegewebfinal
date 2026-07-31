@@ -43,21 +43,26 @@ model Teacher {
 }
 
 model Student {
-  id          String          @id @default(uuid())
-  userId      String          @unique
-  name        String
-  rollNumber  String          @unique
-  fatherName  String
-  classId     String
-  cnic        String?
-  fatherCnic  String?
-  attendance  Attendance[]
-  examResults ExamResult[]
-  parents     ParentStudent[]
-  class       Class           @relation(fields: [classId], references: [id])
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  submissions Submission[]
-  whatsAppLogs WhatsAppLog[]
+  id                  String          @id @default(uuid())
+  userId              String          @unique
+  name                String
+  rollNumber          String          @unique
+  fatherName          String
+  classId             String
+  cnic                String?
+  fatherCnic          String?
+  admissionPercentage Decimal?        @db.Decimal(5, 2)
+  feePackageId        String?
+  feeMonthlyOverride  Decimal?        @db.Decimal(10, 2)
+  attendance          Attendance[]
+  examResults         ExamResult[]
+  parents             ParentStudent[]
+  feeBills            FeeBill[]
+  feePackage          FeePackage?     @relation(fields: [feePackageId], references: [id])
+  class               Class           @relation(fields: [classId], references: [id])
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions         Submission[]
+  whatsAppLogs        WhatsAppLog[]
 }
 
 model Parent {
@@ -292,3 +297,43 @@ model PasswordResetRequest {
   createdAt    DateTime @default(now())
 }
 
+// ─── Fee Management ───────────────────────────────────────────────────────────
+
+model FeePackage {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  minPercentage Decimal   @db.Decimal(5, 2)
+  maxPercentage Decimal   @db.Decimal(5, 2)
+  monthlyFee    Decimal   @db.Decimal(10, 2)
+  description   String?
+  students      Student[]
+  createdAt     DateTime  @default(now())
+}
+
+model FeeBill {
+  id           String        @id @default(uuid())
+  studentId    String
+  month        Int
+  year         Int
+  baseAmount   Decimal       @db.Decimal(10, 2)
+  totalAmount  Decimal       @db.Decimal(10, 2)
+  dueDate      DateTime
+  status       String        @default("UNPAID")  // UNPAID | PAID | PARTIAL | WAIVED
+  paidAmount   Decimal?      @db.Decimal(10, 2)
+  paidAt       DateTime?
+  remarks      String?
+  whatsappSent Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  items        FeeBillItem[]
+
+  @@unique([studentId, month, year])
+}
+
+model FeeBillItem {
+  id     String  @id @default(uuid())
+  billId String
+  title  String
+  amount Decimal @db.Decimal(10, 2)
+  bill   FeeBill @relation(fields: [billId], references: [id], onDelete: Cascade)
+}

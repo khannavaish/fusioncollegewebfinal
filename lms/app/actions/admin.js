@@ -336,6 +336,11 @@ export async function createStudent(_prev, formData) {
   const guardianPhone = formData.get('guardianPhone')?.toString().trim();
   const cnic = formData.get('cnic')?.toString().trim() || null;
   const fatherCnic = formData.get('fatherCnic')?.toString().trim() || null;
+  const admissionPercentageRaw = formData.get('admissionPercentage')?.toString().trim();
+  const admissionPercentage = admissionPercentageRaw ? parseFloat(admissionPercentageRaw) : null;
+  const feePackageId = formData.get('feePackageId')?.toString().trim() || null;
+  const feeMonthlyOverrideRaw = formData.get('feeMonthlyOverride')?.toString().trim();
+  const feeMonthlyOverride = feeMonthlyOverrideRaw ? parseFloat(feeMonthlyOverrideRaw) : null;
 
   if (!name || !fatherName || !classId || !guardianName || !guardianPhone) {
     return { error: 'Name, father\'s name, class, guardian name, and guardian phone are required.' };
@@ -401,7 +406,18 @@ export async function createStudent(_prev, formData) {
           status: 'ACTIVE',
           plainPassword: password,
           student: {
-            create: { id: authId, name, rollNumber, fatherName, classId, cnic, fatherCnic },
+            create: {
+              id: authId,
+              name,
+              rollNumber,
+              fatherName,
+              classId,
+              cnic,
+              fatherCnic,
+              admissionPercentage: admissionPercentage ?? undefined,
+              feePackageId: feePackageId || undefined,
+              feeMonthlyOverride: feeMonthlyOverride ?? undefined,
+            },
           },
         },
       });

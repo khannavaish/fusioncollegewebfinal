@@ -194,17 +194,15 @@ export async function sendArrivalWhatsApp(studentId, status = 'PRESENT') {
     }
 
     const message = `*FUSION COLLEGE NAROWAL — ARRIVAL NOTIFICATION* 🏫
-----------------------------------------
+
 ${statusBlock}
-----------------------------------------
-*English:*
+
 Assalamu Alaikum,
 Your child *${student.name}* (Roll No: ${student.rollNumber}) ${englishStatus}
 
-*اردو:*
 السلام علیکم
 آپ کا بچہ *${student.name}* (رول نمبر: ${student.rollNumber}) ${urduStatus}
-----------------------------------------
+
 Regards,
 Fusion College Narowal Administration`;
 

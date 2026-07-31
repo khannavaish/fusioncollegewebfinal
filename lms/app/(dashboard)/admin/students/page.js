@@ -23,9 +23,9 @@ export default async function AdminStudentsPage({ searchParams }) {
   const page = Math.max(1, parseInt(resolvedParams?.page || '1', 10));
   const skip = (page - 1) * PAGE_SIZE;
 
-  let students = [], classes = [], total = 0;
+  let students = [], classes = [], feePackages = [], total = 0;
   try {
-    [students, total, classes] = await Promise.all([
+    [students, total, classes, feePackages] = await Promise.all([
       prisma.student.findMany({
         include: { class: true, user: true },
         orderBy: { name: 'asc' },
@@ -34,8 +34,18 @@ export default async function AdminStudentsPage({ searchParams }) {
       }),
       prisma.student.count(),
       prisma.class.findMany({ orderBy: { name: 'asc' } }),
+      prisma.feePackage.findMany({ orderBy: { minPercentage: 'desc' }, select: { id: true, name: true, minPercentage: true, maxPercentage: true, monthlyFee: true } }),
     ]);
   } catch {}
+
+  // Serialize Decimal fields from feePackages
+  const serializedPackages = feePackages.map((p) => ({
+    id: p.id,
+    name: p.name,
+    minPercentage: Number(p.minPercentage),
+    maxPercentage: Number(p.maxPercentage),
+    monthlyFee: Number(p.monthlyFee),
+  }));
 
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
   const statusColors = {
@@ -56,7 +66,7 @@ export default async function AdminStudentsPage({ searchParams }) {
       </div>
 
       {/* Client enrollment form (shows credential modal on success) */}
-      <StudentCreateForm classes={classes} />
+      <StudentCreateForm classes={classes} feePackages={serializedPackages} />
 
       {/* Students Table */}
       {students.length === 0 ? (

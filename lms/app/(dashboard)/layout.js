@@ -178,6 +178,10 @@ export default async function DashboardLayout({ children }) {
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
                 Schedule Exams
               </a>
+              <a href="/admin/fees" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconDocumentText className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                Fee Management
+              </a>
               <a href="/admin/whatsapp" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconChatBubble className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 WhatsApp Alerts
@@ -254,6 +258,10 @@ export default async function DashboardLayout({ children }) {
               <a href="/student/grades" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconTrophy className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors" />
                 My Grades
+              </a>
+              <a href="/student/fees" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
+                <IconDocumentText className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                My Fee Bills
               </a>
               <a href="/timetable" className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all group">
                 <IconBuilding className="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-colors" />

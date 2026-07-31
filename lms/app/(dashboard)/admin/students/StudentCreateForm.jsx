@@ -6,10 +6,13 @@ import { IconCheckCircle, IconAlertTriangle, IconIdCard, IconMail, IconKey, Icon
 
 const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors";
 
-export default function StudentCreateForm({ classes }) {
+export default function StudentCreateForm({ classes, feePackages = [] }) {
   const [state, action, pending] = useActionState(createStudent, null);
   const [guardianNameInput, setGuardianNameInput] = useState('');
   const [matchingParents, setMatchingParents] = useState([]);
+  const [admissionPct, setAdmissionPct] = useState('');
+  const [suggestedPkg, setSuggestedPkg] = useState(null);
+  const [manualPkgId, setManualPkgId] = useState('');
   const formRef = useRef(null);
   const dialogRef = useRef(null);
 
@@ -18,6 +21,9 @@ export default function StudentCreateForm({ classes }) {
       formRef.current?.reset();
       setGuardianNameInput('');
       setMatchingParents([]);
+      setAdmissionPct('');
+      setSuggestedPkg(null);
+      setManualPkgId('');
       dialogRef.current?.showModal();
     }
   }, [state]);
@@ -35,6 +41,20 @@ export default function StudentCreateForm({ classes }) {
 
     return () => clearTimeout(delayDebounce);
   }, [guardianNameInput]);
+
+  // Auto-suggest fee package based on admission percentage
+  useEffect(() => {
+    const pct = parseFloat(admissionPct);
+    if (!isNaN(pct) && feePackages.length > 0) {
+      const matched = feePackages.find(
+        (p) => pct >= p.minPercentage && pct <= p.maxPercentage
+      );
+      setSuggestedPkg(matched || null);
+      if (matched && !manualPkgId) setManualPkgId(matched.id);
+    } else {
+      setSuggestedPkg(null);
+    }
+  }, [admissionPct, feePackages]);
 
   const creds = state?.credentials;
 
@@ -173,6 +193,62 @@ export default function StudentCreateForm({ classes }) {
               <input name="cnic" placeholder="B-Form / CNIC Number (Optional)" className={inputCls} />
               <input name="fatherCnic" placeholder="Father's CNIC (Optional)" className={inputCls} />
             </div>
+
+            {/* Admission % + Fee Package */}
+            {feePackages.length > 0 && (
+              <div className="bg-[#0a0c14] border border-[#1e233d] rounded-xl p-4 space-y-3">
+                <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">📦 Fee Package Assignment</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <input
+                      name="admissionPercentage"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={admissionPct}
+                      onChange={(e) => setAdmissionPct(e.target.value)}
+                      placeholder="📊 Admission Percentage (e.g. 87.50)"
+                      className={inputCls}
+                    />
+                    {suggestedPkg && (
+                      <p className="text-[10px] text-cyan-400 mt-1.5 flex items-center gap-1">
+                        ✅ Auto-assigned: <span className="font-bold">{suggestedPkg.name}</span> — ₨{suggestedPkg.monthlyFee.toLocaleString()}/month
+                      </p>
+                    )}
+                    {admissionPct && !suggestedPkg && (
+                      <p className="text-[10px] text-amber-400 mt-1.5">⚠️ No package matches this percentage</p>
+                    )}
+                  </div>
+                  <div>
+                    <select
+                      name="feePackageId"
+                      value={manualPkgId}
+                      onChange={(e) => setManualPkgId(e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">📦 Select Package (override)</option>
+                      {feePackages.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} — ₨{p.monthlyFee.toLocaleString()}/mo ({p.minPercentage}–{p.maxPercentage}%)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <input
+                    name="feeMonthlyOverride"
+                    type="number"
+                    step="1"
+                    min="0"
+                    placeholder="💰 Custom Monthly Fee Override (leave blank to use package rate)"
+                    className={inputCls}
+                  />
+                  <p className="text-[10px] text-zinc-600 mt-1">Only fill this to override the package fee for this specific student</p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-2 relative">
