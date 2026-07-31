@@ -115,7 +115,7 @@ export default function PackagesClient({ packages }) {
               {editId === pkg.id ? (
                 <form action={updateAction} className="p-5 space-y-4">
                   <input type="hidden" name="id" value={pkg.id} />
-                  <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1"><IconEdit className="w-3 h-3" /> Editing — {pkg.name}</p>
+                  <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1"><IconEdit className="w-3 h-3" /> Editing - {pkg.name}</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
                       <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Package Name</label>

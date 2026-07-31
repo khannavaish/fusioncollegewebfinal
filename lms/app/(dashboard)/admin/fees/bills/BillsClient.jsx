@@ -163,7 +163,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
           </Link>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2"><IconClipboardCheck className="w-6 h-6 text-cyan-400" /> Fee Bills</h1>
           <p className="text-zinc-400 text-sm mt-1 flex items-center gap-1">
-            {monthNames[filters.month - 1]} {filters.year} — {total} bills
+            {monthNames[filters.month - 1]} {filters.year} - {total} bills
             {total > 0 && <> · <span className="text-red-400">{unpaidCount} unpaid</span> · <span className="text-emerald-400">{paidCount} paid</span></>}
           </p>
         </div>
