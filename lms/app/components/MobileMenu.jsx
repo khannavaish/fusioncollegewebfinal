@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function MobileMenu({ role, name, handleSignOutAction }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const adminLinks = [
     { href: '/admin', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -68,78 +74,84 @@ export default function MobileMenu({ role, name, handleSignOutAction }) {
         </svg>
       </button>
 
-      {/* Drawer Overlay */}
-      {isOpen && (
-        <div 
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
-        />
-      )}
-
-      {/* Slide-out Drawer */}
-      <div
-        style={{ backgroundColor: '#050505' }}
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 border-r border-[#1e233d] p-5 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div>
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#1e233d] pb-4 mb-5">
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo.png"
-                alt="Logo"
-                className="w-8 h-8 rounded-full border border-cyan-500/30 object-contain bg-white"
-              />
-              <span className="font-bold tracking-tight text-white text-sm">FUSION LMS</span>
-            </div>
-            <button
+      {/* Drawer rendered via Portal to escape header backdrop-filter bug on iOS */}
+      {mounted && createPortal(
+        <>
+          {/* Drawer Overlay */}
+          {isOpen && (
+            <div 
               onClick={() => setIsOpen(false)}
-              className="p-1.5 hover:bg-[#1e233d] rounded text-zinc-400 hover:text-white cursor-pointer"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+              className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm transition-opacity"
+            />
+          )}
 
-          {/* Links */}
-          <nav className="space-y-1 overflow-y-auto max-h-[70vh]">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all"
-              >
-                <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                </svg>
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        </div>
+          {/* Slide-out Drawer */}
+          <div
+            style={{ backgroundColor: '#050505' }}
+            className={`fixed top-0 left-0 bottom-0 z-[9999] w-72 border-r border-[#1e233d] p-5 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ${
+              isOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-[#1e233d] pb-4 mb-5">
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/logo.png"
+                    alt="Logo"
+                    className="w-8 h-8 rounded-full border border-cyan-500/30 object-contain bg-white"
+                  />
+                  <span className="font-bold tracking-tight text-white text-sm">FUSION LMS</span>
+                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 hover:bg-[#1e233d] rounded text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-        {/* Footer info & Logout */}
-        <div className="pt-4 border-t border-[#1e233d] flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-cyan-950/50 border border-cyan-800/30 flex items-center justify-center font-bold text-cyan-400 text-xs">
-              {name.charAt(0).toUpperCase()}
+              {/* Links */}
+              <nav className="space-y-1 overflow-y-auto max-h-[70vh]">
+                {links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[#1e233d] text-zinc-400 hover:text-white transition-all"
+                  >
+                    <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
+                    </svg>
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
             </div>
-            <div className="truncate">
-              <div className="text-xs font-bold text-white truncate">{name}</div>
-              <div className="text-[10px] text-zinc-400 uppercase font-semibold">{role}</div>
+
+            {/* Footer info & Logout */}
+            <div className="pt-4 border-t border-[#1e233d] flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-cyan-950/50 border border-cyan-800/30 flex items-center justify-center font-bold text-cyan-400 text-xs">
+                  {name.charAt(0).toUpperCase()}
+                </div>
+                <div className="truncate">
+                  <div className="text-xs font-bold text-white truncate">{name}</div>
+                  <div className="text-[10px] text-zinc-400 uppercase font-semibold">{role}</div>
+                </div>
+              </div>
+              <form action={handleSignOutAction} className="mt-2">
+                <button type="submit" className="w-full text-left text-xs text-red-400 hover:text-red-300 font-medium py-2 px-3 rounded hover:bg-red-950/20 transition-colors cursor-pointer">
+                  Sign Out
+                </button>
+              </form>
             </div>
           </div>
-          <form action={handleSignOutAction} className="mt-2">
-            <button type="submit" className="w-full text-left text-xs text-red-400 hover:text-red-300 font-medium py-2 px-3 rounded hover:bg-red-950/20 transition-colors cursor-pointer">
-              Sign Out
-            </button>
-          </form>
-        </div>
-      </div>
+        </>,
+        document.body
+      )}
     </div>
   );
 }
