@@ -105,7 +105,7 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
   };
 
   const AlertMsg = ({ msg }) => msg ? (
-    <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm ${msg.type === 'success' ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border border-red-500/30 text-red-400'}`}>
+    <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm ${msg.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400'}`}>
       {msg.type === 'success' ? <IconCheckCircle className="w-4 h-4 flex-shrink-0" /> : <IconAlertTriangle className="w-4 h-4 flex-shrink-0" />}
       {msg.text}
     </div>
@@ -114,19 +114,19 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
   return (
     <div className="space-y-8">
       {/* Configuration Form */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-        <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d]">
-          <h2 className="text-sm font-bold text-white">WhatsApp Provider Configuration</h2>
-          <p className="text-[11px] text-zinc-500 mt-1">Configure your WhatsApp sending client credentials below.</p>
+      <div className="bg-white dark:bg-[#0d0f1a] border border-gray-200 dark:border-[#1e233d] rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-[#16192b]/40 border-b border-gray-200 dark:border-[#1e233d]">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white">WhatsApp Provider Configuration</h2>
+          <p className="text-[11px] text-gray-500 dark:text-zinc-500 mt-1">Configure your WhatsApp sending client credentials below.</p>
         </div>
         <form onSubmit={handleSave} className="p-6 space-y-5">
           {saveMsg && <AlertMsg msg={saveMsg} />}
 
           {/* Toggle Enable */}
-          <div className="flex items-center justify-between pb-5 border-b border-[#1e233d]">
+          <div className="flex items-center justify-between pb-5 border-b border-gray-200 dark:border-[#1e233d]">
             <div>
-              <div className="text-sm font-bold text-white">Enable WhatsApp Notifications</div>
-              <div className="text-xs text-zinc-500 mt-0.5">Automate parent arrival and daily summary alerts.</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">Enable WhatsApp Notifications</div>
+              <div className="text-xs text-gray-500 dark:text-zinc-500 mt-0.5">Automate parent arrival and daily summary alerts.</div>
             </div>
             <button type="button" onClick={() => setIsEnabled(v => !v)}
               className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-emerald-600' : 'bg-zinc-700'}`}>
@@ -136,17 +136,17 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
 
           {/* Provider Selection */}
           <div>
-            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Service Provider</label>
+            <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Service Provider</label>
             <div className="grid grid-cols-2 gap-3">
               <button type="button" onClick={() => setProvider('ULTRAMSG')}
                 className={`py-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                  provider === 'ULTRAMSG' ? 'bg-cyan-950/20 border-cyan-500/40 text-cyan-400 font-bold' : 'border-[#1e233d] text-zinc-500 bg-transparent'
+                  provider === 'ULTRAMSG' ? 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-500 text-cyan-700 dark:text-cyan-400 font-bold' : 'border-gray-200 dark:border-[#1e233d] text-gray-500 dark:text-zinc-500 bg-transparent'
                 }`}>
                 UltraMsg (Paid API Cloud)
               </button>
               <button type="button" onClick={() => setProvider('CUSTOM')}
                 className={`py-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                  provider === 'CUSTOM' ? 'bg-cyan-950/20 border-cyan-500/40 text-cyan-400 font-bold' : 'border-[#1e233d] text-zinc-500 bg-transparent'
+                  provider === 'CUSTOM' ? 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-500 text-cyan-700 dark:text-cyan-400 font-bold' : 'border-gray-200 dark:border-[#1e233d] text-gray-500 dark:text-zinc-500 bg-transparent'
                 }`}>
                 Free Self-Hosted Gateway (Scan QR)
               </button>
@@ -156,30 +156,30 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
           {provider === 'CUSTOM' ? (
             // Custom Self-Hosted API Panel
             <div className="space-y-4 pt-2">
-              <div className="p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 space-y-2">
-                <p className="font-bold text-white flex items-center gap-2">
-                  <IconSparkles className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-500/20 rounded-xl text-xs text-indigo-700 dark:text-indigo-300 space-y-2">
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <IconSparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
                   Free &amp; Unlimited WhatsApp Sending
                 </p>
                 <p>
                   We have generated a custom microservice script for you in this codebase under:
-                  <code className="text-white bg-black/40 px-1 py-0.5 rounded ml-1 font-mono">scratch/whatsapp-gateway.js</code>
+                  <code className="text-gray-900 dark:text-white bg-gray-200 dark:bg-black/40 px-1 py-0.5 rounded ml-1 font-mono">scratch/whatsapp-gateway.js</code>
                 </p>
-                <p className="font-semibold text-white mt-1">To run it on your local server/machine:</p>
+                <p className="font-semibold text-gray-900 dark:text-white mt-1">To run it on your local server/machine:</p>
                 <ol className="list-decimal pl-4 space-y-1">
                   <li>Open a terminal in the project directory.</li>
-                  <li>Install dependencies: <code className="text-cyan-300">npm install express whatsapp-web.js qrcode-terminal</code></li>
-                  <li>Start the gateway service: <code className="text-cyan-300">node scratch/whatsapp-gateway.js</code></li>
+                  <li>Install dependencies: <code className="text-cyan-700 dark:text-cyan-300">npm install express whatsapp-web.js qrcode-terminal</code></li>
+                  <li>Start the gateway service: <code className="text-cyan-700 dark:text-cyan-300">node scratch/whatsapp-gateway.js</code></li>
                   <li>Scan the terminal's QR code with your phone's WhatsApp Linked Devices to log in.</li>
                 </ol>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Self-Hosted Gateway URL</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Self-Hosted Gateway URL</label>
                 <input type="text" value={gatewayUrl} onChange={e => setGatewayUrl(e.target.value)}
                   placeholder="e.g. http://localhost:3001"
-                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
-                <p className="text-[10px] text-zinc-500 mt-1">Your self-hosted API gateway endpoint address.</p>
+                  className="w-full bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500" />
+                <p className="text-[10px] text-gray-500 dark:text-zinc-500 mt-1">Your self-hosted API gateway endpoint address.</p>
               </div>
 
               <div className="pt-2">
@@ -188,29 +188,29 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
                   className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
                   {isLoggingOut ? 'Logging Out...' : 'Logout from WhatsApp Gateway'}
                 </button>
-                <p className="text-[10px] text-zinc-500 mt-2">Disconnect your WhatsApp account from the gateway. You will need to scan the QR code again to reconnect.</p>
+                <p className="text-[10px] text-gray-500 dark:text-zinc-500 mt-2">Disconnect your WhatsApp account from the gateway. You will need to scan the QR code again to reconnect.</p>
               </div>
             </div>
           ) : (
             // UltraMsg API Panel
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sender Number</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Sender Number</label>
                 <input type="text" value={senderNumber} onChange={e => setSenderNumber(e.target.value)}
                   placeholder="e.g. 03001234567"
-                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+                  className="w-full bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500 placeholder-gray-400 dark:placeholder-zinc-600" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg Instance ID</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Instance ID</label>
                 <input type="text" value={instanceId} onChange={e => setInstanceId(e.target.value)}
                   placeholder="e.g. instance12345"
-                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+                  className="w-full bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500 placeholder-gray-400 dark:placeholder-zinc-600" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">UltraMsg API Token</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">API Token</label>
                 <input type="password" value={apiToken} onChange={e => setApiToken(e.target.value)}
-                  placeholder="Your UltraMsg API token"
-                  className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500" />
+                  placeholder="Paste your UltraMsg token here"
+                  className="w-full bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500 placeholder-gray-400 dark:placeholder-zinc-600" />
               </div>
             </div>
           )}
@@ -223,17 +223,17 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
       </div>
 
       {/* Test Message */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-        <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d]">
-          <h2 className="text-sm font-bold text-white">Send Test Message</h2>
-          <p className="text-[11px] text-zinc-500 mt-1">Verify your configuration is working correctly.</p>
+      <div className="bg-white dark:bg-[#0d0f1a] border border-gray-200 dark:border-[#1e233d] rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-[#16192b]/40 border-b border-gray-200 dark:border-[#1e233d]">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white">Send Test Message</h2>
+          <p className="text-[11px] text-gray-500 dark:text-zinc-500 mt-1">Verify your configuration is working correctly.</p>
         </div>
         <form onSubmit={handleTest} className="p-6 space-y-4">
           {testMsg && <AlertMsg msg={testMsg} />}
           <div className="flex gap-3">
             <input type="text" value={testNumber} onChange={e => setTestNumber(e.target.value)}
               placeholder="e.g. 03001234567"
-              className="flex-1 bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600" />
+              className="flex-1 bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500 placeholder-gray-400 dark:placeholder-zinc-600" />
             <button type="submit" disabled={isTesting}
               className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer whitespace-nowrap">
               {isTesting ? 'Sending...' : 'Send Test'}
@@ -243,10 +243,10 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
       </div>
 
       {/* End of Day Report */}
-      <div className="bg-[#0d0f1a] border border-amber-500/20 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 bg-amber-950/10 border-b border-amber-500/20">
-          <h2 className="text-sm font-bold text-white">Send End-of-Day Attendance Report</h2>
-          <p className="text-[11px] text-zinc-500 mt-1">
+      <div className="bg-white dark:bg-[#0d0f1a] border border-amber-200 dark:border-amber-500/20 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+        <div className="px-6 py-4 bg-amber-50 dark:bg-amber-950/10 border-b border-amber-200 dark:border-amber-500/20">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white">Send End-of-Day Attendance Report</h2>
+          <p className="text-[11px] text-gray-500 dark:text-zinc-500 mt-1">
             Sends every parent a full summary of their child's attendance and lecture topics for the selected date.
           </p>
         </div>
@@ -254,9 +254,9 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
           {eodMsg && <AlertMsg msg={eodMsg} />}
           <div className="flex flex-wrap gap-4 items-end">
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
+              <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
               <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}
-                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 min-w-[200px] cursor-pointer">
+                className="bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-amber-500 min-w-[200px] cursor-pointer">
                 <option value="ALL">All Classes</option>
                 {classes.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -264,9 +264,9 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Report Date</label>
+              <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Report Date</label>
               <input type="date" value={eodDate} onChange={e => setEodDate(e.target.value)}
-                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 cursor-pointer" />
+                className="bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-amber-500 cursor-pointer" />
             </div>
             <button type="submit" disabled={isEod}
               className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer">
@@ -276,10 +276,10 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
         </form>
       </div>
       {/* Quick Broadcast */}
-      <div className="bg-[#0d0f1a] border border-indigo-500/20 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 bg-indigo-950/10 border-b border-indigo-500/20">
-          <h2 className="text-sm font-bold text-white">Quick Broadcast Message</h2>
-          <p className="text-[11px] text-zinc-500 mt-1">Send a custom notice to all parents — use templates or write your own.</p>
+      <div className="bg-white dark:bg-[#0d0f1a] border border-indigo-200 dark:border-indigo-500/20 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+        <div className="px-6 py-4 bg-indigo-50 dark:bg-indigo-950/10 border-b border-indigo-200 dark:border-indigo-500/20">
+          <h2 className="text-sm font-bold text-gray-900 dark:text-white">Quick Broadcast Message</h2>
+          <p className="text-[11px] text-gray-500 dark:text-zinc-500 mt-1">Send a custom notice to all parents — use templates or write your own.</p>
         </div>
         <form onSubmit={handleBroadcast} className="p-6 space-y-4">
           {broadcastMsg && <AlertMsg msg={broadcastMsg} />}
@@ -288,7 +288,7 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
             {TEMPLATES.map(t => (
               <button key={t.label} type="button"
                 onClick={() => setBroadcastText(t.text)}
-                className="px-3 py-1.5 bg-indigo-950/50 border border-indigo-500/30 hover:border-indigo-400 text-indigo-300 hover:text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                className="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-950/50 border border-indigo-300 dark:border-indigo-500/30 hover:border-indigo-500 dark:hover:border-indigo-400 text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">
                 {t.label}
               </button>
             ))}
@@ -299,14 +299,14 @@ export default function WhatsAppSettingsClient({ config, classes = [] }) {
             onChange={e => setBroadcastText(e.target.value)}
             rows={6}
             placeholder="Type your message here, or click a template above to prefill..."
-            className="w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 placeholder-zinc-600 resize-y"
+            className="w-full bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 placeholder-gray-400 dark:placeholder-zinc-600 resize-y"
           />
 
           <div className="flex flex-wrap gap-4 items-end">
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
+              <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Target Class</label>
               <select value={broadcastClass} onChange={e => setBroadcastClass(e.target.value)}
-                className="bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 min-w-[200px] cursor-pointer">
+                className="bg-white dark:bg-[#0a0c14] border border-gray-300 dark:border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 min-w-[200px] cursor-pointer">
                 <option value="ALL">All Classes</option>
                 {classes.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>

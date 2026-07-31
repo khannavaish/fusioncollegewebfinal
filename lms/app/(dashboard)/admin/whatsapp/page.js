@@ -67,24 +67,24 @@ export default async function WhatsAppSettingsPage() {
   return (
     <div className="space-y-8 font-sans">
       <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-[#1e233d] pb-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">WhatsApp Notifications</h1>
-            <p className="text-zinc-400 text-sm mt-1">Configure parent notification settings and send reports</p>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">WhatsApp Notifications</h1>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1">Configure parent notification settings and send reports</p>
           </div>
           <div className="flex items-center gap-2">
             {config?.isEnabled ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                 Active
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/40 border border-zinc-700/30 text-zinc-500 text-xs font-bold rounded-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-700/30 text-gray-600 dark:text-zinc-500 text-xs font-bold rounded-lg">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-zinc-600" />
                 Inactive
               </span>
             )}
-            <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
+            <Link href="/admin" className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium">
               Back to Admin
             </Link>
           </div>
@@ -93,22 +93,22 @@ export default async function WhatsAppSettingsPage() {
 
       {/* Today's Logging Status Panel */}
       <AnimatedSection delay={0.15}>
-        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl overflow-hidden">
-          <div className="px-6 py-4 bg-[#16192b]/40 border-b border-[#1e233d] flex items-center justify-between">
+        <div className="bg-white dark:bg-[#0d0f1a] border border-gray-200 dark:border-[#1e233d] rounded-xl overflow-hidden shadow-sm dark:shadow-none">
+          <div className="px-6 py-4 bg-gray-50 dark:bg-[#16192b]/40 border-b border-gray-200 dark:border-[#1e233d] flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-white">Today&apos;s Topic Logging Status</h2>
-              <p className="text-[11px] text-zinc-500 mt-1">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">Today&apos;s Topic Logging Status</h2>
+              <p className="text-[11px] text-gray-500 dark:text-zinc-500 mt-1">
                 {new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
             <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5 text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Logged</span>
-              <span className="flex items-center gap-1.5 text-amber-400"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
+              <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Logged</span>
+              <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
             </div>
           </div>
           <div className="p-4">
             {loggingStatus.length === 0 ? (
-              <p className="text-zinc-500 text-sm text-center py-4">No classes with assigned subjects found.</p>
+              <p className="text-gray-500 dark:text-zinc-500 text-sm text-center py-4">No classes with assigned subjects found.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {loggingStatus.map((cls) => {
@@ -116,10 +116,10 @@ export default async function WhatsAppSettingsPage() {
                   const total = cls.subjects.length;
                   const allDone = loggedCount === total;
                   return (
-                    <div key={cls.className} className={`rounded-xl border p-4 ${allDone ? 'border-emerald-500/20 bg-emerald-950/10' : 'border-amber-500/20 bg-amber-950/10'}`}>
+                    <div key={cls.className} className={`rounded-xl border p-4 ${allDone ? 'border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-950/10' : 'border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-950/10'}`}>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-bold text-white">{cls.className}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${allDone ? 'bg-emerald-950/50 text-emerald-400' : 'bg-amber-950/50 text-amber-400'}`}>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{cls.className}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${allDone ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'}`}>
                           {loggedCount}/{total} Logged
                         </span>
                       </div>
@@ -128,9 +128,9 @@ export default async function WhatsAppSettingsPage() {
                           <div key={s.subjectName} className="flex items-start gap-2">
                             <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${s.logged ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                             <div className="min-w-0">
-                              <span className="text-xs text-zinc-300 font-semibold">{s.subjectName}</span>
-                              <span className="text-[10px] text-zinc-500 ml-1">({s.teacherName})</span>
-                              {s.topic && <p className="text-[10px] text-zinc-500 truncate mt-0.5">{s.topic}</p>}
+                              <span className="text-xs text-gray-700 dark:text-zinc-300 font-semibold">{s.subjectName}</span>
+                              <span className="text-[10px] text-gray-500 dark:text-zinc-500 ml-1">({s.teacherName})</span>
+                              {s.topic && <p className="text-[10px] text-gray-500 dark:text-zinc-500 truncate mt-0.5">{s.topic}</p>}
                             </div>
                           </div>
                         ))}
