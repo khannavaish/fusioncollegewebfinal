@@ -125,13 +125,15 @@ export default async function WhatsAppSettingsPage() {
                       </div>
                       <div className="space-y-1.5">
                         {cls.subjects.map((s) => (
-                          <div key={s.subjectName} className="flex items-start gap-2">
-                            <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${s.logged ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                            <div className="min-w-0">
-                              <span className="text-xs text-gray-700 dark:text-zinc-300 font-semibold">{s.subjectName}</span>
-                              <span className="text-[10px] text-gray-500 dark:text-zinc-500 ml-1">({s.teacherName})</span>
-                              {s.topic && <p className="text-[10px] text-gray-500 dark:text-zinc-500 truncate mt-0.5">{s.topic}</p>}
+                          <div key={s.subjectName} className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className={`flex-shrink-0 w-2 h-2 rounded-full ${s.logged ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              <div className="min-w-0 flex items-baseline gap-1">
+                                <span className="text-xs text-gray-700 dark:text-zinc-300 font-semibold truncate">{s.subjectName}</span>
+                                <span className="text-[10px] text-gray-500 dark:text-zinc-500 truncate">({s.teacherName})</span>
+                              </div>
                             </div>
+                            {s.topic && <p className="text-[10px] text-gray-500 dark:text-zinc-500 truncate ml-4">{s.topic}</p>}
                           </div>
                         ))}
                       </div>
