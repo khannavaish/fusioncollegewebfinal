@@ -3,14 +3,15 @@
  * Uses jsPDF and jspdf-autotable to build a professional 3-part A4 fee voucher.
  */
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
 export async function generateBillPDF(bill, bankConfig = null) {
-  const { default: jsPDF } = await import('jspdf');
-  await import('jspdf-autotable'); // autoTable plugin
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210;
