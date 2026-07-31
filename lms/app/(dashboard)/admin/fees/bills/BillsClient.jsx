@@ -248,7 +248,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             return (
               <div key={bill.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
                 {/* Main row */}
-                <div className="flex flex-col md:flex-row md:items-center gap-3 p-4">
+                <div className="flex flex-col xl:flex-row xl:items-center gap-4 p-5">
                   {/* Student info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -261,7 +261,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-zinc-500">
                       <span>Father: {bill.student?.fatherName}</span>
                       {bill.student?.admissionPercentage != null && (
                         <span className="flex items-center gap-1"><IconChart className="w-3 h-3" /> {bill.student.admissionPercentage}%</span>
@@ -272,22 +272,22 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                     </div>
                   </div>
 
-                  {/* Amount */}
-                  <div className="text-right md:min-w-[120px]">
-                    <div className="text-lg font-bold text-white">₨{bill.totalAmount.toLocaleString()}</div>
-                    {bill.status === 'PARTIAL' && bill.paidAmount && (
-                      <div className="text-xs text-amber-400">Paid: ₨{bill.paidAmount.toLocaleString()}</div>
-                    )}
-                  </div>
-
-                  {/* Status badge */}
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold ${sc.bg} ${sc.text}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                    {sc.label}
+                  {/* Amount & Status Container */}
+                  <div className="flex items-center xl:justify-end gap-4 mt-2 xl:mt-0 xl:min-w-[180px]">
+                    <div className="text-left xl:text-right">
+                      <div className="text-lg font-bold text-white">₨{bill.totalAmount.toLocaleString()}</div>
+                      {bill.status === 'PARTIAL' && bill.paidAmount && (
+                        <div className="text-xs text-amber-400">Paid: ₨{bill.paidAmount.toLocaleString()}</div>
+                      )}
+                    </div>
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap ${sc.bg} ${sc.text}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                      {sc.label}
+                    </div>
                   </div>
 
                   {/* Actions row */}
-                  <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                  <div className="flex flex-wrap items-center gap-2 mt-3 xl:mt-0 xl:justify-end xl:w-fit">
                     {/* Edit Fee Account */}
                     <button onClick={() => openPanel(bill.id, 'edit-account')}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${

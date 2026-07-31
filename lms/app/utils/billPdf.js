@@ -4,7 +4,7 @@
  */
 
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -132,7 +132,7 @@ export async function generateBillPDF(bill, bankConfig = null) {
       `Rs ${Number(item.amount).toLocaleString()}`,
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: sy,
       head: [['#', 'Fee Description', 'Amount']],
       body: tableData,
