@@ -26,62 +26,34 @@ export async function sendWhatsAppMessage(to, message) {
   const phone = rawTarget.replace(/[^0-9]/g, '');
   const formattedPhone = isWhatsAppJid ? rawTarget : (phone.startsWith('92') ? phone : `92${phone.replace(/^0/, '')}`);
 
-  if (config.provider === 'CUSTOM') {
-    const baseUrl = config.gatewayUrl.replace(/\/$/, '');
-    try {
-      // First verify the WhatsApp socket is actually connected
-      const statusRes = await fetch(`${baseUrl}/status`, { method: 'GET' });
-      const contentType = statusRes.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        // Gateway is sleeping / returning HTML - Render cold start
-        return { error: 'Gateway is starting up. Please try again in 30 seconds.' };
-      }
-      const statusData = await statusRes.json();
-      if (!statusData.connected) {
-        return { error: 'WhatsApp not connected. Admin must scan the QR code at /admin/whatsapp.' };
-      }
+  const baseUrl = config.gatewayUrl.replace(/\/$/, '');
+  try {
+    // First verify the WhatsApp socket is actually connected
+    const statusRes = await fetch(`${baseUrl}/status`, { method: 'GET' });
+    const contentType = statusRes.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      // Gateway is sleeping / returning HTML - Render cold start
+      return { error: 'Gateway is starting up. Please try again in 30 seconds.' };
+    }
+    const statusData = await statusRes.json();
+    if (!statusData.connected) {
+      return { error: 'WhatsApp not connected. Admin must scan the QR code at /admin/whatsapp.' };
+    }
 
-      // Socket is connected - send the message
-      const res = await fetch(`${baseUrl}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        body: JSON.stringify({ to: formattedPhone, message }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        return { error: data.error || 'Failed to send message.' };
-      }
-      return { success: true, data };
-    } catch (e) {
-      console.error('[WhatsApp] Self-hosted gateway send error:', e);
-      return { error: e.message };
-    }
-  } else {
-    // UltraMsg Mode
-    if (!config.apiToken || !config.instanceId) {
-      console.log('[WhatsApp] UltraMsg token or instanceId is missing.');
-      return { skipped: true };
-    }
-    const url = `https://api.ultramsg.com/${config.instanceId}/messages/chat`;
-    const body = new URLSearchParams({
-      token: config.apiToken,
-      to: formattedPhone,
-      body: message,
-      priority: '10',
+    // Socket is connected - send the message
+    const res = await fetch(`${baseUrl}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ to: formattedPhone, message }),
     });
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      });
-      const data = await res.json();
-      return { success: true, data };
-    } catch (e) {
-      console.error('[WhatsApp] UltraMsg send error:', e);
-      return { error: e.message };
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      return { error: data.error || 'Failed to send message.' };
     }
+    return { success: true, data };
+  } catch (e) {
+    console.error('[WhatsApp] Self-hosted gateway send error:', e);
+    return { error: e.message };
   }
 }
 
