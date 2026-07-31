@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { updateEnquiryStatus, resetSchoolData } from '@/app/actions/admin';
 import { IconGraduationCap, IconUserTie, IconBuilding, IconBookOpen, IconUsers, IconChevronRight, IconChatBubble, IconTrash } from '@/app/components/icons';
 import AnimatedSection from '@/app/components/AnimatedSection';
+import WebsiteSettingsCard from '@/app/components/WebsiteSettingsCard';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -142,8 +143,13 @@ export default async function AdminDashboard() {
         </div>
       </AnimatedSection>
 
-      {/* Recent Data */}
+      {/* Website Settings Integration */}
       <AnimatedSection delay={0.25}>
+        <WebsiteSettingsCard />
+      </AnimatedSection>
+
+      {/* Recent Data */}
+      <AnimatedSection delay={0.3}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Students */}
         <div>

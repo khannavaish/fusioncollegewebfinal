@@ -297,6 +297,15 @@ model PasswordResetRequest {
   createdAt    DateTime @default(now())
 }
 
+// ─── System Config ──────────────────────────────────────────────────────────────
+
+model WebsiteConfig {
+  id          String   @id @default("default")
+  heroTagLine String   @default("Admissions Open · Session 2026")
+  isBlinking  Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
 // ─── Fee Management ───────────────────────────────────────────────────────────
 
 model FeePackage {

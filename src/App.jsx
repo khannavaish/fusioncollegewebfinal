@@ -342,7 +342,7 @@ const Navbar = ({ theme, toggleTheme, lmsUrl }) => {
           <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
         ))}
         <a
-          href={lmsUrl}
+          href={`${lmsUrl}/login`}
           target="_blank"
           rel="noreferrer"
           className="nav-lms"
@@ -446,11 +446,29 @@ export default function App() {
   useActiveSection();
 
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [heroConfig, setHeroConfig] = useState({
+    heroTagLine: 'Admissions Open · Session 2026',
+    isBlinking: false
+  });
 
   const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const lmsUrl = isLocal 
     ? 'http://localhost:3000' 
-    : 'https://fusioncollegewebfinal.vercel.app/login';
+    : 'https://fusioncollegewebfinal.vercel.app';
+
+  useEffect(() => {
+    fetch(`${lmsUrl}/api/website-config`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.heroTagLine) {
+          setHeroConfig({
+            heroTagLine: data.heroTagLine,
+            isBlinking: data.isBlinking || false
+          });
+        }
+      })
+      .catch(err => console.error("Failed to load website config", err));
+  }, [lmsUrl]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -586,8 +604,8 @@ export default function App() {
       <section className="hero section-shell section-shell--hero">
         <SectionBeads seed={1} count={16} />
         <div className="hero-content">
-          <div className="hero-tag">
-            <span /> Admissions Open · Session 2026
+          <div className={`hero-tag ${heroConfig.isBlinking ? 'blinking' : ''}`}>
+            <span /> {heroConfig.heroTagLine}
           </div>
           <h1 className="hero-h1">
             Where <span className="accent">Excellence</span><br />
@@ -598,7 +616,7 @@ export default function App() {
           </p>
           <div className="hero-ctas">
             <a href="#admissions" className="btn btn-solid">Apply Now 2026</a>
-            <a href={lmsUrl} target="_blank" rel="noreferrer" className="btn btn-red">Student LMS ↗</a>
+            <a href={`${lmsUrl}/login`} target="_blank" rel="noreferrer" className="btn btn-red">Student LMS ↗</a>
             <a href="#programs" className="btn btn-outline">View Programs</a>
           </div>
         </div>
@@ -806,7 +824,7 @@ export default function App() {
             <div className="lms-cta-box reveal">
               <div className="lms-cta-circle">LMS</div>
               <a
-                href={lmsUrl}
+                href={`${lmsUrl}/login`}
                 target="_blank" rel="noreferrer"
                 className="btn btn-cyan"
                 style={{marginBottom:'1.2rem'}}
@@ -926,7 +944,7 @@ export default function App() {
           <div className="footer-links">
             <h4>Resources</h4>
             <ul>
-              <li><a href={lmsUrl} target="_blank" rel="noreferrer">Student LMS ↗</a></li>
+              <li><a href={`${lmsUrl}/login`} target="_blank" rel="noreferrer">Student LMS ↗</a></li>
               <li><a href="https://www.fusioncollege.edu.pk" target="_blank" rel="noreferrer">Main Website ↗</a></li>
               <li><a href="#contact">Contact Us</a></li>
             </ul>
