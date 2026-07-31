@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PackagesClient from './PackagesClient';
 
-export const metadata = { title: '📦 Fee Packages — Fusion LMS' };
+export const metadata = { title: 'Fee Packages — Fusion LMS' };
 
 export default async function PackagesPage() {
   const supabase = await createClient();

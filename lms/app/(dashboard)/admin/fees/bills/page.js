@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import BillsClient from './BillsClient';
 
-export const metadata = { title: '📋 Fee Bills — Fusion LMS' };
+export const metadata = { title: 'Fee Bills — Fusion LMS' };
 
 const MONTH_NAMES = [
   'January','February','March','April','May','June',

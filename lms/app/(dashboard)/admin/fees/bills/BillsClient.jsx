@@ -24,6 +24,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [zipLoading, setZipLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ── Filter helpers ─────────────────────────────────────────────────────────
   function applyFilter(key, value) {
@@ -184,9 +185,23 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-4 flex flex-wrap gap-3 items-end">
-        <div>
+      {/* Filters & Search */}
+      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-4 flex flex-col gap-4">
+        <div className="relative">
+          <input 
+            type="text" 
+            placeholder="Search by student name or roll number..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[#060810] border border-[#1e233d] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-end">
+          <div>
           <label className="block text-xs text-zinc-500 mb-1.5 font-medium flex items-center gap-1"><IconChart className="w-3 h-3" /> Month</label>
           <select value={filters.month} onChange={(e) => applyFilter('month', e.target.value)}
             className="bg-[#060810] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
@@ -219,36 +234,47 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             <option value="WAIVED">Waived</option>
           </select>
         </div>
-        {isPending && <span className="text-xs text-cyan-400 animate-pulse">Loading...</span>}
+          {isPending && <span className="text-xs text-cyan-400 animate-pulse mt-2">Loading...</span>}
+        </div>
       </div>
 
       {/* Bills Table */}
-      {bills.length === 0 ? (
-        <div className="bg-[#0d0f1a] border border-dashed border-[#1e233d] rounded-2xl p-12 text-center">
-          <div className="flex justify-center mb-3"><IconDocumentText className="w-10 h-10 text-zinc-600" /></div>
-          <p className="text-zinc-400 font-medium">No bills found</p>
-          <p className="text-zinc-600 text-sm mt-1">
-            {total === 0 ? 'Generate bills from the Fee Hub →' : 'Try changing the filters above'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {/* Quick total bar */}
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-5 py-3 flex flex-wrap gap-6 text-sm">
-            <span className="text-zinc-500 flex items-center gap-1"><IconBolt className="w-4 h-4" /> Total Due: <span className="text-white font-bold">₨{totalDue.toLocaleString()}</span></span>
-            <span className="text-zinc-500 flex items-center gap-1"><IconDocumentText className="w-4 h-4" /> Bills: <span className="text-white font-bold">{total}</span></span>
-            <span className="text-zinc-500 flex items-center gap-1"><IconXCircle className="w-4 h-4" /> Unpaid: <span className="text-red-400 font-bold">{unpaidCount}</span></span>
-            <span className="text-zinc-500 flex items-center gap-1"><IconCheckCircle className="w-4 h-4" /> Paid: <span className="text-emerald-400 font-bold">{paidCount}</span></span>
-          </div>
+      {(() => {
+        const filtered = bills.filter(b => 
+          b.student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          b.student.rollNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-          {bills.map((bill) => {
-            const sc = STATUS_CONFIG[bill.status] || STATUS_CONFIG.UNPAID;
-            const isOpen = actionBillId === bill.id;
+        if (filtered.length === 0) {
+          return (
+            <div className="bg-[#0d0f1a] border border-dashed border-[#1e233d] rounded-2xl p-12 text-center">
+              <div className="flex justify-center mb-3"><IconDocumentText className="w-10 h-10 text-zinc-600" /></div>
+              <p className="text-zinc-400 font-medium">No bills found</p>
+              <p className="text-zinc-600 text-sm mt-1">
+                {total === 0 ? 'Generate bills from the Fee Hub →' : 'Try changing filters or search query'}
+              </p>
+            </div>
+          );
+        }
 
-            return (
-              <div key={bill.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
-                {/* Main row */}
-                <div className="flex flex-col xl:flex-row xl:items-center gap-4 p-5">
+        return (
+          <div className="space-y-3">
+            {/* Quick total bar */}
+            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl px-5 py-3 flex flex-wrap gap-6 text-sm">
+              <span className="text-zinc-500 flex items-center gap-1"><IconBolt className="w-4 h-4" /> Total Due: <span className="text-white font-bold">₨{totalDue.toLocaleString()}</span></span>
+              <span className="text-zinc-500 flex items-center gap-1"><IconDocumentText className="w-4 h-4" /> Bills: <span className="text-white font-bold">{filtered.length}</span></span>
+              <span className="text-zinc-500 flex items-center gap-1"><IconXCircle className="w-4 h-4" /> Unpaid: <span className="text-red-400 font-bold">{filtered.filter(b => b.status === 'UNPAID').length}</span></span>
+              <span className="text-zinc-500 flex items-center gap-1"><IconCheckCircle className="w-4 h-4" /> Paid: <span className="text-emerald-400 font-bold">{filtered.filter(b => b.status === 'PAID').length}</span></span>
+            </div>
+
+            {filtered.map((bill) => {
+              const sc = STATUS_CONFIG[bill.status] || STATUS_CONFIG.UNPAID;
+              const isOpen = actionBillId === bill.id;
+
+              return (
+                <div key={bill.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden flex flex-col">
+                  {/* Top: Details */}
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 p-5 border-b border-[#1e233d]/50">
                   {/* Student info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -273,11 +299,11 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                   </div>
 
                   {/* Amount & Status Container */}
-                  <div className="flex items-center xl:justify-end gap-4 mt-2 xl:mt-0 xl:min-w-[180px]">
-                    <div className="text-left xl:text-right">
-                      <div className="text-lg font-bold text-white">₨{bill.totalAmount.toLocaleString()}</div>
+                  <div className="flex items-center gap-4 mt-2 md:mt-0">
+                    <div className="text-left md:text-right">
+                      <div className="text-xl font-bold text-white">₨{bill.totalAmount.toLocaleString()}</div>
                       {bill.status === 'PARTIAL' && bill.paidAmount && (
-                        <div className="text-xs text-amber-400">Paid: ₨{bill.paidAmount.toLocaleString()}</div>
+                        <div className="text-xs text-amber-400 mt-0.5">Paid: ₨{bill.paidAmount.toLocaleString()}</div>
                       )}
                     </div>
                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap ${sc.bg} ${sc.text}`}>
@@ -285,9 +311,11 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                       {sc.label}
                     </div>
                   </div>
+                </div>
 
-                  {/* Actions row */}
-                  <div className="flex flex-wrap items-center gap-2 mt-3 xl:mt-0 xl:justify-end xl:w-fit">
+                {/* Bottom: Actions */}
+                <div className="bg-[#0a0c14]/50 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
                     {/* Edit Fee Account */}
                     <button onClick={() => openPanel(bill.id, 'edit-account')}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
@@ -500,7 +528,8 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             );
           })}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

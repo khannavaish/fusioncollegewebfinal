@@ -10,6 +10,7 @@ const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py
 
 export default function PackagesClient({ packages }) {
   const [editId, setEditId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [createState, createAction, createPending] = useActionState(createFeePackage, null);
   const [updateState, updateAction, updatePending] = useActionState(updateFeePackage, null);
   const [deleteState, deleteAction, deletePending] = useActionState(deleteFeePackage, null);
@@ -76,16 +77,40 @@ export default function PackagesClient({ packages }) {
         </form>
       </div>
 
-      {/* Packages List */}
-      {packages.length === 0 ? (
-        <div className="bg-[#0d0f1a] border border-dashed border-[#1e233d] rounded-2xl p-12 text-center">
-          <div className="text-4xl mb-3">📦</div>
-          <p className="text-zinc-400 font-medium">No fee packages yet</p>
-          <p className="text-zinc-600 text-sm mt-1">Create your first package above to get started</p>
+      {/* Search and List Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2"><IconSettings className="w-5 h-5 text-zinc-400" /> Existing Packages</h2>
+        <div className="relative">
+          <input 
+            type="text" 
+            placeholder="Search packages..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full sm:w-64 bg-[#0a0c14] border border-[#1e233d] rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
         </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {packages.map((pkg, idx) => (
+      </div>
+
+      {/* Packages List */}
+      {(() => {
+        const filtered = packages.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        if (filtered.length === 0) {
+          return (
+            <div className="bg-[#0d0f1a] border border-dashed border-[#1e233d] rounded-2xl p-12 text-center">
+              <div className="flex justify-center mb-3"><IconSettings className="w-10 h-10 text-zinc-600" /></div>
+              <p className="text-zinc-400 font-medium">No fee packages found</p>
+              <p className="text-zinc-600 text-sm mt-1">{packages.length === 0 ? 'Create your first package above to get started' : 'Try adjusting your search query'}</p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="grid md:grid-cols-2 gap-4">
+            {filtered.map((pkg, idx) => (
             <div key={pkg.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden h-full">
               {editId === pkg.id ? (
                 <form action={updateAction} className="p-5 space-y-4">
@@ -115,8 +140,8 @@ export default function PackagesClient({ packages }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <button type="submit" disabled={updatePending}
-                      className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
-                      {updatePending ? '⏳' : '💾 Save'}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+                      {updatePending ? <><IconLoader className="w-4 h-4 animate-spin" /> Saving...</> : <><IconSave className="w-4 h-4" /> Save</>}
                     </button>
                     <button type="button" onClick={() => setEditId(null)}
                       className="px-4 py-2 rounded-lg border border-[#1e233d] text-zinc-400 text-sm hover:text-white transition-colors">
@@ -166,9 +191,10 @@ export default function PackagesClient({ packages }) {
                 </div>
               )}
             </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
