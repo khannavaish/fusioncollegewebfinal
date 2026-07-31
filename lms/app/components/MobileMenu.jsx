@@ -78,7 +78,8 @@ export default function MobileMenu({ role, name, handleSignOutAction }) {
 
       {/* Slide-out Drawer */}
       <div
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-black bg-opacity-100 border-r border-[#1e233d] p-5 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ${
+        style={{ backgroundColor: '#050505' }}
+        className={`fixed top-0 left-0 bottom-0 z-50 w-72 border-r border-[#1e233d] p-5 shadow-2xl flex flex-col justify-between transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
