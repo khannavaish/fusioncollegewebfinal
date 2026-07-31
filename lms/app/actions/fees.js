@@ -168,19 +168,22 @@ export async function generateMonthlyBills(formData) {
 }
 
 async function sendBillWhatsAppBatch(month, year) {
-  const bills = await prisma.feeBill.findMany({
-    where: { month, year, whatsappSent: false },
-    include: {
-      student: {
-        include: {
-          parents: { include: { parent: true } },
-          feePackage: true,
-          class: true,
+  const [bills, bankConfig] = await Promise.all([
+    prisma.feeBill.findMany({
+      where: { month, year, whatsappSent: false },
+      include: {
+        student: {
+          include: {
+            parents: { include: { parent: true } },
+            feePackage: true,
+            class: true,
+          },
         },
+        items: true,
       },
-      items: true,
-    },
-  });
+    }),
+    prisma.bankConfig.findUnique({ where: { id: 'default' } }),
+  ]);
 
   const { sendWhatsAppMessage } = await import('@/app/actions/whatsapp');
   const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -192,7 +195,7 @@ async function sendBillWhatsAppBatch(month, year) {
       .map((i) => `  • ${i.title}: ₨${Number(i.amount).toLocaleString()}`)
       .join('\n');
 
-    const message = buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines);
+    const message = buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bankConfig);
 
     for (const ps of student.parents) {
       if (ps.parent?.phone) {
@@ -205,12 +208,19 @@ async function sendBillWhatsAppBatch(month, year) {
   }
 }
 
-function buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines) {
+function buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bankConfig = null) {
   const dueDate = new Date(bill.dueDate).toLocaleDateString('en-PK', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
+
+  const bankSection = bankConfig?.accountNumber
+    ? `\n🏦 *Deposit To:*
+  Bank: ${bankConfig.bankName}${bankConfig.branchCode ? ` (${bankConfig.branchCode})` : ''}
+  A/C Title: ${bankConfig.accountTitle}
+  A/C No: *${bankConfig.accountNumber}*`
+    : '';
 
   return `💼 *FUSION COLLEGE NAROWAL — FEE NOTICE*
 
@@ -225,6 +235,7 @@ ${itemLines}
 ─────────────────────
 💰 *Total Due: ₨${Number(bill.totalAmount).toLocaleString()}*
 📆 *Due Date: ${dueDate}*
+${bankSection}
 
 Please deposit fee before the due date.
 JazakAllah Khair 🤲
@@ -252,12 +263,13 @@ export async function resendBillWhatsApp(formData) {
     });
     if (!bill) return { error: 'Bill not found.' };
 
+    const bankConfig = await prisma.bankConfig.findUnique({ where: { id: 'default' } });
     const monthName = MONTH_NAMES[bill.month - 1];
     const itemLines = bill.items
       .map((i) => `  • ${i.title}: ₨${Number(i.amount).toLocaleString()}`)
       .join('\n');
 
-    const message = buildFeeWhatsAppMessage(bill.student, bill, monthName, bill.year, itemLines);
+    const message = buildFeeWhatsAppMessage(bill.student, bill, monthName, bill.year, itemLines, bankConfig);
     const { sendWhatsAppMessage } = await import('@/app/actions/whatsapp');
 
     let sent = 0;

@@ -243,8 +243,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
             const isOpen = actionBillId === bill.id;
 
             return (
-              <AnimatedSection key={bill.id} delay={0.05 * (bills.indexOf(bill) % 20)}>
-              <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
+              <div key={bill.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden">
                 {/* Main row */}
                 <div className="flex flex-col md:flex-row md:items-center gap-3 p-4">
                   {/* Student info */}
@@ -460,7 +459,6 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                   </div>
                 )}
               </div>
-              </AnimatedSection>
             );
           })}
         </div>

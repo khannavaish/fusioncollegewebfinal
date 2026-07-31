@@ -81,8 +81,7 @@ export default function PackagesClient({ packages }) {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {packages.map((pkg, idx) => (
-            <AnimatedSection key={pkg.id} delay={0.1 * idx}>
-            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden h-full">
+            <div key={pkg.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden h-full">
               {editId === pkg.id ? (
                 <form action={updateAction} className="p-5 space-y-4">
                   <input type="hidden" name="id" value={pkg.id} />
@@ -162,7 +161,6 @@ export default function PackagesClient({ packages }) {
                 </div>
               )}
             </div>
-            </AnimatedSection>
           ))}
         </div>
       )}
