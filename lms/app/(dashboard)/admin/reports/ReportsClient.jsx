@@ -450,8 +450,16 @@ export default function ReportsClient({ students, classes, teachers }) {
                   </div>
 
                   {/* Student Info Card */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#0d0f1a] border border-[#1e233d] p-5 rounded-xl print:bg-blue-50 print:border-blue-200 print:text-black">
-                    <div className="space-y-1">
+                  <div className="flex flex-col md:flex-row gap-6 items-start bg-[#0d0f1a] border border-[#1e233d] p-5 rounded-xl print:bg-blue-50 print:border-blue-200 print:text-black">
+                    {studentReport.student.photoUrl ? (
+                      <img src={studentReport.student.photoUrl} alt={studentReport.student.name} className="w-24 h-24 rounded-full object-cover border-4 border-[#1e233d] print:border-white shadow-lg flex-shrink-0" />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-[#16192b] print:bg-white flex items-center justify-center text-cyan-500 print:text-blue-800 text-4xl font-black border-4 border-[#1e233d] print:border-blue-200 shadow-lg flex-shrink-0">
+                        {studentReport.student.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                      <div className="space-y-1">
                       <div className="text-xs text-zinc-500 font-bold uppercase">Student Name</div>
                       <div className="text-base font-extrabold text-white print:text-black">{studentReport.student.name}</div>
                     </div>
@@ -488,6 +496,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                             );
                           })()
                         ) : '-'}
+                      </div>
                       </div>
                     </div>
                   </div>

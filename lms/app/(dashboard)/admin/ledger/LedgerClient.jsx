@@ -123,22 +123,31 @@ export default function LedgerClient({ students, teachers, classes }) {
               <PrintHeader title="Student Fee Ledger" />
               
               <div className="flex justify-between items-start mb-8 print:mb-6">
-                <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight text-cyan-900">{studentData.name}</h3>
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-12 gap-y-1 text-sm font-medium text-zinc-700">
-                    <p><strong>Roll No:</strong> {studentData.rollNumber}</p>
-                    <p><strong>Father:</strong> {studentData.fatherName}</p>
-                    <p><strong>Class:</strong> {studentData.class?.name}</p>
-                    <p><strong>Address:</strong> {studentData.address || 'N/A'}</p>
-                    <p><strong>Contact:</strong> {studentData.whatsappNumber || studentData.telephone || 'N/A'}</p>
-                  </div>
-                  {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
-                    <p className="text-cyan-700 print:text-cyan-900 bg-cyan-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-cyan-200 print:border-none mt-3 text-sm">
-                      <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
-                    </p>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+                  {studentData.photoUrl ? (
+                    <img src={studentData.photoUrl} alt={studentData.name} className="w-20 h-20 rounded-full object-cover border-2 border-cyan-600 print:border-black shadow-md flex-shrink-0" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-800 text-3xl font-black border-2 border-cyan-600 print:border-black shadow-md flex-shrink-0">
+                      {studentData.name.charAt(0)}
+                    </div>
                   )}
+                  <div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight text-cyan-900">{studentData.name}</h3>
+                    <div className="mt-2 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-1 text-sm font-medium text-zinc-700">
+                      <p><strong>Roll No:</strong> {studentData.rollNumber}</p>
+                      <p><strong>Father:</strong> {studentData.fatherName}</p>
+                      <p><strong>Class:</strong> {studentData.class?.name}</p>
+                      <p><strong>Address:</strong> {studentData.address || 'N/A'}</p>
+                      <p><strong>Contact:</strong> {studentData.whatsappNumber || studentData.telephone || 'N/A'}</p>
+                    </div>
+                    {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
+                      <p className="text-cyan-700 print:text-cyan-900 bg-cyan-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-cyan-200 print:border-none mt-3 text-sm">
+                        <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg">
+                <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg mt-2 md:mt-0">
                   <IconPrint className="w-4 h-4" /> Print PDF
                 </button>
               </div>
@@ -244,20 +253,25 @@ export default function LedgerClient({ students, teachers, classes }) {
               <PrintHeader title="Teacher Salary Ledger" />
               
               <div className="flex justify-between items-start mb-8 print:mb-6">
-                <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight text-emerald-900">{teacherData.name}</h3>
-                  <div className="mt-2 space-y-1 text-sm font-medium text-zinc-700">
-                    <p><strong>Department:</strong> {teacherData.department || 'N/A'}</p>
-                    <p><strong>Base Salary:</strong> ₨ {teacherData.baseSalary?.toLocaleString() || 'N/A'}</p>
-                    <p><strong>Address:</strong> {teacherData.address || 'N/A'}</p>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+                  <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 text-3xl font-black border-2 border-emerald-600 print:border-black shadow-md flex-shrink-0">
+                    {teacherData.name.charAt(0)}
                   </div>
-                  {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
-                    <p className="text-emerald-700 print:text-emerald-900 bg-emerald-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-emerald-200 print:border-none mt-3 text-sm">
-                      <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
-                    </p>
-                  )}
+                  <div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight text-emerald-900">{teacherData.name}</h3>
+                    <div className="mt-2 space-y-1 text-sm font-medium text-zinc-700">
+                      <p><strong>Department:</strong> {teacherData.department || 'N/A'}</p>
+                      <p><strong>Base Salary:</strong> ₨ {teacherData.baseSalary?.toLocaleString() || 'N/A'}</p>
+                      <p><strong>Address:</strong> {teacherData.address || 'N/A'}</p>
+                    </div>
+                    {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
+                      <p className="text-emerald-700 print:text-emerald-900 bg-emerald-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-emerald-200 print:border-none mt-3 text-sm">
+                        <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg">
+                <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg mt-2 md:mt-0">
                   <IconPrint className="w-4 h-4" /> Print PDF
                 </button>
               </div>
