@@ -5,9 +5,10 @@ import { createClient } from '@/utils/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import prisma from '@/utils/db';
 import { classDisplayNameFromSlot } from '@/utils/timetable';
+import { saveLocalFile } from '@/app/actions/upload';
 
 // Auth helper
-async function verifyAdmin() {
+export async function verifyAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
@@ -328,6 +329,9 @@ export async function createTeacher(_prev, formData) {
   const name = formData.get('name')?.toString().trim();
   const phone = formData.get('phone')?.toString().trim() || null;
   const qualification = formData.get('qualification')?.toString().trim() || null;
+  const department = formData.get('department')?.toString().trim() || null;
+  const baseSalaryRaw = formData.get('baseSalary')?.toString().trim();
+  const baseSalary = baseSalaryRaw ? parseFloat(baseSalaryRaw) : null;
 
   if (!email || !name) return { error: 'Email and name are required.' };
 
@@ -353,7 +357,7 @@ export async function createTeacher(_prev, formData) {
         status: 'ACTIVE',
         plainPassword: password,
         teacher: {
-          create: { id: authId, name, phone, qualification },
+          create: { id: authId, name, phone, qualification, department, baseSalary },
         },
       },
     });
@@ -371,12 +375,16 @@ export async function updateTeacher(formData) {
   const name = formData.get('name')?.toString().trim();
   const phone = formData.get('phone')?.toString().trim() || null;
   const qualification = formData.get('qualification')?.toString().trim() || null;
+  const department = formData.get('department')?.toString().trim() || null;
+  const baseSalaryRaw = formData.get('baseSalary')?.toString().trim();
+  const baseSalary = baseSalaryRaw ? parseFloat(baseSalaryRaw) : null;
   const status = formData.get('status')?.toString();
+  
   if (!id || !name) return { error: 'ID and name are required.' };
   try {
     const teacher = await prisma.teacher.findUnique({ where: { id }, include: { user: true } });
     if (!teacher) return { error: 'Teacher not found.' };
-    await prisma.teacher.update({ where: { id }, data: { name, phone, qualification } });
+    await prisma.teacher.update({ where: { id }, data: { name, phone, qualification, department, baseSalary } });
     if (status) await prisma.user.update({ where: { id: teacher.userId }, data: { status } });
     revalidatePath('/admin/teachers');
     return { success: true };
@@ -442,9 +450,19 @@ export async function createStudent(_prev, formData) {
   const feePackageId = formData.get('feePackageId')?.toString().trim() || null;
   const feeMonthlyOverrideRaw = formData.get('feeMonthlyOverride')?.toString().trim();
   const feeMonthlyOverride = feeMonthlyOverrideRaw ? parseFloat(feeMonthlyOverrideRaw) : null;
+  const whatsappNumber = formData.get('whatsappNumber')?.toString().trim() || null;
+  const telephone = formData.get('telephone')?.toString().trim() || null;
+  const address = formData.get('address')?.toString().trim() || null;
+  const gender = formData.get('gender')?.toString().trim() || null;
+  const photo = formData.get('photo');
+  let photoUrl = null;
 
   if (!name || !fatherName || !classId || !guardianName || !guardianPhone) {
     return { error: 'Name, father\'s name, class, guardian name, and guardian phone are required.' };
+  }
+
+  if (photo && photo.size > 0) {
+    photoUrl = await saveLocalFile(photo, 'student_photos');
   }
 
   // Auto-generate roll number + credentials
@@ -515,8 +533,13 @@ export async function createStudent(_prev, formData) {
               classId,
               cnic,
               fatherCnic,
+              whatsappNumber,
+              telephone,
+              address,
+              gender,
+              photoUrl,
               admissionPercentage: admissionPercentage ?? undefined,
-              feePackageId: feePackageId || undefined,
+              feePackageId: (feePackageId && feePackageId !== 'CUSTOM') ? feePackageId : undefined,
               feeMonthlyOverride: feeMonthlyOverride ?? undefined,
             },
           },
@@ -586,15 +609,47 @@ export async function updateStudent(formData) {
   const fatherName = formData.get('fatherName')?.toString().trim();
   const classId = formData.get('classId')?.toString();
   const status = formData.get('status')?.toString();
+  
+  const cnic = formData.get('cnic')?.toString().trim() || null;
+  const fatherCnic = formData.get('fatherCnic')?.toString().trim() || null;
+  const whatsappNumber = formData.get('whatsappNumber')?.toString().trim() || null;
+  const telephone = formData.get('telephone')?.toString().trim() || null;
+  const address = formData.get('address')?.toString().trim() || null;
+  const gender = formData.get('gender')?.toString().trim() || null;
+  const photo = formData.get('photo');
+  
   if (!id || !name || !fatherName || !classId) return { error: 'All fields are required.' };
+  
   try {
     const student = await prisma.student.findUnique({ where: { id } });
     if (!student) return { error: 'Student not found.' };
-    await prisma.student.update({ where: { id }, data: { name, fatherName, classId } });
+    
+    let photoUrl = student.photoUrl;
+    if (photo && photo.size > 0) {
+      const savedPhoto = await saveLocalFile(photo, 'student_photos');
+      if (savedPhoto) photoUrl = savedPhoto;
+    }
+
+    await prisma.student.update({ 
+      where: { id }, 
+      data: { 
+        name, 
+        fatherName, 
+        classId,
+        cnic,
+        fatherCnic,
+        whatsappNumber,
+        telephone,
+        address,
+        gender,
+        photoUrl
+      } 
+    });
     if (status) await prisma.user.update({ where: { id: student.userId }, data: { status } });
     revalidatePath('/admin/students');
     return { success: true };
-  } catch {
+  } catch (e) {
+    console.error(e);
     return { error: 'Failed to update student.' };
   }
 }
@@ -603,16 +658,76 @@ export async function deleteStudent(formData) {
   await verifyAdmin();
   const id = formData.get('id')?.toString();
   if (!id) return { error: 'Student ID required.' };
+  
   try {
-    const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
+    // 1. Fetch complete record for archiving and parent check
+    const student = await prisma.student.findUnique({ 
+      where: { id }, 
+      include: { 
+        user: true,
+        parents: {
+          include: {
+            parent: {
+              include: {
+                user: true,
+                _count: {
+                  select: { children: true }
+                }
+              }
+            }
+          }
+        },
+        feeBills: true,
+        attendance: true,
+        examResults: true
+      } 
+    });
+    
     if (!student) return { error: 'Student not found.' };
+
+    // 2. Archive student data
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const archiveDir = path.join(process.cwd(), 'archives');
+      if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
+      const archiveFile = path.join(archiveDir, 'deleted_students.json');
+      
+      const archiveData = {
+        deletedAt: new Date().toISOString(),
+        studentData: student
+      };
+      
+      fs.appendFileSync(archiveFile, JSON.stringify(archiveData) + '\n');
+    } catch (archiveErr) {
+      console.error('Failed to archive student data:', archiveErr);
+      // Proceed with deletion even if archiving fails, or return error?
+      // Better to log it and proceed so it doesn't block deletion if file permissions fail.
+    }
+
+    const admin = adminClient();
+    
+    // 3. Process Parents
+    for (const ps of student.parents) {
+      const parent = ps.parent;
+      // If this parent has exactly 1 child (which is the one being deleted), delete the parent completely
+      if (parent._count.children <= 1) {
+        if (parent.user?.authId) {
+          await admin.auth.admin.deleteUser(parent.user.authId);
+        }
+        await prisma.user.delete({ where: { id: parent.userId } });
+      }
+    }
+
+    // 4. Delete Student
     const authId = student.user.authId;
     await prisma.user.delete({ where: { id: student.userId } });
-    const admin = adminClient();
     await admin.auth.admin.deleteUser(authId);
+    
     revalidatePath('/admin/students');
     return { success: true };
-  } catch {
+  } catch (e) {
+    console.error(e);
     return { error: 'Failed to delete student.' };
   }
 }
@@ -631,6 +746,118 @@ export async function transferStudent(formData) {
     return { success: true };
   } catch (e) {
     return { error: `Failed to transfer student: ${e.message}` };
+  }
+}
+
+export async function updateStudentFee(formData) {
+  await verifyAdmin();
+  const id = formData.get('id')?.toString();
+  const admissionPercentageRaw = formData.get('admissionPercentage')?.toString().trim();
+  const admissionPercentage = admissionPercentageRaw ? parseFloat(admissionPercentageRaw) : null;
+  const feePackageId = formData.get('feePackageId')?.toString().trim() || null;
+  const feeMonthlyOverrideRaw = formData.get('feeMonthlyOverride')?.toString().trim();
+  const feeMonthlyOverride = feeMonthlyOverrideRaw ? parseFloat(feeMonthlyOverrideRaw) : null;
+
+  if (!id) return { error: 'Student ID is required.' };
+
+  try {
+    await prisma.student.update({
+      where: { id },
+      data: {
+        admissionPercentage: admissionPercentage ?? null,
+        feePackageId: (feePackageId && feePackageId !== 'CUSTOM') ? feePackageId : null,
+        feeMonthlyOverride: (feePackageId === 'CUSTOM' || !feePackageId) ? (feeMonthlyOverride ?? null) : null,
+      }
+    });
+    revalidatePath('/admin/students');
+    return { success: true };
+  } catch (e) {
+    return { error: `DB error: ${e.message}` };
+  }
+}
+
+export async function searchGlobalUsers(query) {
+  await verifyAdmin();
+  if (!query || typeof query !== 'string' || query.trim().length < 2) {
+    return { results: [] };
+  }
+
+  const q = query.trim();
+
+  try {
+    const [students, teachers, parents] = await Promise.all([
+      prisma.student.findMany({
+        where: {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { cnic: { contains: q, mode: 'insensitive' } },
+            { fatherName: { contains: q, mode: 'insensitive' } },
+            { fatherCnic: { contains: q, mode: 'insensitive' } },
+            { telephone: { contains: q, mode: 'insensitive' } },
+            { whatsappNumber: { contains: q, mode: 'insensitive' } },
+            { address: { contains: q, mode: 'insensitive' } },
+            { rollNumber: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+        include: { class: true },
+      }),
+      prisma.teacher.findMany({
+        where: {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { phone: { contains: q, mode: 'insensitive' } },
+            { qualification: { contains: q, mode: 'insensitive' } },
+            { department: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
+      prisma.parent.findMany({
+        where: {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' } },
+            { phone: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      })
+    ]);
+
+    const results = [
+      ...students.map(s => ({
+        id: s.id,
+        type: 'STUDENT',
+        name: s.name,
+        subtitle: `Roll: ${s.rollNumber} • ${s.class.name}`,
+        details: `S/O ${s.fatherName} ${s.telephone ? `• Tel: ${s.telephone}` : ''}`,
+        link: `/admin/students/${s.id}`
+      })),
+      ...teachers.map(t => ({
+        id: t.id,
+        type: 'TEACHER',
+        name: t.name,
+        subtitle: t.department || 'Staff',
+        details: `Phone: ${t.phone || 'N/A'} ${t.qualification ? `• ${t.qualification}` : ''}`,
+        link: `/admin/teachers`
+      })),
+      ...parents.map(p => ({
+        id: p.id,
+        type: 'PARENT',
+        name: p.name,
+        subtitle: 'Parent/Guardian',
+        details: `Phone: ${p.phone || 'N/A'}`,
+        link: `/admin/parents`
+      }))
+    ];
+
+    // Sort alphabetically by name
+    results.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { results: results.slice(0, 10) }; // Return top 10 combined
+  } catch (e) {
+    console.error('Search error:', e);
+    return { error: 'Failed to search users' };
   }
 }
 
@@ -861,3 +1088,152 @@ export async function checkGuardianName(name) {
   }
 }
 
+export async function bulkImportStudents(formData) {
+  await verifyAdmin();
+  const file = formData.get('file');
+  if (!file || !file.name.endsWith('.csv')) {
+    return { error: 'Please upload a valid CSV file.' };
+  }
+
+  try {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) return { error: 'CSV file is empty or has no data rows.' };
+    
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const requiredCols = ['name', 'rollnumber', 'fathername', 'classid'];
+    const missing = requiredCols.filter(c => !headers.includes(c));
+    if (missing.length > 0) {
+      return { error: `Missing required columns: ${missing.join(', ')}` };
+    }
+
+    const admin = adminClient();
+    let successCount = 0;
+    let errors = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      // Very naive split that ignores quoted commas to keep it simple, but good enough for this
+      const row = lines[i].split(',').map(cell => cell.trim());
+      const data = {};
+      headers.forEach((h, idx) => {
+        data[h] = row[idx] || '';
+      });
+
+      const { name, rollnumber, fathername, classid, cnic, fathercnic, whatsappnumber, telephone, address, gender } = data;
+      
+      if (!name || !rollnumber || !fathername || !classid) {
+        errors.push(`Row ${i + 1}: Missing required fields.`);
+        continue;
+      }
+
+      const classObj = await prisma.class.findUnique({ where: { id: classid } });
+      if (!classObj) {
+        errors.push(`Row ${i + 1}: Class ID ${classid} not found.`);
+        continue;
+      }
+
+      const existingStudent = await prisma.student.findUnique({ where: { rollNumber: rollnumber } });
+      if (existingStudent) {
+        errors.push(`Row ${i + 1}: Roll number ${rollnumber} already exists.`);
+        continue;
+      }
+
+      const email = `s${rollnumber.toLowerCase()}@fusion.edu.pk`;
+      const password = rollnumber;
+      
+      try {
+        const { data: authData, error: authError } = await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { role: 'STUDENT' },
+        });
+
+        if (authError) {
+          errors.push(`Row ${i + 1}: Auth error - ${authError.message}`);
+          continue;
+        }
+
+        const authUser = authData.user;
+
+        await prisma.user.create({
+          data: {
+            authId: authUser.id,
+            email,
+            role: 'STUDENT',
+            plainPassword: password,
+            student: {
+              create: {
+                name,
+                rollNumber: rollnumber,
+                fatherName: fathername,
+                classId: classid,
+                cnic: cnic || null,
+                fatherCnic: fathercnic || null,
+                whatsappNumber: whatsappnumber || null,
+                telephone: telephone || null,
+                address: address || null,
+                gender: gender || null,
+              }
+            }
+          }
+        });
+
+        const parentPhone = telephone || whatsappnumber || `0000000000${successCount}`;
+        let parentRecord = await prisma.parent.findFirst({
+          where: { phone: parentPhone }
+        });
+
+        if (!parentRecord && parentPhone !== `0000000000${successCount}`) {
+          const parentEmail = `p${rollnumber.toLowerCase()}@fusion.edu.pk`;
+          const pAuth = await admin.auth.admin.createUser({
+            email: parentEmail,
+            password: parentPhone,
+            email_confirm: true,
+            user_metadata: { role: 'PARENT' },
+          });
+
+          if (!pAuth.error) {
+            const newParentUser = await prisma.user.create({
+              data: {
+                authId: pAuth.data.user.id,
+                email: parentEmail,
+                role: 'PARENT',
+                plainPassword: parentPhone,
+                parent: {
+                  create: {
+                    name: fathername,
+                    phone: parentPhone
+                  }
+                }
+              },
+              include: { parent: true }
+            });
+            parentRecord = newParentUser.parent;
+          }
+        }
+
+        if (parentRecord) {
+          const newStudent = await prisma.student.findUnique({ where: { rollNumber: rollnumber } });
+          if (newStudent) {
+            await prisma.parentStudent.create({
+              data: {
+                parentId: parentRecord.id,
+                studentId: newStudent.id
+              }
+            });
+          }
+        }
+
+        successCount++;
+      } catch (rowErr) {
+        errors.push(`Row ${i + 1}: DB Error - ${rowErr.message}`);
+      }
+    }
+
+    revalidatePath('/admin/students');
+    return { success: true, count: successCount, errors };
+  } catch (err) {
+    return { error: 'Failed to process CSV file.' };
+  }
+}

@@ -339,7 +339,7 @@ export default function ReportsClient({ students, classes, teachers }) {
   return (
     <div className="space-y-6">
       {/* Date Filters Header (applicable to most reports) */}
-      <div className="flex flex-wrap gap-4 items-center bg-[#0d0f1a] border border-[#1e233d] p-4 rounded-xl">
+      <div className="flex flex-wrap gap-4 items-center bg-[#0d0f1a] border border-[#1e233d] p-4 rounded-xl print:hidden">
         <div className="flex items-center gap-2">
           <IconSparkles className="w-5 h-5 text-cyan-400" />
           <span className="text-sm font-bold text-white uppercase tracking-wider">Date Filters:</span>
@@ -366,7 +366,7 @@ export default function ReportsClient({ students, classes, teachers }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#1e233d] gap-2 overflow-x-auto pb-px">
+      <div className="flex border-b border-[#1e233d] gap-2 overflow-x-auto pb-px print:hidden">
         {[
           { id: 'student', label: 'Student Report', icon: IconGraduationCap },
           { id: 'class', label: 'Class Attendance', icon: IconBuilding },
@@ -391,11 +391,11 @@ export default function ReportsClient({ students, classes, teachers }) {
       </div>
 
       {/* Tab Panels */}
-      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6 min-h-[400px]">
+      <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6 min-h-[400px] print:bg-transparent print:border-none print:p-0 print:min-h-0 print:rounded-none">
         {/* --- STUDENT PROGRESS REPORT --- */}
         {activeTab === 'student' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d]">
+            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d] print:hidden">
               <div className="flex-1 min-w-[240px]">
                 <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Select Student</label>
                 <select
@@ -422,7 +422,7 @@ export default function ReportsClient({ students, classes, teachers }) {
 
             {studentReport && (
               <div className="space-y-6">
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end print:hidden">
                   <button
                     onClick={() => handleExportPNG(`Student_Report_${studentReport.student.rollNumber}.png`)}
                     className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
@@ -438,19 +438,19 @@ export default function ReportsClient({ students, classes, teachers }) {
                 </div>
 
                 {/* Printable container */}
-                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black">
+                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black print:rounded-none print:shadow-none print:w-full" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                   {/* Brand Header */}
-                  <div className="flex items-center gap-4 pb-5 border-b border-[#1e233d] print:border-zinc-300">
+                  <div className="flex items-center gap-4 pb-5 border-b-2 border-[#1e233d] print:border-cyan-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                     <img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
                     <div>
-                      <h2 className="text-xl font-black text-white print:text-black">Fusion College Narowal</h2>
-                      <p className="text-xs text-cyan-400 font-bold print:text-zinc-600">Student Progress Report - Academic Year 2025-26</p>
+                      <h2 className="text-xl font-black text-white print:text-cyan-800">Fusion College Narowal</h2>
+                      <p className="text-xs text-cyan-400 font-bold print:text-cyan-700">Student Progress Report - Academic Year 2025-26</p>
                       <p className="text-[10px] text-zinc-500 print:text-zinc-500">Date Range: {dateFrom} to {dateTo}</p>
                     </div>
                   </div>
 
                   {/* Student Info Card */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#0d0f1a] border border-[#1e233d] p-5 rounded-xl print:bg-zinc-100 print:border-zinc-300 print:text-black">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#0d0f1a] border border-[#1e233d] p-5 rounded-xl print:bg-blue-50 print:border-blue-200 print:text-black">
                     <div className="space-y-1">
                       <div className="text-xs text-zinc-500 font-bold uppercase">Student Name</div>
                       <div className="text-base font-extrabold text-white print:text-black">{studentReport.student.name}</div>
@@ -497,7 +497,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <h3 className="text-sm font-black text-cyan-400 uppercase tracking-wider">Attendance Breakdown</h3>
                     <table className="w-full text-left text-sm border-collapse">
                       <thead>
-                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-zinc-200 print:text-black">
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                           <th className="px-4 py-3">Subject</th>
                           <th className="px-4 py-3">Teacher</th>
                           <th className="px-4 py-3 text-center">Lectures Attended</th>
@@ -536,13 +536,13 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <h3 className="text-sm font-black text-cyan-400 uppercase tracking-wider">Test & Exam Results</h3>
                     <table className="w-full text-left text-sm border-collapse">
                       <thead>
-                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-zinc-200 print:text-black">
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                           <th className="px-4 py-3">Subject</th>
                           <th className="px-4 py-3">Test Title</th>
                           <th className="px-4 py-3 text-center">Date</th>
                           <th className="px-4 py-3 text-center">Marks</th>
                           <th className="px-4 py-3 text-center">Grade</th>
-                          <th className="px-4 py-3 text-right">Actions</th>
+                          <th className="px-4 py-3 text-right print:hidden">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#1e233d] print:divide-zinc-300">
@@ -599,7 +599,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     <h3 className="text-sm font-black text-cyan-400 uppercase tracking-wider">WhatsApp Alerts History</h3>
                     <table className="w-full text-left text-sm border-collapse">
                       <thead>
-                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-zinc-200 print:text-black">
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                           <th className="px-4 py-3">Time Sent</th>
                           <th className="px-4 py-3">Recipient Phone</th>
                           <th className="px-4 py-3">Message Type</th>
@@ -675,7 +675,7 @@ export default function ReportsClient({ students, classes, teachers }) {
 
             {classReport && (
               <div className="space-y-6">
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end print:hidden">
                   <button
                     onClick={() => handleExportPNG(`Class_Grid_${classReport.className.replace(/\s+/g, '_')}.png`)}
                     className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
@@ -684,26 +684,26 @@ export default function ReportsClient({ students, classes, teachers }) {
                   </button>
                 </div>
 
-                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d]">
+                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black print:rounded-none print:shadow-none print:w-full" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                   {/* Brand Header */}
-                  <div className="flex items-center justify-between pb-5 border-b border-[#1e233d]">
+                  <div className="flex items-center justify-between pb-5 border-b border-[#1e233d] print:border-zinc-300">
                     <div className="flex items-center gap-4">
                       <img src="/logo.png" alt="Logo" className="h-14 w-auto object-contain" />
                       <div>
-                        <h2 className="text-lg font-black text-white">{classReport.className} Attendance Report</h2>
+                        <h2 className="text-lg font-black text-white print:text-cyan-800">{classReport.className} Attendance Report</h2>
                         <p className="text-xs text-zinc-500">Date Range: {dateFrom} to {dateTo}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-zinc-500 font-bold uppercase">Class Average</div>
-                      <div className="text-2xl font-black text-cyan-400">{classReport.classAverage}%</div>
+                      <div className="text-xs text-zinc-500 font-bold uppercase print:text-zinc-600">Class Average</div>
+                      <div className="text-2xl font-black text-cyan-400 print:text-cyan-700">{classReport.classAverage}%</div>
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto border border-[#1e233d] rounded-xl">
+                  <div className="overflow-x-auto print:overflow-x-visible border border-[#1e233d] rounded-xl print:border-zinc-300">
                     <table className="w-full text-center text-sm border-collapse">
                       <thead>
-                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-300 font-bold">
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-300 font-bold print:bg-blue-700 print:text-white">
                           <th className="px-4 py-3 text-left w-36 border-r border-[#1e233d]">Roll No</th>
                           <th className="px-4 py-3 text-left min-w-[150px] border-r border-[#1e233d]">Student Name</th>
                           {classReport.dates.map(d => (
@@ -752,7 +752,7 @@ export default function ReportsClient({ students, classes, teachers }) {
         {/* --- TEACHER PERFORMANCE / LOGS --- */}
         {activeTab === 'teacher' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d]">
+            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d] print:hidden">
               <div className="flex-1 min-w-[240px]">
                 <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Select Teacher</label>
                 <select
@@ -778,21 +778,21 @@ export default function ReportsClient({ students, classes, teachers }) {
             {teacherReport && (
               <div className="space-y-6">
                 {/* Lectures Taught Log Card */}
-                <div className="space-y-3 bg-[#070810] p-6 rounded-xl border border-[#1e233d]">
-                  <div className="flex items-center gap-3 border-b border-[#1e233d] pb-3 mb-3">
-                    <IconBookOpen className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-base font-black text-white uppercase tracking-wider">Lectures Log ({teacherReport.teacher.name})</h3>
+                <div className="space-y-3 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none">
+                  <div className="flex items-center gap-3 border-b border-[#1e233d] pb-3 mb-3 print:border-cyan-600 print:pb-2 print:mb-2">
+                    <IconBookOpen className="w-5 h-5 text-cyan-400 print:text-cyan-700" />
+                    <h3 className="text-base font-black text-white uppercase tracking-wider print:text-cyan-800">Lectures Log ({teacherReport.teacher.name})</h3>
                   </div>
 
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
-                      <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
+                      <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                         <th className="px-4 py-3">Date</th>
                         <th className="px-4 py-3">Class</th>
                         <th className="px-4 py-3">Subject</th>
                         <th className="px-4 py-3">Topic / Notes</th>
                         <th className="px-4 py-3 text-center">Attendance Status</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <th className="px-4 py-3 text-right print:hidden">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1e233d]">
@@ -803,11 +803,11 @@ export default function ReportsClient({ students, classes, teachers }) {
                           <td className="px-4 py-3 text-cyan-400 font-bold">{l.subject}</td>
                           <td className="px-4 py-3 italic max-w-xs truncate" title={l.topic}>{l.topic}</td>
                           <td className="px-4 py-3 text-center">
-                            <span className="bg-[#16192b] border border-[#2b3052] px-2 py-0.5 rounded text-xs text-white">
+                            <span className="bg-[#16192b] border border-[#2b3052] px-2 py-0.5 rounded text-xs text-white print:bg-blue-100 print:border-blue-300 print:text-blue-800">
                               {l.presentCount} / {l.totalCount} Present
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-4 py-3 text-right print:hidden">
                             <div className="flex justify-end gap-1.5">
                               <button
                                 onClick={() => setEditModal({
@@ -839,15 +839,15 @@ export default function ReportsClient({ students, classes, teachers }) {
                 </div>
 
                 {/* Exams Administered Log Card */}
-                <div className="space-y-3 bg-[#070810] p-6 rounded-xl border border-[#1e233d]">
-                  <div className="flex items-center gap-3 border-b border-[#1e233d] pb-3 mb-3">
-                    <IconGraduationCap className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-base font-black text-white uppercase tracking-wider">Tests & Exams Log</h3>
+                <div className="space-y-3 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:mt-6">
+                  <div className="flex items-center gap-3 border-b border-[#1e233d] pb-3 mb-3 print:border-cyan-600 print:pb-2 print:mb-2">
+                    <IconGraduationCap className="w-5 h-5 text-cyan-400 print:text-cyan-700" />
+                    <h3 className="text-base font-black text-white uppercase tracking-wider print:text-cyan-800">Tests &amp; Exams Log</h3>
                   </div>
 
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
-                      <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
+                      <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                         <th className="px-4 py-3">Date</th>
                         <th className="px-4 py-3">Class</th>
                         <th className="px-4 py-3">Subject</th>
@@ -870,7 +870,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                               {ex.avgScore}%
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-4 py-3 text-right print:hidden">
                             <div className="flex justify-end gap-1.5">
                               <button
                                 onClick={() => setEditModal({
@@ -908,7 +908,7 @@ export default function ReportsClient({ students, classes, teachers }) {
         {/* --- FEE REPORTS --- */}
         {activeTab === 'fee' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d]">
+            <div className="flex flex-wrap gap-4 items-end bg-[#16192b]/30 p-4 rounded-xl border border-[#1e233d] print:hidden">
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Class Filter</label>
                 <select
@@ -961,7 +961,7 @@ export default function ReportsClient({ students, classes, teachers }) {
 
             {feeReport && (
               <div className="space-y-6">
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end print:hidden">
                   <button
                     onClick={() => handleExportPNG('Fee_Report.png')}
                     className="flex items-center gap-1.5 px-4 py-2 bg-[#16192b] border border-[#2b3052] text-zinc-300 hover:text-white hover:border-cyan-500 text-xs font-bold rounded-lg cursor-pointer transition-all"
@@ -976,9 +976,9 @@ export default function ReportsClient({ students, classes, teachers }) {
                   </button>
                 </div>
 
-                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black">
+                <div ref={exportRef} className="space-y-6 bg-[#070810] p-6 rounded-xl border border-[#1e233d] print:p-0 print:border-none print:bg-white print:text-black print:rounded-none print:shadow-none print:w-full" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                   {/* Brand Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#1e233d] print:border-zinc-300">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-[#1e233d] print:border-cyan-600">
                     <div className="flex items-center gap-4">
                       <img src="/logo.png" alt="Logo" className="h-14 w-auto object-contain" />
                       <div>
@@ -994,12 +994,13 @@ export default function ReportsClient({ students, classes, teachers }) {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto border border-[#1e233d] rounded-xl print:border-zinc-300">
+                  <div className="overflow-x-auto print:overflow-x-visible border border-[#1e233d] rounded-xl print:border-zinc-300">
                     <table className="w-full text-left text-sm border-collapse">
                       <thead>
-                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-zinc-200 print:text-black">
+                        <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
                           <th className="px-4 py-3">Student Name</th>
                           <th className="px-4 py-3">Roll No / Class</th>
+                          <th className="px-4 py-3">Contact</th>
                           <th className="px-4 py-3">Billing Cycle</th>
                           <th className="px-4 py-3 text-right">Total Billed</th>
                           <th className="px-4 py-3 text-right">Paid Amount</th>
@@ -1012,12 +1013,17 @@ export default function ReportsClient({ students, classes, teachers }) {
                           const outstanding = b.totalAmount - b.paidAmount;
                           return (
                             <tr key={b.id} className="hover:bg-[#16192b]/10 text-zinc-300 print:text-black">
-                              <td className="px-4 py-3 font-bold text-white print:text-black">{b.studentName}</td>
-                              <td className="px-4 py-3">
-                                <div>{b.rollNumber}</div>
-                                <div className="text-[10px] text-zinc-500 print:text-zinc-600">{b.className}</div>
+                              <td className="px-4 py-4">
+                                <div className="font-extrabold text-white print:text-black">{b.studentName}</div>
                               </td>
-                              <td className="px-4 py-3 font-semibold">{b.month}/{b.year}</td>
+                              <td className="px-4 py-4">
+                                <div className="text-zinc-300 print:text-zinc-700">{b.rollNumber}</div>
+                                <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{b.className}</div>
+                              </td>
+                              <td className="px-4 py-4 font-mono text-zinc-400 print:text-zinc-700">
+                                {b.contact}
+                              </td>
+                              <td className="px-4 py-4 font-mono">{b.month}/{b.year}</td>
                               <td className="px-4 py-3 text-right">Rs {b.totalAmount.toLocaleString()}</td>
                               <td className="px-4 py-3 text-right text-emerald-400 print:text-emerald-700 font-bold">Rs {b.paidAmount.toLocaleString()}</td>
                               <td className="px-4 py-3 text-right text-red-400 print:text-red-600 font-bold">
@@ -1025,11 +1031,11 @@ export default function ReportsClient({ students, classes, teachers }) {
                               </td>
                               <td className="px-4 py-3 text-center">
                                 <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                                  b.status === 'PAID' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' :
-                                  b.status === 'PARTIAL' ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20' :
-                                  b.status === 'WAIVED' ? 'bg-cyan-950/40 text-cyan-400 border border-cyan-500/20' :
-                                  'bg-red-950/40 text-red-400 border border-red-500/20'
-                                } print:text-black`}>
+                                  b.status === 'PAID' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 print:bg-green-100 print:text-green-800 print:border-green-300' :
+                                  b.status === 'PARTIAL' ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20 print:bg-amber-100 print:text-amber-800 print:border-amber-300' :
+                                  b.status === 'WAIVED' ? 'bg-cyan-950/40 text-cyan-400 border border-cyan-500/20 print:bg-blue-100 print:text-blue-800 print:border-blue-300' :
+                                  'bg-red-950/40 text-red-400 border border-red-500/20 print:bg-red-100 print:text-red-800 print:border-red-300'
+                                }`}>
                                   {b.status}
                                 </span>
                               </td>
@@ -1081,7 +1087,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                 <h3 className="text-base font-black text-white uppercase tracking-wider">WhatsApp Broadcast Logs</h3>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto print:overflow-x-visible">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead>
                     <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1198,7 +1204,7 @@ export default function ReportsClient({ students, classes, teachers }) {
             {warningsSubTab === 'absentees' && absenteesList.length > 0 && (
               <div className="bg-[#070810] p-5 rounded-xl border border-[#1e233d] space-y-4">
                 <h3 className="text-sm font-black text-red-400 uppercase tracking-wider">Absentee Record - {selectedDateIssues}</h3>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto print:overflow-x-visible">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1245,7 +1251,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                   <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider">Students with Attendance below 75%</h3>
                   <span className="text-xs text-zinc-500">Auto generated warning list</span>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto print:overflow-x-visible">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1284,7 +1290,7 @@ export default function ReportsClient({ students, classes, teachers }) {
             {warningsSubTab === 'completeness' && completenessList.length > 0 && (
               <div className="bg-[#070810] p-5 rounded-xl border border-[#1e233d] space-y-4">
                 <h3 className="text-sm font-black text-cyan-400 uppercase tracking-wider">Teacher Timetable Submissions checklist</h3>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto print:overflow-x-visible">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">

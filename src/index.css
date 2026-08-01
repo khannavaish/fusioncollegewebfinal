@@ -656,12 +656,13 @@ h1,h2,h3,h4,h5 {
   border: none;
   cursor: pointer;
   padding: 6px;
+  z-index: 1001; /* Ensure hamburger stays above nav-links overlay */
 }
 .hamburger span {
   display: block;
   width: 24px;
   height: 2.5px;
-  background: var(--navy);
+  background: var(--text);
   border-radius: 2px;
   transition: var(--ease);
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { updateStudent, deleteStudent, transferStudent, updateUserPassword } from '@/app/actions/admin';
 import PasswordShowHide from '@/app/components/PasswordShowHide';
 import Pagination from '@/app/components/Pagination';
@@ -22,7 +23,7 @@ function Modal({ title, onClose, children }) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+      <div className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e233d]">
           <h2 className="text-sm font-bold text-white">{title}</h2>
@@ -35,7 +36,7 @@ function Modal({ title, onClose, children }) {
             </svg>
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-6 py-5 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
@@ -63,8 +64,8 @@ export default function StudentsClient({ students, classes, page, total, pageSiz
         <Modal
           title={
             modal.type === 'edit'     ? `Edit — ${modal.student.name}` :
-            modal.type === 'transfer' ? `Transfer — ${modal.student.name}` :
-                                        `Change Password — ${modal.student.name}`
+            modal.type === 'transfer' ? `Transfer — ${modal.student?.name}` :
+                                        `Change Password — ${modal.student?.name}`
           }
           onClose={closeModal}
         >
@@ -92,12 +93,56 @@ export default function StudentsClient({ students, classes, page, total, pageSiz
                   {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">CNIC</label>
+                  <input name="cnic" defaultValue={modal.student.cnic} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Father&apos;s CNIC</label>
+                  <input name="fatherCnic" defaultValue={modal.student.fatherCnic} className={inputCls} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">WhatsApp</label>
+                  <input name="whatsappNumber" defaultValue={modal.student.whatsappNumber} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Telephone</label>
+                  <input name="telephone" defaultValue={modal.student.telephone} className={inputCls} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Gender</label>
+                  <select name="gender" defaultValue={modal.student.gender} className={inputCls}>
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Status</label>
+                  <select name="status" defaultValue={modal.student.user?.status || 'ACTIVE'} className={inputCls}>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Status</label>
-                <select name="status" defaultValue={modal.student.user?.status || 'ACTIVE'} className={inputCls}>
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
+                <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Address</label>
+                <input name="address" defaultValue={modal.student.address} className={inputCls} />
+              </div>
+
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Update Photo (Leave empty to keep current)</label>
+                <input name="photo" type="file" accept="image/*" className={`${inputCls} file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-950 file:text-cyan-400 hover:file:bg-cyan-900 cursor-pointer p-1.5`} />
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={closeModal}
@@ -208,7 +253,18 @@ export default function StudentsClient({ students, classes, page, total, pageSiz
               {students.map((s, i) => (
                 <tr key={s.id} className={`border-b border-[#1e233d] hover:bg-[#16192b]/30 transition-colors ${i % 2 === 1 ? 'bg-[#16192b]/10' : ''}`}>
                   <td className="px-5 py-4 text-xs text-zinc-600">{i + 1 + (page - 1) * pageSize}</td>
-                  <td className="px-5 py-4 font-semibold text-sm text-white whitespace-nowrap">{s.name}</td>
+                  <td className="px-5 py-4">
+                    <Link href={`/admin/students/${s.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                      {s.photoUrl ? (
+                        <img src={s.photoUrl} alt={s.name} className="w-8 h-8 rounded-full object-cover border border-[#1e233d]" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-[#1e233d] flex items-center justify-center text-xs text-zinc-400 font-bold border border-[#2b3052]">
+                          {s.name.charAt(0)}
+                        </div>
+                      )}
+                      <span className="font-semibold text-sm text-cyan-400 hover:text-cyan-300 whitespace-nowrap transition-colors">{s.name}</span>
+                    </Link>
+                  </td>
                   <td className="px-5 py-4">
                     <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/20 px-2 py-0.5 rounded border border-cyan-500/20">
                       {s.rollNumber}
@@ -238,6 +294,10 @@ export default function StudentsClient({ students, classes, page, total, pageSiz
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex gap-1.5">
+                      <Link
+                        href={`/admin/students/${s.id}/ledger`}
+                        className="px-2.5 py-1 bg-[#1e233d] rounded text-emerald-400 text-[10px] font-semibold hover:bg-emerald-950/30 hover:text-emerald-300 transition-colors"
+                      >Ledger</Link>
                       <button
                         onClick={() => setModal({ type: 'edit', student: s })}
                         className="px-2.5 py-1 bg-[#1e233d] rounded text-cyan-400 text-[10px] font-semibold hover:bg-cyan-950/30 hover:text-cyan-300 transition-colors"

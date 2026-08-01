@@ -22,7 +22,7 @@ export default async function AdminDashboard() {
     redirect(dbUser ? `/${dbUser.role.toLowerCase()}` : '/login');
   }
 
-  let admin = null, studentCount = 0, teacherCount = 0, classCount = 0, subjectCount = 0, userCount = 0;
+  let admin = null, studentCount = 0, teacherCount = 0, classCount = 0, subjectCount = 0, parentCount = 0;
   let recentStudents = [], recentTeachers = [], enquiries = [];
 
   try {
@@ -35,7 +35,7 @@ export default async function AdminDashboard() {
     teacherCount = await prisma.teacher.count();
     classCount = await prisma.class.count();
     subjectCount = await prisma.subject.count();
-    userCount = await prisma.user.count();
+    parentCount = await prisma.parent.count();
     recentStudents = await prisma.student.findMany({ include: { class: true, user: true }, orderBy: { name: 'asc' }, take: 5 });
     recentTeachers = await prisma.teacher.findMany({ include: { user: true }, orderBy: { name: 'asc' }, take: 5 });
     enquiries = await prisma.contactEnquiry.findMany({ orderBy: { createdAt: 'desc' }, take: 10 });
@@ -65,43 +65,7 @@ export default async function AdminDashboard() {
       </div>
     </AnimatedSection>
 
-      <AnimatedSection delay={0.1}>
-        <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-red-400">Danger Zone</div>
-            <h2 className="mt-1 text-base font-bold text-white">Reset Teachers and Students</h2>
-            <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-              Removes all teacher, student, and parent accounts linked to them, plus class assignments, lectures, attendance, submissions, exams, and related logs. Admin data, classes, subjects, timetable, and enquiries stay in place.
-            </p>
-          </div>
-          <details className="relative">
-            <summary className="list-none rounded-lg border border-red-500/30 bg-red-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-500 cursor-pointer">
-              Reset Data
-            </summary>
-            <div className="absolute right-0 top-12 z-20 w-80 rounded-xl border border-red-500/20 bg-[#0d0f1a] p-4 shadow-2xl shadow-black/40">
-              <form action={resetSchoolData} className="space-y-3">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Type RESET to confirm</label>
-                  <input
-                    name="confirmText"
-                    placeholder="RESET"
-                    className="w-full rounded-lg border border-[#1e233d] bg-[#0a0c14] px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-red-500 focus:outline-none"
-                    required
-                  />
-                </div>
-                <p className="text-[10px] leading-4 text-zinc-500">
-                  This clears the academic roster and its linked records. It does not remove the admin account or timetable setup.
-                </p>
-                <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-500">
-                  <IconTrash className="h-4 w-4" /> Permanently Reset
-                </button>
-              </form>
-            </div>
-          </details>
-        </div>
-      </div>
-    </AnimatedSection>
+
 
       {/* Stats */}
       <AnimatedSection delay={0.15}>
@@ -111,7 +75,7 @@ export default async function AdminDashboard() {
           { label: 'Teachers', value: teacherCount, color: 'text-violet-400', href: '/admin/teachers' },
           { label: 'Classes', value: classCount, color: 'text-blue-400', href: '/admin/classes' },
           { label: 'Subjects', value: subjectCount, color: 'text-emerald-400', href: '/admin/subjects' },
-          { label: 'Total Users', value: userCount, color: 'text-amber-400', href: '/admin/parents' },
+          { label: 'Parents', value: parentCount, color: 'text-amber-400', href: '/admin/parents' },
         ].map((stat) => (
           <Link key={stat.label} href={stat.href} className="bg-[#16192b]/50 border border-[#1e233d] rounded-xl p-5 hover:border-[#2b3052] transition-colors group">
             <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</div>

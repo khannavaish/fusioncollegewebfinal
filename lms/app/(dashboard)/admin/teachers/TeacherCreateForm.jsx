@@ -83,11 +83,13 @@ export default function TeacherCreateForm() {
         </div>
 
         <form ref={formRef} action={action}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
             <input name="name" placeholder="Full Name *" className={inputCls} required />
             <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
             <input name="phone" placeholder="Phone Number" className={inputCls} />
             <input name="qualification" placeholder="Qualification (e.g. M.Sc Physics)" className={inputCls} />
+            <input name="department" placeholder="Department (e.g. Science)" className={inputCls} />
+            <input name="baseSalary" type="number" placeholder="Base Salary (e.g. 50000)" className={inputCls} />
           </div>
 
           {state?.error && (

@@ -80,6 +80,7 @@ export default async function AdminStudentsPage({ searchParams }) {
               name: s.name,
               fatherName: s.fatherName,
               rollNumber: s.rollNumber,
+              photoUrl: s.photoUrl,
               classId: s.classId,
               class: s.class,
               user: s.user ? { email: s.user.email, plainPassword: s.user.plainPassword, status: s.user.status } : null,

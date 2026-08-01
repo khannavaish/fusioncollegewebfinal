@@ -17,6 +17,7 @@ model User {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   plainPassword String?
+  avatarUrl     String?
   admin         Admin?
   parent        Parent?
   student       Student?
@@ -37,9 +38,12 @@ model Teacher {
   name          String
   phone         String?
   qualification String?
+  department    String?
+  baseSalary    Decimal?       @db.Decimal(10, 2)
   subjects      ClassSubject[]
-  inchargeClasses Class[]       @relation("ClassIncharge")
+  inchargeClasses Class[]      @relation("ClassIncharge")
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salaryBills   TeacherSalaryBill[]
 }
 
 model Student {
@@ -51,6 +55,11 @@ model Student {
   classId             String
   cnic                String?
   fatherCnic          String?
+  whatsappNumber      String?
+  telephone           String?
+  address             String?
+  gender              String?
+  photoUrl            String?
   admissionPercentage Decimal?        @db.Decimal(5, 2)
   feePackageId        String?
   feeMonthlyOverride  Decimal?        @db.Decimal(10, 2)
@@ -362,5 +371,21 @@ model SystemSettings {
   id                String   @id @default("global")
   activeSessionName String   @default("Session 2026-2028")
   updatedAt         DateTime @updatedAt
+}
+
+model TeacherSalaryBill {
+  id           String    @id @default(uuid())
+  teacherId    String
+  month        Int
+  year         Int
+  baseAmount   Decimal   @db.Decimal(10, 2)
+  paidAmount   Decimal?  @db.Decimal(10, 2)
+  status       String    @default("UNPAID") // UNPAID | PAID
+  paidAt       DateTime?
+  remarks      String?
+  createdAt    DateTime  @default(now())
+  teacher      Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, month, year])
 }
 

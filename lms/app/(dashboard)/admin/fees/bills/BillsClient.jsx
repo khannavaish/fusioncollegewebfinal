@@ -129,7 +129,10 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
       for (const bill of classBills) {
         const doc = await generateBillPDF(bill);
         const pdfBytes = doc.output('arraybuffer');
-        zip.file(getBillFilename(bill), pdfBytes);
+        const className = bill.student?.class?.name || 'Unassigned';
+        // If downloading all classes, group them into folders by class name
+        const filePath = !targetClassId ? `${className}/${getBillFilename(bill)}` : getBillFilename(bill);
+        zip.file(filePath, pdfBytes);
       }
 
       const blob = await zip.generateAsync({ type: 'blob' });

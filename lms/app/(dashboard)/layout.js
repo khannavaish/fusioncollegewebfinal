@@ -6,7 +6,7 @@ import {
   IconBuilding, IconBookOpen, IconClipboard, IconTrophy, IconUsers, IconChatBubble, IconDocumentText,
 } from '@/app/components/icons';
 import MobileMenu from '@/app/components/MobileMenu';
-import ThemeToggle from '@/app/components/ThemeToggle';
+import GlobalSearch from '@/app/components/GlobalSearch';
 
 
 export default async function DashboardLayout({ children }) {
@@ -141,7 +141,7 @@ export default async function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen h-dvh bg-[#090b11] text-zinc-100 flex font-sans overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-[#1e233d] bg-[#0d0f1a] hidden md:flex flex-col">
+      <aside className="w-64 border-r border-[#1e233d] bg-[#0d0f1a] hidden md:flex flex-col print:hidden">
         <div className="h-16 flex items-center px-6 border-b border-[#1e233d] gap-2">
           <img
             src="/logo.png"
@@ -183,6 +183,8 @@ export default async function DashboardLayout({ children }) {
               grades:    'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14m-6 0a2 2 0 002 2h2a2 2 0 002-2',
               profile:   'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
               session:   'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+              download:  'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',
+              trash:     'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
             };
 
             return (
@@ -195,13 +197,16 @@ export default async function DashboardLayout({ children }) {
                   <NavLink href="/admin/students"      label="Students"             d={ICONS.students}   hoverColor="group-hover:text-indigo-400" />
                   <NavLink href="/admin/teachers"      label="Teachers"             d={ICONS.teachers}   hoverColor="group-hover:text-cyan-400" />
                   <NavLink href="/admin/parents"       label="Parents"              d={ICONS.parents}    hoverColor="group-hover:text-violet-400" />
+                  <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Finance & Reports</p>
+                  <NavLink href="/admin/fees"          label="Fee Management"       d={ICONS.fees}       hoverColor="group-hover:text-emerald-400" />
+                  <NavLink href="/admin/fees/payroll"  label="Teacher Salaries"     d={ICONS.history}    hoverColor="group-hover:text-green-400" />
+                  <NavLink href="/admin/ledger"        label="Ledger"               d={ICONS.reports}    hoverColor="group-hover:text-teal-400" />
                   <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">Academic & Settings</p>
                   <NavLink href="/admin/session"       label="Session & Promotion"  d={ICONS.session}    hoverColor="group-hover:text-purple-400" />
                   <NavLink href="/admin/classes"       label="Classes"              d={ICONS.classes}    hoverColor="group-hover:text-blue-400" />
                   <NavLink href="/admin/subjects"      label="Subjects"             d={ICONS.subjects}   hoverColor="group-hover:text-emerald-400" />
                   <NavLink href="/admin/timetable"     label="Edit Timetable"       d={ICONS.timetable}  hoverColor="group-hover:text-cyan-400" />
                   <NavLink href="/admin/exams"         label="Schedule Exams"       d={ICONS.exams}      hoverColor="group-hover:text-amber-400" />
-                  <NavLink href="/admin/fees"          label="Fee Management"       d={ICONS.fees}       hoverColor="group-hover:text-emerald-400" />
                   <NavLink href="/admin/whatsapp"      label="WhatsApp Alerts"      d={ICONS.whatsapp}   hoverColor="group-hover:text-green-400" />
                   <NavLink href="/admin/announcements" label="Announcements"        d={ICONS.announce}   hoverColor="group-hover:text-cyan-400" />
                   <NavLink href="/admin/notifications" label="Notification History" d={ICONS.history}    hoverColor="group-hover:text-violet-400"
@@ -212,6 +217,9 @@ export default async function DashboardLayout({ children }) {
                     )}
                   />
                   <NavLink href="/admin/reports"       label="Reports Center"       d={ICONS.reports}    hoverColor="group-hover:text-amber-400" />
+                  <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">System Tools</p>
+                  <NavLink href="/admin/export"        label="Export Data"          d={ICONS.download}   hoverColor="group-hover:text-emerald-400" />
+                  <NavLink href="/admin/reset"         label="System Reset"         d={ICONS.trash}      hoverColor="group-hover:text-red-400" />
                 </>)}
 
                 {role === 'TEACHER' && (<>
@@ -266,7 +274,7 @@ export default async function DashboardLayout({ children }) {
 
       {/* Main pane */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-        <header className="h-16 border-b border-[#1e233d] bg-[#0d0f1a] px-6 flex items-center justify-between">
+        <header className="relative h-16 border-b border-[#1e233d] bg-[#0d0f1a] px-6 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-3">
             <MobileMenu role={role} name={name} handleSignOutAction={handleSignOut} />
             <div className="md:hidden flex items-center gap-2">
@@ -279,15 +287,20 @@ export default async function DashboardLayout({ children }) {
             </div>
           </div>
 
+          {role === 'ADMIN' && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[300px] md:max-w-[400px] lg:max-w-[550px] hidden md:block">
+              <GlobalSearch />
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <span className="text-xs px-2.5 py-1 rounded bg-[#1e233d] border border-[#2b3052] font-semibold text-zinc-300">
               {sessionName}
             </span>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto overflow-x-hidden min-h-0 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto print:overflow-visible overflow-x-hidden print:overflow-x-visible min-h-0 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

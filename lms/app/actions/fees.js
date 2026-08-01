@@ -26,7 +26,7 @@ async function verifyAdmin() {
 
 // ─── Fee Package Actions ──────────────────────────────────────────────────────
 
-export async function createFeePackage(formData) {
+export async function createFeePackage(_prev, formData) {
   await verifyAdmin();
   const name = formData.get('name')?.toString().trim();
   const minPercentage = parseFloat(formData.get('minPercentage'));
@@ -54,7 +54,7 @@ export async function createFeePackage(formData) {
   }
 }
 
-export async function updateFeePackage(formData) {
+export async function updateFeePackage(_prev, formData) {
   await verifyAdmin();
   const id = formData.get('id')?.toString();
   const name = formData.get('name')?.toString().trim();
@@ -80,7 +80,7 @@ export async function updateFeePackage(formData) {
   }
 }
 
-export async function deleteFeePackage(formData) {
+export async function deleteFeePackage(_prev, formData) {
   await verifyAdmin();
   const id = formData.get('id')?.toString();
   if (!id) return { error: 'Package ID required.' };
@@ -103,7 +103,7 @@ export async function deleteFeePackage(formData) {
 
 // ─── Bill Generation ──────────────────────────────────────────────────────────
 
-export async function generateMonthlyBills(formData) {
+export async function generateMonthlyBills(_prev, formData) {
   await verifyAdmin();
   const month = parseInt(formData.get('month'));
   const year = parseInt(formData.get('year'));
@@ -185,7 +185,7 @@ async function sendBillWhatsAppBatch(month, year) {
     prisma.bankConfig.findUnique({ where: { id: 'default' } }),
   ]);
 
-  const { sendWhatsAppMessage } = await import('@/app/actions/whatsapp');
+  const { sendWhatsAppMessage, getTargetNumbers } = await import('@/app/actions/whatsapp');
   const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
   for (const bill of bills) {
@@ -197,11 +197,10 @@ async function sendBillWhatsAppBatch(month, year) {
 
     const message = buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bankConfig);
 
-    for (const ps of student.parents) {
-      if (ps.parent?.phone) {
-        await delay(Math.floor(Math.random() * 2000) + 1500);
-        await sendWhatsAppMessage(ps.parent.phone, message);
-      }
+    const targetNumbers = getTargetNumbers(student);
+    for (const phone of targetNumbers) {
+      await delay(Math.floor(Math.random() * 2000) + 1500);
+      await sendWhatsAppMessage(phone, message);
     }
 
     await prisma.feeBill.update({ where: { id: bill.id }, data: { whatsappSent: true } });
@@ -270,14 +269,13 @@ export async function resendBillWhatsApp(formData) {
       .join('\n');
 
     const message = buildFeeWhatsAppMessage(bill.student, bill, monthName, bill.year, itemLines, bankConfig);
-    const { sendWhatsAppMessage } = await import('@/app/actions/whatsapp');
+    const { sendWhatsAppMessage, getTargetNumbers } = await import('@/app/actions/whatsapp');
 
     let sent = 0;
-    for (const ps of bill.student.parents) {
-      if (ps.parent?.phone) {
-        const result = await sendWhatsAppMessage(ps.parent.phone, message);
-        if (result?.success !== false) sent++;
-      }
+    const targetNumbers = getTargetNumbers(bill.student);
+    for (const phone of targetNumbers) {
+      const result = await sendWhatsAppMessage(phone, message);
+      if (result?.success !== false) sent++;
     }
 
     await prisma.feeBill.update({ where: { id: billId }, data: { whatsappSent: true } });

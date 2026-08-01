@@ -102,12 +102,15 @@ const FusionLogo3D = () => {
   logoTexture.anisotropy = 16;
 
   useFrame(({ clock, pointer }, delta) => {
+    const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
     const t = clock.elapsedTime;
-    const targetX = pointer.x * (hovered.current ? 1.15 : 0.75);
-    const targetY = pointer.y * (hovered.current ? 1.15 : 0.75);
+    
+    // Disable pointer offsets on mobile to fix positioning bugs
+    const targetX = isTouch ? 0 : pointer.x * (hovered.current ? 1.15 : 0.75);
+    const targetY = isTouch ? 0 : pointer.y * (hovered.current ? 1.15 : 0.75);
 
-    smooth.current.x += (targetX - smooth.current.x) * (hovered.current ? 0.07 : 0.045);
-    smooth.current.y += (targetY - smooth.current.y) * (hovered.current ? 0.07 : 0.045);
+    smooth.current.x += (targetX - smooth.current.x) * (hovered.current && !isTouch ? 0.07 : 0.045);
+    smooth.current.y += (targetY - smooth.current.y) * (hovered.current && !isTouch ? 0.07 : 0.045);
 
     const hoverScale = hovered.current ? 1.045 : 1;
     const idleScale = 1 + Math.sin(t * 0.7) * 0.012;
@@ -128,8 +131,8 @@ const FusionLogo3D = () => {
     }
 
     if (haloRef.current) {
-      haloRef.current.rotation.z = t * (hovered.current ? 0.09 : 0.05);
-      haloRef.current.material.opacity = hovered.current ? 0.55 : 0.35;
+      haloRef.current.rotation.z = t * (hovered.current && !isTouch ? 0.09 : 0.05);
+      haloRef.current.material.opacity = (hovered.current && !isTouch) ? 0.55 : 0.35;
     }
 
     if (rimLightRef.current) {

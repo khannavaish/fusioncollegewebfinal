@@ -143,3 +143,88 @@ body {
   border-color: #cbd5e1 !important;
 }
 
+/* ─── GLOBAL PRINT STYLES ─────────────────────────────────────── */
+@media print {
+  @page {
+    margin: 12mm;
+    size: A4;
+  }
+
+  /* Kill scrollbars */
+  * { scrollbar-width: none !important; }
+  *::-webkit-scrollbar { display: none !important; }
+
+  /* Force color printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* White base */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide app chrome */
+  aside, header, nav, footer { display: none !important; }
+
+  /* Flatten layout wrappers - remove overflow clipping */
+  div {
+    overflow: visible !important;
+  }
+
+  /* Nuke ALL dark hex background classes used in this app */
+  .bg-\[\#090b11\],
+  .bg-\[\#0a0c14\],
+  .bg-\[\#0d0f1a\],
+  .bg-\[\#070810\],
+  .bg-\[\#16192b\] {
+    background-color: #ffffff !important;
+  }
+
+  /* Nuke dark border colours */
+  .border-\[\#1e233d\],
+  .border-\[\#2b3052\] {
+    border-color: #e5e7eb !important;
+  }
+
+  /* Make ALL text readable on white */
+  .text-white,
+  .text-zinc-100,
+  .text-zinc-200,
+  .text-zinc-300,
+  .text-zinc-400,
+  .text-zinc-500 {
+    color: #111827 !important;
+  }
+
+  /* Flatten card heights so layout isn't clipped */
+  .min-h-screen,
+  .min-h-\[400px\],
+  .h-dvh,
+  .overflow-hidden {
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
+  }
+
+  /* Remove padding/margin from dashboard wrappers */
+  .flex-1 {
+    display: block !important;
+  }
+
+  /* Table improvements for print */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th, td {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+  thead tr {
+    background-color: #e0f2fe !important;
+    color: #0f172a !important;
+  }
+}

@@ -13,6 +13,21 @@ async function verifyAdmin() {
   return user;
 }
 
+export function getTargetNumbers(student) {
+  const numbers = [];
+  if (student.whatsappNumber?.trim()) {
+    numbers.push(student.whatsappNumber.trim());
+  }
+  if (student.parents && Array.isArray(student.parents)) {
+    for (const ps of student.parents) {
+      if (ps.parent?.phone?.trim() && !numbers.includes(ps.parent.phone.trim())) {
+        numbers.push(ps.parent.phone.trim());
+      }
+    }
+  }
+  return numbers;
+}
+
 // â”€â”€â”€ Send via Custom / UltraMsg â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendWhatsAppMessage(to, message) {
   const config = await prisma.whatsAppConfig.findUnique({ where: { id: 'default' } });
@@ -178,21 +193,20 @@ Your child *${student.name}* (Roll No: ${student.rollNumber}) ${englishStatus}
 Regards,
 Fusion College Narowal Administration`;
 
-    for (const ps of student.parents) {
-      if (ps.parent?.phone) {
-        const result = await sendWhatsAppMessage(ps.parent.phone, message);
-        
-        // Log to DB
-        await prisma.whatsAppLog.create({
-          data: {
-            studentId: student.id,
-            parentPhone: ps.parent.phone,
-            messageType: 'ARRIVAL',
-            success: !!result.success,
-            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
-          }
-        });
-      }
+    const targetNumbers = getTargetNumbers(student);
+    for (const phone of targetNumbers) {
+      const result = await sendWhatsAppMessage(phone, message);
+      
+      // Log to DB
+      await prisma.whatsAppLog.create({
+        data: {
+          studentId: student.id,
+          parentPhone: phone,
+          messageType: 'ARRIVAL',
+          success: !!result.success,
+          errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+        }
+      });
     }
   } catch (e) {
     console.error('[WhatsApp] Arrival send error:', e);
@@ -312,30 +326,29 @@ Fusion College Narowal Administration`;
       // Helper to delay executions (anti-spam block measure)
       const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      for (const ps of student.parents) {
-        if (ps.parent?.phone) {
-          // Wait 5-8 seconds randomly before sending next message
-          const randomDelay = Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
-          await delay(randomDelay);
+      const targetNumbers = getTargetNumbers(student);
+      for (const phone of targetNumbers) {
+        // Wait 5-8 seconds randomly before sending next message
+        const randomDelay = Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
+        await delay(randomDelay);
 
-          const result = await sendWhatsAppMessage(ps.parent.phone, message);
-          if (!result.skipped) {
-            if (result.success) sent++;
-          } else {
-            skipped++;
-          }
-
-          // Log to DB
-          await prisma.whatsAppLog.create({
-            data: {
-              studentId: student.id,
-              parentPhone: ps.parent.phone,
-              messageType: 'EOD_SUMMARY',
-              success: !!result.success,
-              errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
-            }
-          });
+        const result = await sendWhatsAppMessage(phone, message);
+        if (!result.skipped) {
+          if (result.success) sent++;
+        } else {
+          skipped++;
         }
+
+        // Log to DB
+        await prisma.whatsAppLog.create({
+          data: {
+            studentId: student.id,
+            parentPhone: phone,
+            messageType: 'EOD_SUMMARY',
+            success: !!result.success,
+            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+          }
+        });
       }
     }
     }
@@ -367,19 +380,20 @@ export async function sendBroadcastMessage(formData) {
     let sent = 0, skipped = 0;
 
     for (const student of students) {
-      for (const ps of student.parents) {
-        if (!ps.parent?.phone) { skipped++; continue; }
+      const targetNumbers = getTargetNumbers(student);
+      if (targetNumbers.length === 0) { skipped++; continue; }
+      for (const phone of targetNumbers) {
         const randomDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
         await delay(randomDelay);
-        const result = await sendWhatsAppMessage(ps.parent.phone, message);
+        const result = await sendWhatsAppMessage(phone, message);
         if (result.skipped) { skipped++; } else if (result.success) { sent++; }
         await prisma.whatsAppLog.create({
           data: {
             studentId: student.id,
-            parentPhone: ps.parent.phone,
+            parentPhone: phone,
             messageType: 'BROADCAST',
             success: !!result.success,
-            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null),
+            errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
           }
         });
       }

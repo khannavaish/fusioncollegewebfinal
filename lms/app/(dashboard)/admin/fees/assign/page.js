@@ -41,10 +41,27 @@ export default async function AssignFeePackagesPage() {
     }),
   ]);
 
+  const serializedStudents = students.map(s => ({
+    ...s,
+    feeMonthlyOverride: s.feeMonthlyOverride ? Number(s.feeMonthlyOverride) : null,
+    admissionPercentage: s.admissionPercentage ? Number(s.admissionPercentage) : null,
+    feePackage: s.feePackage ? {
+      ...s.feePackage,
+      monthlyFee: s.feePackage.monthlyFee ? Number(s.feePackage.monthlyFee) : null,
+    } : null,
+  }));
+
+  const serializedPackages = packages.map(p => ({
+    ...p,
+    monthlyFee: p.monthlyFee ? Number(p.monthlyFee) : null,
+    minPercentage: p.minPercentage ? Number(p.minPercentage) : null,
+    maxPercentage: p.maxPercentage ? Number(p.maxPercentage) : null,
+  }));
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <AnimatedSection delay={0.1}>
-        <AssignClient students={students} packages={packages} classes={classes} />
+        <AssignClient students={serializedStudents} packages={serializedPackages} classes={classes} />
       </AnimatedSection>
     </div>
   );

@@ -133,8 +133,14 @@ export async function getStudentReport(studentId, dateFromStr, dateToStr) {
     orderBy: { sentAt: 'desc' }
   });
 
+  const serializedStudent = {
+    ...student,
+    admissionPercentage: student.admissionPercentage ? Number(student.admissionPercentage) : null,
+    feeMonthlyOverride: student.feeMonthlyOverride ? Number(student.feeMonthlyOverride) : null,
+  };
+
   return {
-    student,
+    student: serializedStudent,
     subjectStats: Object.values(subjectStats),
     examResults: formattedExamResults,
     whatsAppLogs
@@ -309,8 +315,13 @@ export async function getTeacherReport(teacherId, dateFromStr, dateToStr) {
     };
   });
 
+  const serializedTeacher = {
+    ...teacher,
+    baseSalary: teacher.baseSalary ? Number(teacher.baseSalary) : null,
+  };
+
   return {
-    teacher,
+    teacher: serializedTeacher,
     lectures: formattedLectures,
     exams: formattedExams
   };
@@ -503,7 +514,13 @@ export async function getFeeReport(dateFromStr, dateToStr, classId = '', student
     where,
     include: {
       student: {
-        select: { rollNumber: true, name: true, class: { select: { name: true } } }
+        select: { 
+          rollNumber: true, 
+          name: true, 
+          whatsappNumber: true,
+          telephone: true,
+          class: { select: { name: true } } 
+        }
       }
     },
     orderBy: { createdAt: 'desc' }
@@ -513,6 +530,7 @@ export async function getFeeReport(dateFromStr, dateToStr, classId = '', student
     id: b.id,
     rollNumber: b.student.rollNumber,
     studentName: b.student.name,
+    contact: b.student.whatsappNumber || b.student.telephone || 'N/A',
     className: b.student.class?.name || 'N/A',
     month: b.month,
     year: b.year,
