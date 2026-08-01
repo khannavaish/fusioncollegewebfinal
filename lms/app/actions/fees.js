@@ -197,7 +197,7 @@ async function sendBillWhatsAppBatch(month, year) {
 
     const message = buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bankConfig);
 
-    const targetNumbers = getTargetNumbers(student);
+    const targetNumbers = await getTargetNumbers(student);
     for (const phone of targetNumbers) {
       await delay(Math.floor(Math.random() * 2000) + 1500);
       await sendWhatsAppMessage(phone, message);
@@ -272,7 +272,7 @@ export async function resendBillWhatsApp(formData) {
     const { sendWhatsAppMessage, getTargetNumbers } = await import('@/app/actions/whatsapp');
 
     let sent = 0;
-    const targetNumbers = getTargetNumbers(bill.student);
+    const targetNumbers = await getTargetNumbers(bill.student);
     for (const phone of targetNumbers) {
       const result = await sendWhatsAppMessage(phone, message);
       if (result?.success !== false) sent++;

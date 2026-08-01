@@ -13,7 +13,7 @@ async function verifyAdmin() {
   return user;
 }
 
-export function getTargetNumbers(student) {
+export async function getTargetNumbers(student) {
   const numbers = [];
   if (student.whatsappNumber?.trim()) {
     numbers.push(student.whatsappNumber.trim());
@@ -193,7 +193,7 @@ Your child *${student.name}* (Roll No: ${student.rollNumber}) ${englishStatus}
 Regards,
 Fusion College Narowal Administration`;
 
-    const targetNumbers = getTargetNumbers(student);
+    const targetNumbers = await getTargetNumbers(student);
     for (const phone of targetNumbers) {
       const result = await sendWhatsAppMessage(phone, message);
       
@@ -326,7 +326,7 @@ Fusion College Narowal Administration`;
       // Helper to delay executions (anti-spam block measure)
       const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      const targetNumbers = getTargetNumbers(student);
+      const targetNumbers = await getTargetNumbers(student);
       for (const phone of targetNumbers) {
         // Wait 5-8 seconds randomly before sending next message
         const randomDelay = Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
@@ -380,7 +380,7 @@ export async function sendBroadcastMessage(formData) {
     let sent = 0, skipped = 0;
 
     for (const student of students) {
-      const targetNumbers = getTargetNumbers(student);
+      const targetNumbers = await getTargetNumbers(student);
       if (targetNumbers.length === 0) { skipped++; continue; }
       for (const phone of targetNumbers) {
         const randomDelay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
