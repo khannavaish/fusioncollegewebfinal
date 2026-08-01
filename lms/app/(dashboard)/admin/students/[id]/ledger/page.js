@@ -47,15 +47,6 @@ export default async function StudentLedgerPage({ params }) {
 
   return (
     <div className="p-6 print:bg-white print:p-0 print:m-0 print:text-black min-h-screen">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          @page {
-            margin-top: 0;
-            margin-bottom: 5mm;
-          }
-        }
-      `}} />
-
       <AnimatedSection delay={0.1}>
         {/* Header Actions */}
         <div className="flex justify-between items-center mb-6 print:hidden">

@@ -146,8 +146,12 @@ body {
 /* ─── GLOBAL PRINT STYLES ─────────────────────────────────────── */
 @media print {
   @page {
-    margin: 12mm;
-    size: A4;
+    margin: 0;
+    size: auto;
+  }
+  
+  body {
+    margin: 1cm;
   }
 
   /* Kill scrollbars */
