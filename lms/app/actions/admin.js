@@ -861,6 +861,52 @@ export async function searchGlobalUsers(query) {
   }
 }
 
+// ── ADMIN PROFILE MANAGEMENT ────────────────────────────────────────────────
+export async function updateAdminProfile(formData) {
+  const user = await verifyAdmin();
+  const name = formData.get('name')?.toString().trim();
+  const email = formData.get('email')?.toString().trim();
+  const password = formData.get('password')?.toString();
+
+  if (!name || !email) return { error: 'Name and email are required.' };
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { authId: user.id },
+      include: { admin: true }
+    });
+
+    if (!dbUser || !dbUser.admin) return { error: 'Admin record not found.' };
+
+    const adminClientObj = adminClient();
+    if (email !== user.email) {
+      await adminClientObj.auth.admin.updateUserById(user.id, { email });
+    }
+    if (password && password.length >= 6) {
+      await adminClientObj.auth.admin.updateUserById(user.id, { password });
+    }
+
+    await prisma.admin.update({
+      where: { id: dbUser.admin.id },
+      data: { name },
+    });
+
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: { 
+        email,
+        ...(password && password.length >= 6 ? { plainPassword: password } : {})
+      },
+    });
+
+    revalidatePath('/admin/profile');
+    return { success: true };
+  } catch (e) {
+    console.error('Update profile error:', e);
+    return { error: 'Failed to update profile.' };
+  }
+}
+
 // PARENTS
 export async function createParent(formData) {
   await verifyAdmin();

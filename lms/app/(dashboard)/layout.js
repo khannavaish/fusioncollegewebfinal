@@ -220,6 +220,7 @@ export default async function DashboardLayout({ children }) {
                   <p className="text-zinc-600 text-[10px] font-semibold px-3 uppercase tracking-widest pt-4 pb-1">System Tools</p>
                   <NavLink href="/admin/export"        label="Export Data"          d={ICONS.download}   hoverColor="group-hover:text-emerald-400" />
                   <NavLink href="/admin/reset"         label="System Reset"         d={ICONS.trash}      hoverColor="group-hover:text-red-400" />
+                  <NavLink href="/admin/profile"       label="My Profile"           d={ICONS.profile}    hoverColor="group-hover:text-zinc-300" />
                 </>)}
 
                 {role === 'TEACHER' && (<>
