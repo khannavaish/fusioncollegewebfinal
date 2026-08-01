@@ -350,15 +350,19 @@ export async function markBillPaid(formData) {
 
   try {
     if (receiptImage && receiptImage.size > 0) {
-      const bytes = await receiptImage.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const ext = receiptImage.name.split('.').pop() || 'png';
-      const filename = `receipt_${billId}_${Date.now()}.${ext}`;
-      const uploadDir = join(process.cwd(), 'public', 'uploads');
-      
-      await mkdir(uploadDir, { recursive: true }).catch(() => {});
-      await writeFile(join(uploadDir, filename), buffer);
-      paymentReceipt = `/uploads/${filename}`;
+      try {
+        const bytes = await receiptImage.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const ext = receiptImage.name.split('.').pop() || 'png';
+        const filename = `receipt_${billId}_${Date.now()}.${ext}`;
+        const uploadDir = join(process.cwd(), 'public', 'uploads');
+        
+        await mkdir(uploadDir, { recursive: true }).catch(() => {});
+        await writeFile(join(uploadDir, filename), buffer);
+        paymentReceipt = `/uploads/${filename}`;
+      } catch (uploadError) {
+        console.warn('Failed to save receipt image (Vercel read-only FS?):', uploadError.message);
+      }
     }
 
     const bill = await prisma.feeBill.findUnique({ where: { id: billId } });
