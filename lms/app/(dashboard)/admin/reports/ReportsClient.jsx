@@ -77,6 +77,7 @@ export default function ReportsClient({ students, classes, teachers }) {
   // --- WhatsApp Log Tab States ---
   const [selectedClassWA, setSelectedClassWA] = useState('ALL');
   const [whatsappLogs, setWhatsappLogs] = useState([]);
+  const [searchQueryWA, setSearchQueryWA] = useState('');
   const [loadingWA, startLoadingWA] = useTransition();
 
   // --- Fee Tab States ---
@@ -1082,6 +1083,16 @@ export default function ReportsClient({ students, classes, teachers }) {
                   ))}
                 </select>
               </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Search</label>
+                <input
+                  type="text"
+                  placeholder="Search name, phone, roll #..."
+                  value={searchQueryWA}
+                  onChange={e => setSearchQueryWA(e.target.value)}
+                  className="w-full bg-[#0a0c14] border border-[#1e233d] text-white px-3 py-2.5 rounded-lg text-sm focus:outline-none focus:border-cyan-500"
+                />
+              </div>
               <button
                 onClick={fetchWhatsAppLogs}
                 disabled={loadingWA}
@@ -1090,6 +1101,19 @@ export default function ReportsClient({ students, classes, teachers }) {
                 {loadingWA ? 'Fetching...' : 'Fetch Logs'}
               </button>
             </div>
+
+            {(() => {
+              const filteredLogs = whatsappLogs.filter(log => {
+                if (!searchQueryWA) return true;
+                const q = searchQueryWA.toLowerCase();
+                return (
+                  log.student.name.toLowerCase().includes(q) ||
+                  (log.student.rollNumber && log.student.rollNumber.toLowerCase().includes(q)) ||
+                  (log.parentPhone && log.parentPhone.includes(q))
+                );
+              });
+
+              return (
 
             <div className="bg-[#070810] p-6 rounded-xl border border-[#1e233d] space-y-4">
               <div className="flex items-center justify-between border-b border-[#1e233d] pb-3 mb-3">
@@ -1109,7 +1133,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#1e233d]">
-                    {whatsappLogs.map(log => (
+                    {filteredLogs.map(log => (
                       <tr key={log.id} className="hover:bg-[#16192b]/10 text-zinc-300">
                         <td className="px-4 py-3 text-xs">{new Date(log.sentAt).toLocaleString('en-PK')}</td>
                         <td className="px-4 py-3 font-bold text-white">{log.student.name} ({log.student.rollNumber})</td>
@@ -1137,15 +1161,19 @@ export default function ReportsClient({ students, classes, teachers }) {
                         </td>
                       </tr>
                     ))}
-                    {whatsappLogs.length === 0 && (
+                    {filteredLogs.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">No logs returned in date range. Click Fetch.</td>
+                        <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">
+                          {whatsappLogs.length === 0 ? 'No logs returned in date range. Click Fetch.' : 'No matches found for your search.'}
+                        </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
+            );
+            })()}
           </div>
         )}
 
