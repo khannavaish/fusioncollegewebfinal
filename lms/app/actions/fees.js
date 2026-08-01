@@ -215,7 +215,16 @@ async function sendBillWhatsAppBatch(month, year) {
     const targetNumbers = await getTargetNumbers(student);
     for (const phone of targetNumbers) {
       await delay(Math.floor(Math.random() * 2000) + 1500);
-      await sendWhatsAppMessage(phone, message);
+      const result = await sendWhatsAppMessage(phone, message);
+      await prisma.whatsAppLog.create({
+        data: {
+          studentId: student.id,
+          parentPhone: phone,
+          messageType: 'FEE_VOUCHER',
+          success: !!result.success,
+          errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+        }
+      });
     }
 
     await prisma.feeBill.update({ where: { id: bill.id }, data: { whatsappSent: true } });
@@ -291,6 +300,16 @@ export async function resendBillWhatsApp(formData) {
     for (const phone of targetNumbers) {
       const result = await sendWhatsAppMessage(phone, message);
       if (result?.success !== false) sent++;
+      
+      await prisma.whatsAppLog.create({
+        data: {
+          studentId: bill.student.id,
+          parentPhone: phone,
+          messageType: 'FEE_VOUCHER',
+          success: !!result.success,
+          errorMessage: result.error || (result.skipped ? 'Skipped: Config disabled' : null)
+        }
+      });
     }
 
     await prisma.feeBill.update({ where: { id: billId }, data: { whatsappSent: true } });
@@ -338,12 +357,21 @@ export async function addBillItem(formData) {
         }
       });
       
+      const fakeFd = new FormData();
+      fakeFd.append('billId', newBill.id);
+      await resendBillWhatsApp(fakeFd).catch(console.error);
+
       revalidatePath(`/admin/fees/bills/${existingBill.id}`);
       revalidatePath('/admin/fees/bills');
       return { success: true, newBillId: newBill.id };
     } else {
       await prisma.feeBillItem.create({ data: { billId, title, amount } });
       await recalculateBillTotal(billId);
+
+      const fakeFd = new FormData();
+      fakeFd.append('billId', billId);
+      await resendBillWhatsApp(fakeFd).catch(console.error);
+
       revalidatePath(`/admin/fees/bills/${billId}`);
       revalidatePath('/admin/fees/bills');
       return { success: true };
