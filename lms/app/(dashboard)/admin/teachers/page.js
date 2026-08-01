@@ -65,15 +65,13 @@ export default async function AdminTeachersPage({ searchParams }) {
             <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Teachers</h1>
             <p className="text-zinc-400 text-sm mt-1">{total} teacher{total !== 1 ? 's' : ''} registered</p>
           </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
+              <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+            </Link>
+            <TeacherCreateForm />
+          </div>
         </div>
-      </AnimatedSection>
-
-      {/* Registration form */}
-      <AnimatedSection delay={0.2}>
-        <TeacherCreateForm />
       </AnimatedSection>
 
       {/* Teachers Table */}
