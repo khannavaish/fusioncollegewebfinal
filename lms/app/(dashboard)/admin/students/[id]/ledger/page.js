@@ -46,7 +46,7 @@ export default async function StudentLedgerPage({ params }) {
   const getMonthName = (m) => new Date(2000, m - 1).toLocaleString('default', { month: 'short' });
 
   return (
-    <div className="min-h-screen bg-[#06080e] p-6 print:bg-white print:p-0 print:m-0">
+    <div className="p-6 print:bg-white print:p-0 print:m-0">
       <AnimatedSection delay={0.1}>
         {/* Header Actions */}
         <div className="flex justify-between items-center mb-6">

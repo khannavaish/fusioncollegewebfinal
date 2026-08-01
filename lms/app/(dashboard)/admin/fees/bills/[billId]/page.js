@@ -62,7 +62,7 @@ export default async function BillDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8">
+    <div className="text-white p-6 md:p-8">
       <AnimatedSection delay={0.1}>
         <div className="flex items-center gap-2 text-zinc-500 text-xs mb-6">
           <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>

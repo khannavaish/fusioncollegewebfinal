@@ -30,7 +30,7 @@ export default async function TeacherPayrollPage({ searchParams }) {
   });
 
   return (
-    <div className="min-h-screen bg-[#06080e] p-6">
+    <div className="p-6">
       <PayrollClient 
         initialBills={bills} 
         allTeachers={allTeachers}

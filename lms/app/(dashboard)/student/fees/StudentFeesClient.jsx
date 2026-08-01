@@ -33,7 +33,7 @@ export default function StudentFeesClient({ student }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#060810] text-white p-6 md:p-8 space-y-8">
+    <div className="text-white p-6 md:p-8 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">💰 My Fee Bills</h1>

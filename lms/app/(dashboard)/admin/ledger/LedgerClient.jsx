@@ -66,7 +66,7 @@ export default function LedgerClient({ students, teachers, classes }) {
   );
 
   return (
-    <div className="bg-[#0a0c14] min-h-screen">
+    <div>
       {/* Tabs - Hidden in Print */}
       <div className="print:hidden flex items-center bg-[#0d0f1a] border border-[#1e233d] p-1 rounded-lg w-fit mb-8">
         <button onClick={() => setActiveTab('student')} className={`px-5 py-2 text-sm font-semibold rounded-md transition-colors flex items-center gap-2 ${activeTab === 'student' ? 'bg-[#1e233d] text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>
