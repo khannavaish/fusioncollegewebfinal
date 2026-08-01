@@ -25,7 +25,7 @@ export default function LedgerClient({ students, teachers, classes }) {
   const handleFetchStudent = () => {
     if (!selectedStudent) return;
     startTransition(async () => {
-      const res = await getStudentLedger(selectedStudent);
+      const res = await getStudentLedger(selectedStudent, filterMonth, filterYear);
       if (res.student) setStudentData(res.student);
     });
   };
@@ -33,7 +33,7 @@ export default function LedgerClient({ students, teachers, classes }) {
   const handleFetchTeacher = () => {
     if (!selectedTeacher) return;
     startTransition(async () => {
-      const res = await getTeacherLedger(selectedTeacher);
+      const res = await getTeacherLedger(selectedTeacher, filterMonth, filterYear);
       if (res.teacher) setTeacherData(res.teacher);
     });
   };
@@ -83,16 +83,37 @@ export default function LedgerClient({ students, teachers, classes }) {
       {/* --- STUDENT LEDGER --- */}
       {activeTab === 'student' && (
         <div className="space-y-6">
-          <div className="print:hidden flex items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
+          <div className="print:hidden flex flex-col md:flex-row items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
             <select
               value={selectedStudent}
               onChange={(e) => setSelectedStudent(e.target.value)}
-              className="flex-1 bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+              className="flex-1 w-full bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
             >
               <option value="">-- Select a Student --</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.rollNumber})</option>)}
             </select>
-            <button onClick={handleFetchStudent} disabled={isPending || !selectedStudent} className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors">
+            
+            <select
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Months</option>
+              {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                <option key={m} value={i + 1}>{m}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Years</option>
+              {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+
+            <button onClick={handleFetchStudent} disabled={isPending || !selectedStudent} className="w-full md:w-auto px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap">
               {isPending ? 'Loading...' : 'Load Ledger'}
             </button>
           </div>
@@ -111,6 +132,11 @@ export default function LedgerClient({ students, teachers, classes }) {
                     <p><strong>Address:</strong> {studentData.address || 'N/A'}</p>
                     <p><strong>Contact:</strong> {studentData.whatsappNumber || studentData.telephone || 'N/A'}</p>
                   </div>
+                  {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
+                    <p className="text-cyan-700 print:text-cyan-900 bg-cyan-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-cyan-200 print:border-none mt-3 text-sm">
+                      <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
+                    </p>
+                  )}
                 </div>
                 <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg">
                   <IconPrint className="w-4 h-4" /> Print PDF
@@ -178,16 +204,37 @@ export default function LedgerClient({ students, teachers, classes }) {
       {/* --- TEACHER LEDGER --- */}
       {activeTab === 'teacher' && (
         <div className="space-y-6">
-          <div className="print:hidden flex items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
+          <div className="print:hidden flex flex-col md:flex-row items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
             <select
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="flex-1 bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+              className="flex-1 w-full bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
             >
               <option value="">-- Select a Teacher --</option>
               {teachers.map(t => <option key={t.id} value={t.id}>{t.name} - {t.department}</option>)}
             </select>
-            <button onClick={handleFetchTeacher} disabled={isPending || !selectedTeacher} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors">
+            
+            <select
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Months</option>
+              {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                <option key={m} value={i + 1}>{m}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Years</option>
+              {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+
+            <button onClick={handleFetchTeacher} disabled={isPending || !selectedTeacher} className="w-full md:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap">
               {isPending ? 'Loading...' : 'Load Ledger'}
             </button>
           </div>
@@ -204,6 +251,11 @@ export default function LedgerClient({ students, teachers, classes }) {
                     <p><strong>Base Salary:</strong> ₨ {teacherData.baseSalary?.toLocaleString() || 'N/A'}</p>
                     <p><strong>Address:</strong> {teacherData.address || 'N/A'}</p>
                   </div>
+                  {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
+                    <p className="text-emerald-700 print:text-emerald-900 bg-emerald-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-emerald-200 print:border-none mt-3 text-sm">
+                      <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
+                    </p>
+                  )}
                 </div>
                 <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg">
                   <IconPrint className="w-4 h-4" /> Print PDF

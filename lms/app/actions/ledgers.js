@@ -3,14 +3,19 @@
 import prisma from '@/utils/db';
 import { verifyAdmin } from './admin';
 
-export async function getStudentLedger(studentId) {
+export async function getStudentLedger(studentId, month = 'ALL', year = 'ALL') {
   await verifyAdmin();
   try {
+    const billFilter = {};
+    if (month !== 'ALL') billFilter.month = parseInt(month);
+    if (year !== 'ALL') billFilter.year = parseInt(year);
+
     const student = await prisma.student.findUnique({
       where: { id: studentId },
       include: {
         class: true,
         feeBills: {
+          where: billFilter,
           orderBy: [
             { year: 'asc' },
             { month: 'asc' }
@@ -45,13 +50,18 @@ export async function getStudentLedger(studentId) {
   }
 }
 
-export async function getTeacherLedger(teacherId) {
+export async function getTeacherLedger(teacherId, month = 'ALL', year = 'ALL') {
   await verifyAdmin();
   try {
+    const billFilter = {};
+    if (month !== 'ALL') billFilter.month = parseInt(month);
+    if (year !== 'ALL') billFilter.year = parseInt(year);
+
     const teacher = await prisma.teacher.findUnique({
       where: { id: teacherId },
       include: {
         salaryBills: {
+          where: billFilter,
           orderBy: [
             { year: 'asc' },
             { month: 'asc' }
