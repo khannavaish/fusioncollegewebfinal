@@ -212,6 +212,26 @@ export default async function FeeHubPage() {
         </div>
       </AnimatedSection>
 
+      {/* General Charges Overview */}
+      <AnimatedSection delay={0.25}>
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#1e233d] flex items-center justify-center">
+                <IconDocumentText className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white tracking-tight">General Charges</h2>
+                <p className="text-xs text-zinc-400 mt-0.5">Manage fees applied to all students during billing</p>
+              </div>
+            </div>
+            <Link href="/admin/fees/general-charges" className="inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
+              Manage Charges <IconChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </AnimatedSection>
+
       {/* Fee Packages Overview */}
       <AnimatedSection delay={0.3}>
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6">

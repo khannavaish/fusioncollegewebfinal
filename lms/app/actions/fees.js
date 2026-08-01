@@ -127,17 +127,28 @@ export async function generateMonthlyBills(_prev, formData) {
       include: { feePackage: true, class: true },
     });
 
+    const activeGeneralCharges = await prisma.generalCharge.findMany({
+      where: { isActive: true },
+    });
+
     let created = 0;
     let skipped = 0;
 
     for (const student of students) {
-      const existing = await prisma.feeBill.findUnique({
-        where: { studentId_month_year: { studentId: student.id, month, year } },
+      const existing = await prisma.feeBill.findFirst({
+        where: { studentId: student.id, month, year, isTuition: true },
       });
       if (existing) { skipped++; continue; }
 
       const baseAmount = student.feeMonthlyOverride ?? student.feePackage?.monthlyFee;
       if (!baseAmount) { skipped++; continue; }
+
+      const extraItems = activeGeneralCharges.map(charge => ({
+        title: charge.title,
+        amount: charge.amount,
+      }));
+      
+      const totalAmount = Number(baseAmount) + extraItems.reduce((sum, item) => sum + Number(item.amount), 0);
 
       await prisma.feeBill.create({
         data: {
@@ -145,10 +156,14 @@ export async function generateMonthlyBills(_prev, formData) {
           month,
           year,
           baseAmount,
-          totalAmount: baseAmount,
+          totalAmount,
           dueDate,
+          isTuition: true,
           items: {
-            create: [{ title: 'Monthly Tuition Fee', amount: baseAmount }],
+            create: [
+              { title: 'Monthly Tuition Fee', amount: baseAmount },
+              ...extraItems
+            ],
           },
         },
       });
@@ -300,12 +315,41 @@ export async function addBillItem(formData) {
   }
 
   try {
-    await prisma.feeBillItem.create({ data: { billId, title, amount } });
-    await recalculateBillTotal(billId);
-    revalidatePath(`/admin/fees/bills/${billId}`);
-    revalidatePath('/admin/fees/bills');
-    return { success: true };
+    const existingBill = await prisma.feeBill.findUnique({ where: { id: billId } });
+    if (!existingBill) return { error: 'Bill not found.' };
+
+    if (existingBill.status === 'PAID') {
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 5);
+
+      const newBill = await prisma.feeBill.create({
+        data: {
+          studentId: existingBill.studentId,
+          month: existingBill.month,
+          year: existingBill.year,
+          baseAmount: 0,
+          totalAmount: amount,
+          dueDate,
+          isTuition: false,
+          status: 'UNPAID',
+          items: {
+            create: [{ title, amount }]
+          }
+        }
+      });
+      
+      revalidatePath(`/admin/fees/bills/${existingBill.id}`);
+      revalidatePath('/admin/fees/bills');
+      return { success: true, newBillId: newBill.id };
+    } else {
+      await prisma.feeBillItem.create({ data: { billId, title, amount } });
+      await recalculateBillTotal(billId);
+      revalidatePath(`/admin/fees/bills/${billId}`);
+      revalidatePath('/admin/fees/bills');
+      return { success: true };
+    }
   } catch (e) {
+    console.error('Add charge error:', e);
     return { error: 'Failed to add charge.' };
   }
 }

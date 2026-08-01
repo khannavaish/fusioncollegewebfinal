@@ -63,7 +63,16 @@ export default function BillDetailClient({ bill, bankConfig }) {
     fd.set('billId', bill.id);
     const result = await addBillItem(fd);
     setLoading(false);
-    if (result?.success) { e.target.reset(); showMsg('✅ Charge added!'); router.refresh(); }
+    if (result?.success) { 
+      if (result.newBillId) {
+        showMsg('✅ Charge added to a new bill!'); 
+        router.push(`/admin/fees/bills/${result.newBillId}`);
+      } else {
+        e.target.reset(); 
+        showMsg('✅ Charge added!'); 
+        router.refresh(); 
+      }
+    }
     else showMsg('❌ ' + (result?.error || 'Failed'));
   }
 

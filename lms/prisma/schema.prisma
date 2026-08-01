@@ -352,11 +352,18 @@ model FeeBill {
   remarks        String?
   whatsappSent   Boolean       @default(false)
   paymentReceipt String?
+  isTuition      Boolean       @default(true)
   createdAt      DateTime      @default(now())
-  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  items        FeeBillItem[]
+  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  items          FeeBillItem[]
+}
 
-  @@unique([studentId, month, year])
+model GeneralCharge {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Decimal  @db.Decimal(10, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model FeeBillItem {
