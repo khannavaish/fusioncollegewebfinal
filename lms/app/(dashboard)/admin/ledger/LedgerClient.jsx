@@ -12,6 +12,10 @@ export default function LedgerClient({ students, teachers, classes }) {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedTeacher, setSelectedTeacher] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  
+  // Date Filters for Class Ledger
+  const [filterMonth, setFilterMonth] = useState('ALL');
+  const [filterYear, setFilterYear] = useState('ALL');
 
   // Fetched Data
   const [studentData, setStudentData] = useState(null);
@@ -37,7 +41,7 @@ export default function LedgerClient({ students, teachers, classes }) {
   const handleFetchClass = () => {
     if (!selectedClass) return;
     startTransition(async () => {
-      const res = await getClassLedger(selectedClass);
+      const res = await getClassLedger(selectedClass, filterMonth, filterYear);
       if (res.classData) setClassData(res);
     });
   };
@@ -265,16 +269,37 @@ export default function LedgerClient({ students, teachers, classes }) {
       {/* --- CLASS LEDGER --- */}
       {activeTab === 'class' && (
         <div className="space-y-6">
-          <div className="print:hidden flex items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
+          <div className="print:hidden flex flex-col md:flex-row items-center gap-3 p-4 bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-lg">
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="flex-1 bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+              className="flex-1 w-full bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
             >
               <option value="">-- Select a Class --</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            <button onClick={handleFetchClass} disabled={isPending || !selectedClass} className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors">
+            
+            <select
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Months</option>
+              {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                <option key={m} value={i + 1}>{m}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="w-full md:w-auto bg-[#16192b] border border-[#1e233d] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="ALL">All Years</option>
+              {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+
+            <button onClick={handleFetchClass} disabled={isPending || !selectedClass} className="w-full md:w-auto px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors whitespace-nowrap">
               {isPending ? 'Loading...' : 'Load Ledger'}
             </button>
           </div>
@@ -289,6 +314,11 @@ export default function LedgerClient({ students, teachers, classes }) {
                   <div className="mt-2 space-y-1 text-sm font-medium">
                     <p><strong>Total Students:</strong> {classData.studentLedgers.length}</p>
                     <p><strong>Academic Year:</strong> {classData.classData.academicYr}</p>
+                    {(filterMonth !== 'ALL' || filterYear !== 'ALL') && (
+                      <p className="text-amber-700 print:text-amber-900 bg-amber-50 print:bg-transparent w-fit px-2 py-0.5 rounded border border-amber-200 print:border-none mt-1">
+                        <strong>Period Filter:</strong> {filterMonth !== 'ALL' ? getMonthName(filterMonth) : 'All Months'} {filterYear !== 'ALL' ? filterYear : 'All Years'}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white text-sm font-bold rounded-lg transition-colors shadow-lg">

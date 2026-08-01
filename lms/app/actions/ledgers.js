@@ -82,7 +82,7 @@ export async function getTeacherLedger(teacherId) {
   }
 }
 
-export async function getClassLedger(classId) {
+export async function getClassLedger(classId, month = 'ALL', year = 'ALL') {
   await verifyAdmin();
   try {
     const classData = await prisma.class.findUnique({
@@ -91,10 +91,16 @@ export async function getClassLedger(classId) {
     
     if (!classData) return { error: 'Class not found.' };
 
+    const billFilter = {};
+    if (month !== 'ALL') billFilter.month = parseInt(month);
+    if (year !== 'ALL') billFilter.year = parseInt(year);
+
     const students = await prisma.student.findMany({
       where: { classId },
       include: {
-        feeBills: true
+        feeBills: {
+          where: billFilter
+        }
       },
       orderBy: { name: 'asc' }
     });
