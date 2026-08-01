@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { createGeneralCharge, deleteGeneralCharge, toggleGeneralCharge } from '@/app/actions/generalCharges';
-import { IconCheckCircle, IconXCircle, IconTrash, IconPlus, IconArrowLeft } from '@/app/components/icons';
+import { IconCheckCircle, IconXCircle, IconTrash, IconPlus, IconChevronRight } from '@/app/components/icons';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -48,7 +48,7 @@ export default function GeneralChargesClient({ initialCharges }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
           <div>
             <Link href="/admin/fees" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-bold mb-2 transition-colors">
-              <IconArrowLeft className="w-4 h-4" /> Back to Fees
+              <IconChevronRight className="w-4 h-4 rotate-180" /> Back to Fees
             </Link>
             <h1 className="text-3xl font-extrabold text-white tracking-tight">General Charges</h1>
             <p className="text-zinc-400 text-sm mt-1">Manage charges (like Sports Fee, Exam Fee) that apply to all new monthly fee bills.</p>
