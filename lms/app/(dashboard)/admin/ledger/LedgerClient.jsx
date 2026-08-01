@@ -119,7 +119,7 @@ export default function LedgerClient({ students, teachers, classes }) {
           </div>
 
           {studentData && (
-            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 shadow-2xl text-black">
+            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 print:p-0 shadow-2xl text-black">
               <PrintHeader title="Student Fee Ledger" />
               
               <div className="flex justify-between items-start mb-8 print:mb-6">
@@ -249,7 +249,7 @@ export default function LedgerClient({ students, teachers, classes }) {
           </div>
 
           {teacherData && (
-            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 shadow-2xl text-black">
+            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 print:p-0 shadow-2xl text-black">
               <PrintHeader title="Teacher Salary Ledger" />
               
               <div className="flex justify-between items-start mb-8 print:mb-6">
@@ -371,7 +371,7 @@ export default function LedgerClient({ students, teachers, classes }) {
           </div>
 
           {classData && (
-            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 shadow-2xl text-black">
+            <div className="bg-white print:bg-transparent print:shadow-none print:border-none border border-zinc-200 rounded-2xl p-8 print:p-0 shadow-2xl text-black">
               <PrintHeader title="Class Fee Balances" />
               
               <div className="flex justify-between items-start mb-8 print:mb-6">

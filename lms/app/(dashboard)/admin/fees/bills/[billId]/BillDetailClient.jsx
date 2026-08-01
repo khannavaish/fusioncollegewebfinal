@@ -257,13 +257,17 @@ export default function BillDetailClient({ bill, bankConfig }) {
 
             {/* Receipt image */}
             {bill.paymentReceipt && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 receipt-container">
                 <span className="text-xs text-gray-400 block mb-1">Payment Receipt</span>
                 <a href={bill.paymentReceipt} target="_blank" rel="noreferrer">
                   <img
                     src={bill.paymentReceipt}
                     alt="Payment Receipt"
-                    className="w-32 h-32 object-cover rounded-xl border border-gray-200 shadow-md hover:scale-105 transition-transform cursor-pointer"
+                    className="w-32 h-32 object-cover rounded-xl border border-gray-200 shadow-md hover:scale-105 transition-transform cursor-pointer bg-white"
+                    onError={(e) => {
+                      const container = e.target.closest('.receipt-container');
+                      if (container) container.style.display = 'none';
+                    }}
                   />
                 </a>
               </div>
