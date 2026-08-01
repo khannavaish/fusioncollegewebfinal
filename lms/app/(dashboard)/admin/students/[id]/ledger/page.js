@@ -46,10 +46,19 @@ export default async function StudentLedgerPage({ params }) {
   const getMonthName = (m) => new Date(2000, m - 1).toLocaleString('default', { month: 'short' });
 
   return (
-    <div className="p-6 print:bg-white print:p-0 print:m-0">
+    <div className="p-6 print:bg-white print:p-0 print:m-0 print:text-black min-h-screen">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            margin-top: 0;
+            margin-bottom: 5mm;
+          }
+        }
+      `}} />
+
       <AnimatedSection delay={0.1}>
         {/* Header Actions */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 print:hidden">
           <Link href="/admin/students" className="flex items-center gap-2 text-zinc-400 hover:text-cyan-400 transition-colors text-sm font-semibold">
             <IconChevronLeft className="w-4 h-4" /> Back to Students
           </Link>
@@ -57,6 +66,21 @@ export default async function StudentLedgerPage({ params }) {
             label="Print Ledger" 
             className="px-4 py-2 bg-[#16192b] hover:bg-[#1e233d] text-white text-xs font-bold rounded-lg border border-[#2b3052] transition-colors" 
           />
+        </div>
+
+        {/* Print Header */}
+        <div className="hidden print:flex justify-between items-end border-b-2 border-cyan-600 pb-4 mb-8 text-black" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <div className="flex items-center gap-4">
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+            <div>
+              <h1 className="text-2xl font-black uppercase tracking-widest text-cyan-800 m-0">Fusion College</h1>
+              <p className="text-sm font-semibold text-zinc-600 m-0">Excellence in Education</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <h2 className="text-xl font-bold uppercase tracking-widest text-indigo-900 m-0">Student Fee Ledger</h2>
+            <p className="text-xs font-medium text-zinc-500 m-0">Generated: {new Date().toLocaleDateString()}</p>
+          </div>
         </div>
 
         {/* Ledger Header Card */}
