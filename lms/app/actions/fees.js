@@ -626,3 +626,82 @@ export async function updateBankConfig(formData) {
     return { error: 'Failed to update bank details.' };
   }
 }
+
+export async function generateIndividualBill(_prev, formData) {
+  await verifyAdmin();
+  const studentId = formData.get('studentId');
+  const month = parseInt(formData.get('month'));
+  const year = parseInt(formData.get('year'));
+  const dueDay = parseInt(formData.get('dueDay') || '10');
+
+  if (!studentId || !month || !year || month < 1 || month > 12) {
+    return { error: 'Invalid input parameters.' };
+  }
+
+  const dueDate = new Date(year, month - 1, dueDay);
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+      include: { feePackage: true },
+    });
+
+    if (!student) {
+      return { error: 'Student not found.' };
+    }
+
+    const existing = await prisma.feeBill.findFirst({
+      where: { studentId: student.id, month, year, isTuition: true },
+    });
+
+    if (existing) {
+      return { error: `A regular fee bill already exists for this student for ${month}/${year}.` };
+    }
+
+    const baseAmount = student.feeMonthlyOverride ?? student.feePackage?.monthlyFee;
+    if (!baseAmount) {
+      return { error: 'This student does not have a fee package or override assigned.' };
+    }
+
+    const activeGeneralCharges = await prisma.generalCharge.findMany({
+      where: { isActive: true },
+    });
+
+    const extraItems = activeGeneralCharges.map(charge => ({
+      title: charge.title,
+      amount: charge.amount,
+    }));
+    
+    const totalAmount = Number(baseAmount) + extraItems.reduce((sum, item) => sum + Number(item.amount), 0);
+
+    await prisma.feeBill.create({
+      data: {
+        studentId: student.id,
+        month,
+        year,
+        baseAmount,
+        totalAmount,
+        dueDate,
+        isTuition: true,
+        items: {
+          create: [
+            { title: 'Monthly Tuition Fee', amount: baseAmount },
+            ...extraItems
+          ],
+        },
+      },
+    });
+
+    // Fire-and-forget WhatsApp batch send
+    sendBillWhatsAppBatch(month, year).catch(console.error);
+
+    revalidatePath('/admin/fees/bills');
+    revalidatePath('/admin/fees');
+    revalidatePath(`/admin/students/${studentId}`);
+    revalidatePath(`/admin/students/${studentId}/ledger`);
+    return { success: true };
+  } catch (e) {
+    console.error('Bill generation error:', e);
+    return { error: 'Failed to generate bill: ' + e.message };
+  }
+}

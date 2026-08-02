@@ -11,6 +11,7 @@ import AnimatedSection from '@/app/components/AnimatedSection';
 import { generateMonthlyBills } from '@/app/actions/fees';
 import BillingExecutionForm from './BillingExecutionForm';
 import BankSettingsForm from './BankSettingsForm';
+import IndividualBillingForm from './IndividualBillingForm';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -31,15 +32,20 @@ export default async function FeeHubPage() {
   const year = now.getFullYear();
 
   // Aggregate stats for current month
-  const [bills, packages, totalStudents, bankConfig] = await Promise.all([
+  const [bills, packages, allStudents, bankConfig] = await Promise.all([
     prisma.feeBill.findMany({
       where: { month, year },
       select: { status: true, totalAmount: true, paidAmount: true },
     }),
     prisma.feePackage.findMany({ orderBy: { monthlyFee: 'asc' } }),
-    prisma.student.count({ where: { user: { status: 'ACTIVE' } } }),
+    prisma.student.findMany({ 
+      where: { user: { status: 'ACTIVE' } },
+      select: { id: true, name: true, rollNumber: true }
+    }),
     prisma.bankConfig.findUnique({ where: { id: 'default' } }),
   ]);
+
+  const totalStudents = allStudents.length;
 
   const stats = {
     total: bills.length,
@@ -209,6 +215,25 @@ export default async function FeeHubPage() {
         </p>
         
         <BillingExecutionForm month={month} year={year} />
+        </div>
+      </AnimatedSection>
+
+      {/* Individual Billing Section */}
+      <AnimatedSection delay={0.25}>
+        <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
+        
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+            <IconDocumentText className="w-4 h-4 text-indigo-400" />
+          </div>
+          <h2 className="text-lg font-bold text-white tracking-tight">Generate Individual Bill</h2>
+        </div>
+        
+        <p className="text-zinc-400 text-sm mb-6 max-w-2xl leading-relaxed">
+          Select a specific student to generate a customized fee bill for a given month. Useful for late enrollments or missing bills.
+        </p>
+        
+        <IndividualBillingForm month={month} year={year} students={allStudents} />
         </div>
       </AnimatedSection>
 

@@ -7,6 +7,7 @@ import AnimatedSection from '@/app/components/AnimatedSection';
 import Image from 'next/image';
 import StudentProfileActions from './StudentProfileActions';
 import EditFeeButton from './EditFeeButton';
+import GenerateBillButton from './GenerateBillButton';
 
 export default async function StudentProfilePage({ params }) {
   const { id } = await params;
@@ -89,6 +90,7 @@ export default async function StudentProfilePage({ params }) {
                 }} 
                 classes={classes} 
               />
+            <GenerateBillButton studentId={student.id} />
             <Link href={`/admin/students/${student.id}/ledger`} className="flex items-center gap-2 px-4 py-2 bg-[#0d0f1a] hover:bg-[#16192b] border border-[#1e233d] text-white text-sm font-semibold rounded-xl transition-colors">
               <IconDocumentText className="w-4 h-4 text-emerald-400" /> Ledger
             </Link>
