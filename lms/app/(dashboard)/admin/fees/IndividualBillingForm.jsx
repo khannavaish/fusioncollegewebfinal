@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { generateIndividualBill } from '@/app/actions/fees';
 import { IconBolt, IconCheckCircle, IconXCircle, IconLoader } from '@/app/components/icons';
 
@@ -12,12 +12,24 @@ const MONTH_NAMES = [
 export default function IndividualBillingForm({ month, year, students }) {
   const [state, action, isPending] = useActionState(generateIndividualBill, null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
   
   // Filter students based on search
   const filteredStudents = students.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 50); // limit to 50 for performance in dropdown
+
+  // Auto-select the first matching student when search changes
+  useEffect(() => {
+    if (searchTerm.trim() !== '') {
+      if (filteredStudents.length > 0 && !filteredStudents.find(s => s.id === selectedStudentId)) {
+        setSelectedStudentId(filteredStudents[0].id);
+      } else if (filteredStudents.length === 0) {
+        setSelectedStudentId('');
+      }
+    }
+  }, [searchTerm, filteredStudents, selectedStudentId]);
 
   return (
     <>
@@ -29,9 +41,12 @@ export default function IndividualBillingForm({ month, year, students }) {
             placeholder="Search by name or roll no..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
             className="w-full mb-2 bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 placeholder-zinc-600"
           />
           <select name="studentId" required
+            value={selectedStudentId}
+            onChange={(e) => setSelectedStudentId(e.target.value)}
             className="w-full bg-[#060810] border border-[#1e233d] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all cursor-pointer">
             <option value="">Select a student</option>
             {filteredStudents.map((s) => (
