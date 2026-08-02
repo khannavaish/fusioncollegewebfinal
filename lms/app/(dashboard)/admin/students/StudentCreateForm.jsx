@@ -84,14 +84,14 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
                     <IconIdCard className="w-3.5 h-3.5" /> Roll No
                   </span>
-                  <span className="text-sm font-mono font-bold text-white tracking-wider">{creds.student.rollNumber}</span>
+                  <span className="text-sm font-mono font-bold text-white tracking-wider">{creds.rollNumber}</span>
                 </div>
                 <div className="border-t border-[#1e233d]" />
                 <div className="flex justify-between items-center">
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
                     <IconMail className="w-3.5 h-3.5" /> Login
                   </span>
-                  <span className="text-sm font-mono font-bold text-cyan-400">{creds.student.email}</span>
+                  <span className="text-sm font-mono font-bold text-cyan-400">{creds.email}</span>
                 </div>
                 <div className="border-t border-[#1e233d]" />
                 <div className="flex justify-between items-center">
@@ -99,7 +99,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                     <IconKey className="w-3.5 h-3.5" /> Password
                   </span>
                   <span className="text-sm font-mono font-bold text-emerald-400 bg-emerald-950/30 px-3 py-1 rounded-lg border border-emerald-500/20 tracking-widest">
-                    {creds.student.password}
+                    {creds.password}
                   </span>
                 </div>
               </div>
@@ -231,8 +231,8 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
       {/* Main Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-4xl bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl relative my-auto animate-in fade-in slide-in-from-bottom-4 duration-200 mt-20 mb-10">
+        <div className="fixed inset-0 z-[9000] flex items-start md:items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-4xl bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl relative my-4 md:my-auto animate-in fade-in slide-in-from-bottom-4 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e233d] sticky top-0 bg-[#0d0f1a] z-10 rounded-t-2xl">
               <div>
@@ -286,7 +286,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
                   {/* Admission % + Fee Package */}
                   <div className="bg-[#0a0c14] border border-[#1e233d] rounded-xl p-4 space-y-3">
-                    <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">📦 Fee Package Assignment</p>
+                    <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">Fee Package Assignment</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <input
@@ -297,16 +297,16 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                           max="100"
                           value={admissionPct}
                           onChange={(e) => setAdmissionPct(e.target.value)}
-                          placeholder="📊 Admission Percentage (e.g. 87.50)"
+                          placeholder="Admission Percentage (e.g. 87.50)"
                           className={inputCls}
                         />
                         {suggestedPkg && (
                           <p className="text-[10px] text-cyan-400 mt-1.5 flex items-center gap-1">
-                            ✅ Auto-assigned: <span className="font-bold">{suggestedPkg.name}</span> - ₨{suggestedPkg.monthlyFee.toLocaleString()}/month
+                            Auto-assigned: <span className="font-bold">{suggestedPkg.name}</span> - ₨{suggestedPkg.monthlyFee.toLocaleString()}/month
                           </p>
                         )}
                         {admissionPct && !suggestedPkg && (
-                          <p className="text-[10px] text-amber-400 mt-1.5">⚠️ No package matches this percentage</p>
+                          <p className="text-[10px] text-amber-400 mt-1.5">No package matches this percentage</p>
                         )}
                       </div>
                       <div>
@@ -316,13 +316,13 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                           onChange={(e) => setManualPkgId(e.target.value)}
                           className={inputCls}
                         >
-                          <option value="">📦 Select Package (override)</option>
+                          <option value="">Select Package (override)</option>
                           {feePackages.map((p) => (
                             <option key={p.id} value={p.id}>
                               {p.name} - ₨{p.monthlyFee.toLocaleString()}/mo ({p.minPercentage}–{p.maxPercentage}%)
                             </option>
                           ))}
-                          <option value="CUSTOM">⚙️ Custom (Override)</option>
+                          <option value="CUSTOM">Custom (Override)</option>
                         </select>
                         {manualPkgId === 'CUSTOM' && (
                           <input
