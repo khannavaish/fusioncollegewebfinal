@@ -173,56 +173,65 @@ body::after {
   background-position: center center;
 }
 
-/* Floating ambient orbs */
-.site-atmosphere {
+/* Preloader */
+.preloader {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 99999;
+  background-color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+  visibility: visible;
+  opacity: 1;
+}
+.preloader.preloader--hidden {
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  overflow: hidden;
 }
-.site-atmosphere .orb {
+.preloader-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+}
+.preloader-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  z-index: 2;
+  animation: pulse-logo 2s ease-in-out infinite;
+}
+.preloader-spinner {
   position: absolute;
+  inset: 0;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.55;
-  will-change: transform;
+  border: 3px solid transparent;
+  border-top-color: var(--cyan);
+  border-right-color: var(--red);
+  animation: spin-preloader 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
-.site-atmosphere .orb-1 {
-  width: 520px;
-  height: 520px;
-  top: -8%;
-  right: -6%;
-  background: var(--orb-cyan);
-  animation: drift-orb-1 28s ease-in-out infinite;
+.preloader-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-left-color: var(--navy-light);
+  border-bottom-color: var(--cyan-light);
+  animation: spin-preloader 2s linear infinite reverse;
 }
-.site-atmosphere .orb-2 {
-  width: 440px;
-  height: 440px;
-  bottom: 18%;
-  left: -8%;
-  background: var(--orb-navy);
-  animation: drift-orb-2 34s ease-in-out infinite;
+@keyframes pulse-logo {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(0,180,216,0.3)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 24px rgba(232,0,29,0.5)); }
 }
-.site-atmosphere .orb-3 {
-  width: 360px;
-  height: 360px;
-  top: 42%;
-  right: 12%;
-  background: var(--orb-red);
-  animation: drift-orb-3 24s ease-in-out infinite;
-}
-@keyframes drift-orb-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(-40px, 30px) scale(1.06); }
-}
-@keyframes drift-orb-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(35px, -25px) scale(1.05); }
-}
-@keyframes drift-orb-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(-25px, 20px) scale(0.96); }
+@keyframes spin-preloader {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Keep page content above atmosphere */

@@ -449,6 +449,7 @@ export default function App() {
   useActiveSection();
 
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [isLoading, setIsLoading] = useState(true);
   const [heroConfig, setHeroConfig] = useState({
     heroTagLine: 'Admissions Open · Session 2026',
     isBlinking: false
@@ -477,6 +478,12 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    // Hide preloader after 1.8s
+    const timer = setTimeout(() => setIsLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -595,10 +602,11 @@ export default function App() {
 
   return (
     <>
-      <div className="site-atmosphere" aria-hidden="true">
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-        <div className="orb orb-3" />
+      <div className={`preloader ${!isLoading ? 'preloader--hidden' : ''}`} aria-hidden="true">
+        <div className="preloader-inner">
+          <img src="/logo.png" alt="Fusion Logo" className="preloader-logo" />
+          <div className="preloader-spinner" />
+        </div>
       </div>
       <Cursor />
       <Navbar theme={theme} toggleTheme={toggleTheme} lmsUrl={lmsUrl} />
