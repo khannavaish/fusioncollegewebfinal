@@ -43,7 +43,6 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-pinned");
@@ -106,42 +105,30 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
     { href: `/${role.toLowerCase()}`, label: "Home" }
   ];
 
+  // Auto-scroll active item on mobile
+  useEffect(() => {
+    const activeIndex = navItems.findIndex(item => isActive(item.href));
+    if (activeIndex !== -1) {
+      const activeEl = document.getElementById(`mobile-nav-item-${activeIndex}`);
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [pathname]);
+
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <button 
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="md:hidden fixed bottom-6 right-6 z-[60] w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-transform hover:scale-105 active:scale-95 print:hidden"
-      >
-        {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-
-      {/* Mobile Overlay */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMobileOpen(false)}
-            className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm print:hidden"
-          />
-        )}
-      </AnimatePresence>
-
       <motion.aside
         initial={false}
-        animate={{ width: isOpen || mobileOpen ? FULL_W : RAIL_W }}
+        animate={{ width: isOpen ? FULL_W : RAIL_W }}
         transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
-        className={`flex flex-col fixed left-4 top-4 bottom-4 z-50 overflow-hidden
+        className="hidden md:flex flex-col fixed left-4 top-4 bottom-4 z-30 overflow-hidden
                    rounded-[2rem] border border-white/10
-                   bg-[#0b051a]/95 backdrop-blur-3xl
+                   bg-[#0b051a]/90 backdrop-blur-2xl
                    shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]
-                   justify-between py-4 print:hidden isolate
-                   transition-transform duration-300 md:translate-x-0
-                   ${mobileOpen ? 'translate-x-0' : '-translate-x-[150%]'}`}
+                   justify-between py-4 print:hidden isolate"
         style={{ minWidth: RAIL_W }}
       >
       {/* Dynamic Flowing Neon Water Background - Clean & Aesthetic */}
@@ -308,6 +295,43 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
         </form>
       </div>
     </motion.aside>
+
+      {/* Mobile Bottom Dynamic Island Nav */}
+      <nav className="md:hidden fixed bottom-4 left-4 right-4 z-[100] print:hidden pointer-events-none">
+        <div className="max-w-md mx-auto bg-[#0b051a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] pointer-events-auto">
+          <div 
+            className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory relative scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {/* CSS to completely hide webkit scrollbar but preserve scrolling */}
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            
+            {navItems.map((item, index) => {
+              const active = isActive(item.href);
+              const Icon = ICON_MAP[item.label] || BookOpen;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  id={`mobile-nav-item-${index}`}
+                  className={`flex-shrink-0 snap-center relative flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-2xl transition-all duration-300 ${
+                    active ? "text-white bg-white/5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 transition-transform ${active ? "text-cyan-400 scale-110" : ""}`} />
+                  <span className={`text-[9px] font-bold tracking-wider uppercase transition-colors ${active ? "text-cyan-400" : "text-slate-500"}`}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
     </>
   );
 }
