@@ -80,20 +80,6 @@ export default async function FeeHubPage() {
             <IconSettings className="w-4 h-4 text-violet-400" />
             Manage Packages
           </Link>
-          <Link
-            href="/admin/fees/bills"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1e233d] bg-[#0d0f1a] text-zinc-300 text-sm font-medium hover:bg-[#1e233d] hover:text-white transition-all shadow-sm"
-          >
-            <IconDocumentText className="w-4 h-4 text-cyan-400" />
-            View All Bills
-          </Link>
-          <Link
-            href="/admin/fees/payroll"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1e233d] bg-[#0d0f1a] text-zinc-300 text-sm font-medium hover:bg-[#1e233d] hover:text-white transition-all shadow-sm"
-          >
-            <IconCheckCircle className="w-4 h-4 text-emerald-400" />
-            Teacher Payroll
-          </Link>
         </div>
       }
     >
