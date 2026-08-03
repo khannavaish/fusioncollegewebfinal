@@ -490,8 +490,8 @@ export async function createStudent(_prev, formData) {
 
   const firstName = name.split(' ')[0];
   const cleanName = firstName.toLowerCase().replace(/[^a-z]/g, '');
-  const rollSuffix = rollNumber.toLowerCase().replace(/-/g, '');
-  const email = `${cleanName}${rollSuffix}@fusionlms.edu`;
+  const randomCode = Math.floor(100 + Math.random() * 900); // 3 digits
+  const email = `${cleanName}${randomCode}@fusionlms.edu`;
   const password = `${firstName}123`;
 
   const admin = adminClient();
@@ -520,7 +520,9 @@ export async function createStudent(_prev, formData) {
       parentDbId = existingParent.id;
     } else {
       const parentFirstName = guardianName.split(' ')[0];
-      parentEmail = `parent_${cleanName}${rollSuffix}@fusionlms.edu`;
+      const parentCleanName = parentFirstName.toLowerCase().replace(/[^a-z]/g, '');
+      const parentRandomCode = Math.floor(100 + Math.random() * 900);
+      parentEmail = `p_${parentCleanName}${parentRandomCode}@fusionlms.edu`;
       parentPassword = `${parentFirstName}123`;
 
       const { data: parentAuthData, error: parentAuthError } = await admin.auth.admin.createUser({
