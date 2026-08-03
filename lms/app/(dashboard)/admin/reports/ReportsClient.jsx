@@ -1371,7 +1371,7 @@ export default function ReportsClient({ students, classes, teachers }) {
 
       {/* --- EDIT MODAL DIALOG --- */}
       {editModal && (
-        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 bg-black/70 backdrop-blur-sm z-50 flex items-start md:items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
           <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md max-h-full md:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex-shrink-0 flex justify-between items-center">
               <h3 className="text-sm font-black text-white uppercase tracking-wider">

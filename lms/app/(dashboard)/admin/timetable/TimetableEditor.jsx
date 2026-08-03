@@ -478,7 +478,7 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
       {/* Edit Slot Modal */}
       <AnimatePresence>
         {editingSlot && (
-          <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1,   opacity: 1, y: 0  }}
