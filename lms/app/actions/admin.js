@@ -465,8 +465,17 @@ export async function createStudent(_prev, formData) {
     photoUrl = await saveLocalFile(photo, 'student_photos');
   }
 
-  // Auto-generate roll number + credentials
-  const rollNumber = await generateRollNumber(classId);
+  const manualRollNumber = formData.get('manualRollNumber')?.toString().trim();
+  
+  let rollNumber;
+  if (manualRollNumber) {
+    const existing = await prisma.student.findUnique({ where: { rollNumber: manualRollNumber } });
+    if (existing) return { error: `Roll Number '${manualRollNumber}' is already in use.` };
+    rollNumber = manualRollNumber;
+  } else {
+    rollNumber = await generateRollNumber(classId);
+  }
+
   const email = `${rollNumber.toLowerCase().replace('-', '')}@fusionlms.edu`;
   const password = generatePassword(8);
 

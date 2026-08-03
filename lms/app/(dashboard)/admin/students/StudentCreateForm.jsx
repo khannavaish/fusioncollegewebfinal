@@ -257,7 +257,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                   {/* Basic Details */}
                   <div className="space-y-4">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-white/5 pb-2">Student & Class</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <input name="name" placeholder="Student Full Name *" className={inputCls} required />
                       <input name="fatherName" placeholder="Father's Name *" className={inputCls} required />
                       <select name="classId" className={inputCls} required>
@@ -266,6 +266,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                           <option key={c.id} value={c.id} className="bg-[#0c0e1a]">{c.name} ({c.academicYr})</option>
                         ))}
                       </select>
+                      <input name="manualRollNumber" placeholder="Manual Roll No (Optional)" className={inputCls} title="Leave blank for auto-generation" />
                     </div>
                   </div>
 
