@@ -488,8 +488,11 @@ export async function createStudent(_prev, formData) {
     rollNumber = await generateRollNumber(classId);
   }
 
-  const email = `${rollNumber.toLowerCase().replace(/-/g, '')}@fusionlms.edu`;
-  const password = generatePassword(8);
+  const firstName = name.split(' ')[0];
+  const cleanName = firstName.toLowerCase().replace(/[^a-z]/g, '');
+  const rollSuffix = rollNumber.toLowerCase().replace(/-/g, '');
+  const email = `${cleanName}${rollSuffix}@fusionlms.edu`;
+  const password = `${firstName}123`;
 
   const admin = adminClient();
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -516,8 +519,9 @@ export async function createStudent(_prev, formData) {
       isExistingParent = true;
       parentDbId = existingParent.id;
     } else {
-      parentEmail = `parent_${rollNumber.toLowerCase().replace(/-/g, '')}@fusionlms.edu`;
-      parentPassword = generatePassword(8);
+      const parentFirstName = guardianName.split(' ')[0];
+      parentEmail = `parent_${cleanName}${rollSuffix}@fusionlms.edu`;
+      parentPassword = `${parentFirstName}123`;
 
       const { data: parentAuthData, error: parentAuthError } = await admin.auth.admin.createUser({
         email: parentEmail,
@@ -545,6 +549,7 @@ export async function createStudent(_prev, formData) {
           role: 'STUDENT',
           status: 'ACTIVE',
           plainPassword: password,
+          mustChangePassword: true,
           student: {
             create: {
               id: authId,
@@ -577,6 +582,7 @@ export async function createStudent(_prev, formData) {
             role: 'PARENT',
             status: 'ACTIVE',
             plainPassword: parentPassword,
+            mustChangePassword: true,
             parent: {
               create: { id: parentAuthId, name: guardianName, phone: guardianPhone },
             },

@@ -9,20 +9,21 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  authId        String     @unique
-  email         String     @unique
-  role          UserRole   @default(STUDENT)
-  status        UserStatus @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  plainPassword String?
-  avatarUrl     String?
-  admin         Admin?
-  parent        Parent?
-  student       Student?
-  teacher       Teacher?
-  announcementReads AnnouncementRead[]
+  id                 String     @id @default(uuid())
+  authId             String     @unique
+  email              String     @unique
+  role               UserRole   @default(STUDENT)
+  status             UserStatus @default(ACTIVE)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  plainPassword      String?
+  avatarUrl          String?
+  mustChangePassword Boolean    @default(false)
+  admin              Admin?
+  parent             Parent?
+  student            Student?
+  teacher            Teacher?
+  announcementReads  AnnouncementRead[]
 }
 
 model Admin {

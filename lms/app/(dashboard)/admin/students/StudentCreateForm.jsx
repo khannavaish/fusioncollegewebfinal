@@ -73,7 +73,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
             </div>
             <div>
               <h2 className="text-lg font-black text-white tracking-wide">Enrollment Successful</h2>
-              <p className="text-[11px] text-zinc-400 mt-0.5">Save these credentials. Passwords are <span className="font-bold text-rose-400">never</span> shown again.</p>
+          <p className="text-[11px] text-zinc-400 mt-0.5">Student can log in and will be asked to set a new password on first login.</p>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                 <div className="border-t border-white/5" />
                 <div className="flex justify-between items-center">
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
-                    <IconMail className="w-4 h-4 text-blue-400" /> Login
+                    <IconMail className="w-4 h-4 text-blue-400" /> Login Email
                   </span>
                   <span className="text-sm font-mono font-bold text-cyan-400">{creds.email}</span>
                 </div>
@@ -131,11 +131,6 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
               </div>
             </>
           )}
-
-          <p className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-2 font-medium">
-            <IconAlertTriangle className="w-4 h-4 flex-shrink-0" />
-            Save these credentials now - passwords cannot be recovered later.
-          </p>
 
           <button
             onClick={() => dialogRef.current?.close()}
