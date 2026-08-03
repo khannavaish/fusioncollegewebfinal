@@ -5,6 +5,7 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft, IconChevronRight } from '@/app/components/icons';
 import DeleteClassForm from './DeleteClassForm';
+import EditClassDialog from './EditClassDialog';
 import { createClass, updateClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
 import Pagination from '@/app/components/Pagination';
 import { PageShell } from '@/app/components/Brand';
@@ -91,20 +92,7 @@ export default async function AdminClassesPage({ searchParams }) {
                   </div>
                   <div className="flex gap-2 items-center flex-wrap">
                     {/* Edit form (inline, using details/summary trick) */}
-                    <details className="relative group">
-                      <summary className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-xs font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer list-none">
-                        Edit
-                      </summary>
-                      <div className="absolute right-0 top-9 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-80 shadow-2xl">
-                        <h3 className="text-xs font-bold text-white mb-3">Edit Class</h3>
-                        <form action={updateClass} className="space-y-2">
-                          <input type="hidden" name="id" value={cls.id} />
-                          <input name="name" defaultValue={cls.name} className={inputCls} required />
-                          <input name="academicYr" defaultValue={cls.academicYr} className={inputCls} required />
-                          <button type="submit" className={`${btnPrimary} w-full`}>Save Changes</button>
-                        </form>
-                      </div>
-                    </details>
+                    <EditClassDialog cls={cls} />
                     <DeleteClassForm id={cls.id} />
                   </div>
                 </div>
