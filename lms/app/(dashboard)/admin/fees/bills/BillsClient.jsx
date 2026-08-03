@@ -298,7 +298,6 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
               });
 
               return grouped.map((group) => {
-                const sc = STATUS_CONFIG[group.status] || STATUS_CONFIG.UNPAID;
                 const isGroupOpen = expandedGroupId === group.student.id;
 
                 return (
@@ -328,17 +327,24 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 mt-2 md:mt-0">
-                        <div className="text-left md:text-right">
-                          <div className="text-xl font-bold text-white">₨{group.totalBilled.toLocaleString()}</div>
-                          {group.status === 'PARTIAL' && group.totalPaid > 0 && (
-                            <div className="text-xs text-amber-400 mt-0.5">Paid: ₨{group.totalPaid.toLocaleString()}</div>
-                          )}
-                        </div>
-                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap ${sc.bg} ${sc.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                          {sc.label}
-                        </div>
+                      {/* Each bill shown as its own distinct status row */}
+                      <div className="flex flex-col items-end gap-1.5 mt-2 md:mt-0">
+                        {group.bills.map(bill => {
+                          const bsc = STATUS_CONFIG[bill.status] || STATUS_CONFIG.UNPAID;
+                          return (
+                            <div key={bill.id} className="flex items-center gap-2 bg-[#060810]/60 px-3 py-1.5 rounded-lg border border-[#1e233d]/60">
+                              <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{bill.isTuition ? 'Tuition' : 'Extra Charge'}</span>
+                              <span className="text-sm font-bold text-white">₨{Number(bill.totalAmount).toLocaleString()}</span>
+                              {bill.status === 'PARTIAL' && bill.paidAmount && (
+                                <span className="text-[10px] text-amber-400">Paid: ₨{Number(bill.paidAmount).toLocaleString()}</span>
+                              )}
+                              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold whitespace-nowrap ${bsc.bg} ${bsc.text}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${bsc.dot}`} />
+                                {bsc.label}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
