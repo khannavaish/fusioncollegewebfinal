@@ -150,7 +150,7 @@ export function PageShell({
     <div className="relative w-full">
       {/* Background patterns are now in layout.js so we don't need them here */}
       <PageHeader title={title} description={description} icon={icon} rightContent={rightContent} />
-      <main className="relative z-10 w-full">
+      <main className="relative w-full">
         {children}
       </main>
     </div>

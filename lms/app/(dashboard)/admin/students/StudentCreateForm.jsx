@@ -1,5 +1,6 @@
 'use client';
 
+import ClientPortal from '@/app/components/ClientPortal';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { createStudent, checkGuardianName, bulkImportStudents } from '@/app/actions/admin';
 import { IconCheckCircle, IconAlertTriangle, IconIdCard, IconMail, IconKey, IconUsers } from '@/app/components/icons';
@@ -172,6 +173,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
       {/* CSV Import Modal */}
       {showCsvModal && (
+        <ClientPortal>
         <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="w-full max-w-md max-h-[calc(100dvh-11rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
@@ -228,10 +230,12 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
             </div>
           </div>
         </div>
+        </ClientPortal>
       )}
 
       {/* Main Form Modal */}
       {isFormOpen && (
+        <ClientPortal>
         <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="w-full max-w-4xl max-h-[calc(100dvh-6rem-5rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
             {/* Modal Header */}
@@ -427,6 +431,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
             </div>
           </div>
         </div>
+        </ClientPortal>
       )}
     </>
   );
