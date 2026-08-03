@@ -10,7 +10,7 @@ import {
   ClipboardCheck, Bell, History, Settings,
   LogOut, PanelLeftClose, PanelLeftOpen,
   Phone, GraduationCap, Banknote, Calendar, BarChart3, Database,
-  Download, AlertTriangle, UserCheck, HeartHandshake
+  Download, AlertTriangle, UserCheck, HeartHandshake, Menu, X
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -42,6 +42,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-pinned");
@@ -99,19 +100,43 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
   ];
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: isOpen ? FULL_W : RAIL_W }}
-      transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      className="hidden md:flex flex-col fixed left-4 top-4 bottom-4 z-30 overflow-hidden
-                 rounded-[2rem] border border-white/10
-                 bg-[#0b051a]/90 backdrop-blur-2xl
-                 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]
-                 justify-between py-4 print:hidden isolate"
-      style={{ minWidth: RAIL_W }}
-    >
+    <>
+      {/* Mobile Toggle Button */}
+      <button 
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="md:hidden fixed bottom-6 right-6 z-[60] w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-transform hover:scale-105 active:scale-95 print:hidden"
+      >
+        {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm print:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside
+        initial={false}
+        animate={{ width: isOpen || mobileOpen ? FULL_W : RAIL_W }}
+        transition={{ type: "spring", stiffness: 320, damping: 32, mass: 0.8 }}
+        onHoverStart={() => setHovered(true)}
+        onHoverEnd={() => setHovered(false)}
+        className={`flex flex-col fixed left-4 top-4 bottom-4 z-50 overflow-hidden
+                   rounded-[2rem] border border-white/10
+                   bg-[#0b051a]/95 backdrop-blur-3xl
+                   shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]
+                   justify-between py-4 print:hidden isolate
+                   transition-transform duration-300 md:translate-x-0
+                   ${mobileOpen ? 'translate-x-0' : '-translate-x-[150%]'}`}
+        style={{ minWidth: RAIL_W }}
+      >
       {/* Dynamic Flowing Neon Water Background - Clean & Aesthetic */}
       <div 
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.15] mix-blend-screen [mask-image:linear-gradient(to_bottom,white_0%,transparent_60%)]"
@@ -276,6 +301,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
         </form>
       </div>
     </motion.aside>
+    </>
   );
 }
 

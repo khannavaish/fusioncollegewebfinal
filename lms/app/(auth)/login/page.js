@@ -82,7 +82,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-md relative z-10"
+          className="w-full max-w-md relative z-10 px-4"
         >
           {/* Outer glow ring */}
           <div className="absolute -inset-[1px] rounded-[2rem] bg-gradient-to-br from-cyan-500/30 via-violet-500/20 to-transparent blur-sm pointer-events-none" />
