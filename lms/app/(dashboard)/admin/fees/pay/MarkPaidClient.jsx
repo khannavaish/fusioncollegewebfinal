@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { updateBillAmount } from '@/app/actions/fees';
-import { IconSearch, IconFilter, IconCheckCircle, IconXCircle, IconUpload, IconSchool } from '@/app/components/icons';
+import { IconCheckCircle, IconXCircle, IconSchool } from '@/app/components/icons';
+import { Search as IconSearch, Upload as IconUpload } from 'lucide-react';
 import Link from 'next/link';
 import ClientPortal from '@/app/components/ClientPortal';
 
