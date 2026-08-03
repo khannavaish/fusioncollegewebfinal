@@ -201,7 +201,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
                   <div className="text-[13px] font-black tracking-widest text-white uppercase leading-none">
                     FUSION
                   </div>
-                  <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest capitalize leading-none mt-0.5">
+                  <div className="text-[9px] text-slate-300 drop-shadow-md font-bold uppercase tracking-widest capitalize leading-none mt-0.5">
                     {role} Portal
                   </div>
                 </motion.div>
@@ -285,7 +285,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
                 className="overflow-hidden whitespace-nowrap"
               >
                 <div className="text-xs font-bold text-white leading-tight">{name}</div>
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{role}</div>
+                <div className="text-[9px] font-bold text-slate-300 drop-shadow-md uppercase tracking-widest">{role}</div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -388,7 +388,7 @@ function SignOutButton({ isOpen }) {
       title={!isOpen ? "Sign Out" : undefined}
       type="submit"
       disabled={pending}
-      className="w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-rose-500/80 hover:text-rose-400 hover:bg-rose-500/10 transition-colors h-[44px] font-bold cursor-pointer disabled:opacity-50"
+      className="w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-rose-400 drop-shadow-md hover:text-rose-300 hover:bg-rose-500/20 transition-colors h-[44px] font-bold cursor-pointer disabled:opacity-50"
     >
       {pending ? (
         <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
