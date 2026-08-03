@@ -275,7 +275,6 @@ function buildFeeWhatsAppMessage(student, bill, monthName, year, itemLines, bank
 
 👤 Student: *${student.name}* (${student.rollNumber})
 🎓 Class: ${student.class?.name || 'N/A'}
-📦 Package: ${student.feePackage?.name || 'Custom'}${student.admissionPercentage ? ` (${student.admissionPercentage}%)` : ''}
 
 📋 *Charges:*
 ${itemLines}
