@@ -116,15 +116,6 @@ export default async function DashboardLayout({ children }) {
     redirect('/login?error=inactive');
   }
 
-  // Force password change on first login
-  if (dbUser?.mustChangePassword) {
-    const { headers } = await import('next/headers');
-    const headersList = await headers();
-    const pathname = headersList.get('x-pathname') || headersList.get('next-url') || '';
-    if (!pathname.includes('/change-password')) {
-      redirect('/change-password');
-    }
-  }
 
   const name = dbUser?.student?.name || dbUser?.teacher?.name || dbUser?.admin?.name || dbUser?.parent?.name || user.email;
   const role = dbUser?.role || 'STUDENT';
