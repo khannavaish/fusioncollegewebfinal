@@ -441,68 +441,109 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                                 </button>
                               </div>
 
-                              {isOpen && (
-                                <div className="bg-[#0a0c14] p-4">
-                                  {msg && actionBillId === bill.id && (
-                                    <p className={`text-xs mb-3 font-medium ${msg.startsWith('✅') ? 'text-emerald-400' : 'text-red-400'}`}>{msg}</p>
-                                  )}
-
-                                  {/* Mark Paid Panel */}
-                                  {panelType === 'pay' && (
-                                    <form onSubmit={(e) => handleMarkPaid(e, bill.id)} className="flex items-end gap-3 max-w-sm">
-                                      <div className="flex-1">
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Amount Received</label>
-                                        <div className="relative">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">₨</span>
-                                          <input type="number" name="amount" defaultValue={bill.totalAmount} required min="1" max={bill.totalAmount} step="0.01" className={`${inputCls} pl-8`} />
+                              {/* Action Modal Overlay */}
+                              {actionBillId === bill.id && panelType && (
+                                <div className="fixed inset-0 top-16 md:top-0 z-[9999] flex items-start md:items-center justify-center p-4">
+                                  <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => { setActionBillId(null); setPanelType(null); setMsg(''); }} />
+                                  <div className="relative w-full max-w-lg max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5 rounded-t-3xl">
+                                      <h2 className="text-base font-black text-white tracking-wide">
+                                        {panelType === 'pay' && 'Mark as Paid'}
+                                        {panelType === 'charge' && 'Add Extra Charge'}
+                                        {panelType === 'waive' && 'Waive / Void Bill'}
+                                        {panelType === 'edit-bill' && 'Edit Base Tuition'}
+                                      </h2>
+                                      <button
+                                        type="button"
+                                        onClick={() => { setActionBillId(null); setPanelType(null); setMsg(''); }}
+                                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                    <div className="px-6 py-6 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                                      {msg && (
+                                        <div className={`px-4 py-3 rounded-xl text-xs font-bold mb-4 border ${msg.startsWith('✅') ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                                          {msg}
                                         </div>
-                                      </div>
-                                      <button type="submit" disabled={loading} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition-colors">Confirm</button>
-                                    </form>
-                                  )}
+                                      )}
 
-                                  {/* Add Charge Panel */}
-                                  {panelType === 'charge' && (
-                                    <form onSubmit={(e) => handleAddCharge(e, bill.id)} className="flex flex-wrap items-end gap-3 max-w-lg">
-                                      <div className="flex-[2] min-w-[150px]">
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Charge Title</label>
-                                        <input type="text" name="title" placeholder="e.g. Fine, Books" required className={inputCls} />
-                                      </div>
-                                      <div className="flex-1 min-w-[100px]">
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Amount</label>
-                                        <div className="relative">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">₨</span>
-                                          <input type="number" name="amount" required min="1" step="0.01" className={`${inputCls} pl-8`} />
-                                        </div>
-                                      </div>
-                                      <button type="submit" disabled={loading} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-lg transition-colors">Add</button>
-                                    </form>
-                                  )}
+                                      {/* Mark Paid Panel */}
+                                      {panelType === 'pay' && (
+                                        <form onSubmit={(e) => handleMarkPaid(e, bill.id)} className="space-y-4">
+                                          <div>
+                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Amount Received</label>
+                                            <div className="relative">
+                                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
+                                              <input type="number" name="amount" defaultValue={bill.totalAmount} required min="1" max={bill.totalAmount} step="0.01" className={`${inputCls} pl-10`} />
+                                            </div>
+                                          </div>
+                                          <div className="pt-2 border-t border-white/5">
+                                            <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all disabled:opacity-50 cursor-pointer">
+                                              Confirm Payment
+                                            </button>
+                                          </div>
+                                        </form>
+                                      )}
 
-                                  {/* Waive Panel */}
-                                  {panelType === 'waive' && (
-                                    <form onSubmit={(e) => handleWaive(e, bill.id)} className="flex flex-col gap-3 max-w-sm">
-                                      <div>
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Reason for Waiving</label>
-                                        <input type="text" name="remarks" placeholder="Optional..." className={inputCls} />
-                                      </div>
-                                      <button type="submit" disabled={loading} className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-lg transition-colors text-center w-full">Confirm Waive</button>
-                                    </form>
-                                  )}
+                                      {/* Add Charge Panel */}
+                                      {panelType === 'charge' && (
+                                        <form onSubmit={(e) => handleAddCharge(e, bill.id)} className="space-y-4">
+                                          <div>
+                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Charge Title</label>
+                                            <input type="text" name="title" placeholder="e.g. Fine, Books" required className={inputCls} />
+                                          </div>
+                                          <div>
+                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Amount</label>
+                                            <div className="relative">
+                                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
+                                              <input type="number" name="amount" required min="1" step="0.01" className={`${inputCls} pl-10`} />
+                                            </div>
+                                          </div>
+                                          <div className="pt-2 border-t border-white/5">
+                                            <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 cursor-pointer">
+                                              Add Charge
+                                            </button>
+                                          </div>
+                                        </form>
+                                      )}
 
-                                  {/* Edit Bill Amount Panel */}
-                                  {panelType === 'edit-bill' && (
-                                    <form onSubmit={(e) => handleUpdateBill(e, bill.id)} className="flex items-end gap-3 max-w-sm">
-                                      <div className="flex-1">
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">New Base Tuition Amount</label>
-                                        <div className="relative">
-                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">₨</span>
-                                          <input type="number" name="baseAmount" defaultValue={bill.baseAmount} required min="0" step="0.01" className={`${inputCls} pl-8`} />
-                                        </div>
-                                      </div>
-                                      <button type="submit" disabled={loading} className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold rounded-lg transition-colors">Update</button>
-                                    </form>
-                                  )}
+                                      {/* Waive Panel */}
+                                      {panelType === 'waive' && (
+                                        <form onSubmit={(e) => handleWaive(e, bill.id)} className="space-y-4">
+                                          <div>
+                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Reason for Waiving</label>
+                                            <input type="text" name="remarks" placeholder="Optional..." className={inputCls} />
+                                          </div>
+                                          <div className="pt-2 border-t border-white/5">
+                                            <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all disabled:opacity-50 cursor-pointer">
+                                              Confirm Waive / Void
+                                            </button>
+                                          </div>
+                                        </form>
+                                      )}
+
+                                      {/* Edit Bill Amount Panel */}
+                                      {panelType === 'edit-bill' && (
+                                        <form onSubmit={(e) => handleUpdateBill(e, bill.id)} className="space-y-4">
+                                          <div>
+                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">New Base Tuition Amount</label>
+                                            <div className="relative">
+                                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
+                                              <input type="number" name="baseAmount" defaultValue={bill.baseAmount} required min="0" step="0.01" className={`${inputCls} pl-10`} />
+                                            </div>
+                                          </div>
+                                          <div className="pt-2 border-t border-white/5">
+                                            <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50 cursor-pointer">
+                                              Update Base Tuition
+                                            </button>
+                                          </div>
+                                        </form>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               )}
                             </div>
