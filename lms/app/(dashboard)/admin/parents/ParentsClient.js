@@ -125,9 +125,9 @@ function ParentCard({ p, students }) {
 
       {/* Change Password Modal */}
       {pwOpen && (
-        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setPwOpen(false)} />
-          <div className="relative w-full max-w-sm max-h-[calc(100dvh-11rem)] md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm max-h-full md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5 rounded-t-3xl">
               <h2 className="text-sm font-black text-white tracking-wide">Change Password</h2>
               <button
@@ -168,9 +168,9 @@ function ParentCard({ p, students }) {
 
       {/* Edit Parent Modal */}
       {editOpen && (
-        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setEditOpen(false)} />
-          <div className="relative w-full max-w-lg max-h-[calc(100dvh-11rem)] md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-lg max-h-full md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5 rounded-t-3xl">
               <h2 className="text-base font-black text-white tracking-wide">Edit Parent</h2>
               <button

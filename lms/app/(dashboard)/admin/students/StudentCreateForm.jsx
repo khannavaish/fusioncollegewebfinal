@@ -174,8 +174,8 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
       {/* CSV Import Modal */}
       {showCsvModal && (
         <ClientPortal>
-        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-md max-h-[calc(100dvh-11rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-md max-h-full md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
               <h2 className="text-base font-black text-white tracking-wide">Bulk Import via CSV</h2>
               <button
@@ -236,8 +236,8 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
       {/* Main Form Modal */}
       {isFormOpen && (
         <ClientPortal>
-        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-4xl max-h-[calc(100dvh-6rem-5rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-4xl max-h-full md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
             {/* Modal Header */}
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 md:px-8 md:py-5 border-b border-white/5 bg-[#0c0e1a]/90 rounded-t-3xl">
               <div>

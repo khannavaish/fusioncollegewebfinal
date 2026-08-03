@@ -16,7 +16,7 @@ const STATUS_COLORS = {
 function Modal({ title, onClose, children }) {
   return (
     <div
-      className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4"
+      className="fixed inset-0 z-[99999] flex items-start justify-center pt-20 pb-28 px-4 md:pt-0 md:pb-0 md:items-center md:p-6 bg-black/70 backdrop-blur-md"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
@@ -32,7 +32,7 @@ function Modal({ title, onClose, children }) {
             </svg>
           </button>
         </div>
-        <div className="px-6 py-6 overflow-y-auto max-h-[calc(100dvh-11rem)] md:max-h-[75vh] scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">{children}</div>
+        <div className="px-6 py-6 overflow-y-auto max-h-full md:max-h-[90vh] md:max-h-[75vh] scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">{children}</div>
       </div>
     </div>
   );
