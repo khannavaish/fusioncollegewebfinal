@@ -47,7 +47,7 @@ export default function GenerateBillButton({ studentId }) {
       <dialog 
         ref={dialogRef}
         onClose={() => setIsOpen(false)}
-        className="bg-transparent m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm p-4 w-full max-w-sm"
+        className="bg-transparent m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm p-4 w-full max-w-sm max-h-[calc(100vh-6rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full"
       >
         <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e233d] bg-[#0d0f1a]">
