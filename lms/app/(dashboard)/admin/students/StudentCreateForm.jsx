@@ -81,25 +81,25 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
             <>
               <div className="bg-black/20 border border-white/5 rounded-2xl p-5 mb-4 space-y-4">
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Student Account</p>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-1.5">
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
                     <IconIdCard className="w-4 h-4 text-cyan-400" /> Roll No
                   </span>
-                  <span className="text-sm font-mono font-bold text-white tracking-wider">{creds.rollNumber}</span>
+                  <span className="text-sm font-mono font-bold text-white tracking-wider break-all">{creds.rollNumber}</span>
                 </div>
                 <div className="border-t border-white/5" />
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-1.5">
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
                     <IconMail className="w-4 h-4 text-blue-400" /> Login Email
                   </span>
-                  <span className="text-sm font-mono font-bold text-cyan-400">{creds.email}</span>
+                  <span className="text-sm font-mono font-bold text-cyan-400 break-all">{creds.email}</span>
                 </div>
                 <div className="border-t border-white/5" />
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-1.5 items-start">
                   <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
                     <IconKey className="w-4 h-4 text-emerald-400" /> Password
                   </span>
-                  <span className="text-sm font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 tracking-widest">
+                  <span className="text-sm font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 tracking-widest break-all">
                     {creds.password}
                   </span>
                 </div>
@@ -111,18 +111,18 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
                   <p className="text-xs text-zinc-400">Linked to existing parent account <span className="font-bold text-white">{creds.parent.email}</span>.</p>
                 ) : (
                   <>
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col gap-1.5">
                       <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
                         <IconMail className="w-4 h-4 text-indigo-400" /> Login
                       </span>
-                      <span className="text-sm font-mono font-bold text-cyan-400">{creds.parent.email}</span>
+                      <span className="text-sm font-mono font-bold text-cyan-400 break-all">{creds.parent.email}</span>
                     </div>
                     <div className="border-t border-white/5" />
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col gap-1.5 items-start">
                       <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
                         <IconKey className="w-4 h-4 text-purple-400" /> Password
                       </span>
-                      <span className="text-sm font-mono font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20 tracking-widest">
+                      <span className="text-sm font-mono font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20 tracking-widest break-all">
                         {creds.parent.password}
                       </span>
                     </div>
