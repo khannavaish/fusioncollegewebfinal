@@ -38,7 +38,7 @@ const ICON_MAP = {
 const RAIL_W = 68;
 const FULL_W = 256;
 
-export default function Sidebar({ role, name, handleSignOutAction }) {
+export default function Sidebar({ role, name, avatarUrl, handleSignOutAction }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -273,8 +273,12 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
       {/* Bottom User Area */}
       <div className="px-3 pt-3 mt-4 border-t border-white/5">
         <div className="flex items-center gap-3 mb-3 h-[44px]">
-          <div className="w-9 h-9 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-black text-sm">
-            {name.charAt(0).toUpperCase()}
+          <div className="w-9 h-9 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-black text-sm overflow-hidden relative">
+            {avatarUrl ? (
+              <Image src={avatarUrl} alt={name} fill className="object-cover" sizes="36px" />
+            ) : (
+              name.charAt(0).toUpperCase()
+            )}
           </div>
           <AnimatePresence>
             {isOpen && (

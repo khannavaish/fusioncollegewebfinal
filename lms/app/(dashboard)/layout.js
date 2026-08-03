@@ -134,6 +134,9 @@ export default async function DashboardLayout({ children }) {
     redirect('/login');
   };
 
+  // Extract avatar URL (prefer student photo if exists, otherwise user avatar)
+  const avatarUrl = dbUser?.student?.photoUrl || dbUser?.avatarUrl || null;
+
   return (
     <div className="dashboard-layout flex w-full min-h-screen relative overflow-hidden">
       {/* Global Background Patterns */}
@@ -141,7 +144,7 @@ export default async function DashboardLayout({ children }) {
 
       {/* Sidebar with higher z-index to sit above bg */}
       <div className="relative z-20">
-        <Sidebar role={role} name={name} handleSignOutAction={handleSignOut} />
+        <Sidebar role={role} name={name} avatarUrl={avatarUrl} handleSignOutAction={handleSignOut} />
       </div>
 
       {/* Main pane */}
