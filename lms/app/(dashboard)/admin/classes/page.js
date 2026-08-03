@@ -7,6 +7,8 @@ import { IconChevronLeft, IconChevronRight } from '@/app/components/icons';
 import DeleteClassForm from './DeleteClassForm';
 import { createClass, updateClass, assignTeacherToSubject, removeClassSubject } from '@/app/actions/admin';
 import Pagination from '@/app/components/Pagination';
+import { PageShell } from '@/app/components/Brand';
+import { Layers } from 'lucide-react';
 
 const PAGE_SIZE = 12;
 
@@ -47,18 +49,17 @@ export default async function AdminClassesPage({ searchParams }) {
   const btnPrimary = "px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer";
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Classes</h1>
-            <p className="text-zinc-400 text-sm mt-1">{classes.length} class{classes.length !== 1 ? 'es' : ''} total</p>
-          </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Manage Classes"
+      icon={<Layers />}
+      description={`${classes.length} class${classes.length !== 1 ? 'es' : ''} total`}
+      rightContent={
+        <Link href="/admin" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-all hover:bg-cyan-500/20">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       {/* Create Class Form */}
       <AnimatedSection delay={0.2}>
@@ -158,6 +159,7 @@ export default async function AdminClassesPage({ searchParams }) {
         )}
         <Pagination page={page} total={total} pageSize={PAGE_SIZE} basePath="/admin/classes" />
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

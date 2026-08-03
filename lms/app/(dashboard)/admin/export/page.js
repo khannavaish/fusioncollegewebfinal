@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import { IconDownload, IconUsers, IconGraduationCap, IconBuilding, IconBookOpen } from '@/app/components/icons';
+import { PageShell } from '@/app/components/Brand';
+import { Download } from 'lucide-react';
 
 export const metadata = {
   title: 'Export Data | Fusion College LMS',
@@ -33,15 +35,12 @@ export default async function AdminExportPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Export Data</h1>
-            <p className="text-zinc-400 text-sm mt-1">Download your school's data directly to standard CSV format.</p>
-          </div>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Export Data"
+      icon={<Download />}
+      description="Download your school's data directly to standard CSV format."
+    >
+      <div className="space-y-6 max-w-5xl mx-auto mt-4">
 
       <AnimatedSection delay={0.2}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -66,6 +65,7 @@ export default async function AdminExportPage() {
           ))}
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

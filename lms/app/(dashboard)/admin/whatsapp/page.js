@@ -4,6 +4,8 @@ import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import WhatsAppSettingsClient from './WhatsAppSettingsClient';
+import { PageShell } from '@/app/components/Brand';
+import { Phone } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,31 +67,30 @@ export default async function WhatsAppSettingsPage() {
   } catch {}
  
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">WhatsApp Notifications</h1>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1">Configure parent notification settings and send reports</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {config?.isEnabled ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                Active
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-700/30 text-gray-600 dark:text-zinc-500 text-xs font-bold rounded-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-zinc-600" />
-                Inactive
-              </span>
-            )}
-            <Link href="/admin" className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium">
-              Back to Admin
-            </Link>
-          </div>
+    <PageShell
+      title="WhatsApp Notifications"
+      icon={<Phone />}
+      description="Configure parent notification settings and send reports"
+      rightContent={
+        <div className="flex items-center gap-2">
+          {config?.isEnabled ? (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+              Active
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-700/30 text-gray-600 dark:text-zinc-500 text-xs font-bold rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-zinc-600" />
+              Inactive
+            </span>
+          )}
+          <Link href="/admin" className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 uppercase tracking-widest bg-cyan-50 dark:bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-500/20 transition-all">
+            Back to Admin
+          </Link>
         </div>
-      </AnimatedSection>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       {/* Today's Logging Status Panel */}
       <AnimatedSection delay={0.15}>
@@ -149,6 +150,7 @@ export default async function WhatsAppSettingsPage() {
       <AnimatedSection delay={0.2}>
         <WhatsAppSettingsClient config={config} classes={classes} />
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

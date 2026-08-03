@@ -6,7 +6,8 @@ import prisma from '@/utils/db';
 import AnnouncementForm from './AnnouncementForm';
 import { IconChevronLeft, IconChatBubble } from '@/app/components/icons';
 import { deleteAnnouncement, editAnnouncement } from '@/app/actions/announcements';
-
+import { PageShell } from '@/app/components/Brand';
+import { Bell } from 'lucide-react';
 
 export default async function AdminAnnouncementsPage() {
   const supabase = await createClient();
@@ -29,18 +30,17 @@ export default async function AdminAnnouncementsPage() {
   }
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col gap-4 border-b border-[#1e233d] pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">Announcements</h1>
-            <p className="mt-1 text-sm text-zinc-400">Share notices with classes, teachers, and WhatsApp groups.</p>
-          </div>
-          <Link href="/admin" className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300">
-            <IconChevronLeft className="h-3 w-3" /> Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Announcements"
+      icon={<Bell />}
+      description="Share notices with classes, teachers, and WhatsApp groups."
+      rightContent={
+        <Link href="/admin" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-all hover:bg-cyan-500/20">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       <AnimatedSection delay={0.2}>
         <AnnouncementForm classes={classes} teachers={teachers} />
@@ -96,6 +96,7 @@ export default async function AdminAnnouncementsPage() {
           )}
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

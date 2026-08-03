@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
 import StudentCreateForm from './StudentCreateForm';
 import StudentsClient from './StudentsClient';
+import { PageShell } from '@/app/components/Brand';
+import { Users } from 'lucide-react';
 
 const PAGE_SIZE = 20;
 
@@ -46,52 +48,51 @@ export default async function AdminStudentsPage({ searchParams }) {
     monthlyFee: Number(p.monthlyFee),
   }));
 
-
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Students</h1>
-            <p className="text-zinc-400 text-sm mt-1">{students.length} student{students.length !== 1 ? 's' : ''} enrolled</p>
-          </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
+    <PageShell 
+      title="Manage Students" 
+      icon={<Users />}
+      description={`${students.length} student${students.length !== 1 ? 's' : ''} enrolled`}
+      rightContent={
+        <Link href="/admin" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-all hover:bg-cyan-500/20">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
+        {/* Client enrollment form (shows credential modal on success) */}
+        <AnimatedSection delay={0.2}>
+          <StudentCreateForm classes={classes} feePackages={serializedPackages} />
+        </AnimatedSection>
 
-      {/* Client enrollment form (shows credential modal on success) */}
-      <AnimatedSection delay={0.2}>
-        <StudentCreateForm classes={classes} feePackages={serializedPackages} />
-      </AnimatedSection>
-
-      {/* Students Table */}
-      <AnimatedSection delay={0.3}>
-        {students.length === 0 ? (
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
-            No students enrolled yet. Enroll your first student above.
-          </div>
-        ) : (
-          <StudentsClient
-            students={students.map(s => ({
-              id: s.id,
-              userId: s.userId,
-              name: s.name,
-              fatherName: s.fatherName,
-              rollNumber: s.rollNumber,
-              photoUrl: s.photoUrl,
-              classId: s.classId,
-              class: s.class,
-              user: s.user ? { email: s.user.email, plainPassword: s.user.plainPassword, status: s.user.status } : null,
-            }))}
-            classes={classes}
-            page={page}
-            total={total}
-            pageSize={PAGE_SIZE}
-          />
-        )}
-      </AnimatedSection>
-    </div>
+        {/* Students Table */}
+        <AnimatedSection delay={0.3}>
+          {students.length === 0 ? (
+            <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-10 text-center text-zinc-500 text-sm">
+              No students enrolled yet. Enroll your first student above.
+            </div>
+          ) : (
+            <StudentsClient
+              students={students.map(s => ({
+                id: s.id,
+                userId: s.userId,
+                name: s.name,
+                fatherName: s.fatherName,
+                rollNumber: s.rollNumber,
+                photoUrl: s.photoUrl,
+                classId: s.classId,
+                class: s.class,
+                user: s.user ? { email: s.user.email, status: s.user.status } : null,
+              }))}
+              classes={classes}
+              feePackages={serializedPackages}
+              page={page}
+              total={total}
+              pageSize={PAGE_SIZE}
+            />
+          )}
+        </AnimatedSection>
+      </div>
+    </PageShell>
   );
 }

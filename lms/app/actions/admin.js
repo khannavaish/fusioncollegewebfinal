@@ -867,6 +867,7 @@ export async function updateAdminProfile(formData) {
   const name = formData.get('name')?.toString().trim();
   const email = formData.get('email')?.toString().trim();
   const password = formData.get('password')?.toString();
+  const avatarFile = formData.get('avatar');
 
   if (!name || !email) return { error: 'Name and email are required.' };
 
@@ -886,6 +887,14 @@ export async function updateAdminProfile(formData) {
       await adminClientObj.auth.admin.updateUserById(user.id, { password });
     }
 
+    let avatarUrl = dbUser.avatarUrl;
+    if (avatarFile && avatarFile.size > 0) {
+      const url = await saveLocalFile(avatarFile, 'avatars');
+      if (url) {
+        avatarUrl = url;
+      }
+    }
+
     await prisma.admin.update({
       where: { id: dbUser.admin.id },
       data: { name },
@@ -895,6 +904,7 @@ export async function updateAdminProfile(formData) {
       where: { id: dbUser.id },
       data: { 
         email,
+        avatarUrl,
         ...(password && password.length >= 6 ? { plainPassword: password } : {})
       },
     });

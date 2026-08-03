@@ -155,20 +155,18 @@ export default async function TeacherDashboard() {
   };
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.05}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Teacher Dashboard</h1>
-            <p className="text-zinc-400 text-sm mt-1">Welcome back, {teacherName}</p>
-          </div>
-          <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
-            <div className="font-bold text-white">{qualification}</div>
-            <div className="text-[10px] text-zinc-400 mt-0.5">Fusion Faculty</div>
-          </div>
+    <PageShell
+      title="Teacher Dashboard"
+      icon={<UserCheck />}
+      description={`Welcome back, ${teacherName}`}
+      rightContent={
+        <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
+          <div className="font-bold text-white">{qualification}</div>
+          <div className="text-[10px] text-zinc-400 mt-0.5">Fusion Faculty</div>
         </div>
-      </AnimatedSection>
-
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
       <AnimatedSection delay={0.1}>
         {classStatusCard ? (
           <div className={`${colorMap[classStatusCard.color].bg} border ${colorMap[classStatusCard.color].border} rounded-xl p-5 flex items-center gap-4`}>
@@ -290,6 +288,7 @@ export default async function TeacherDashboard() {
           </div>
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

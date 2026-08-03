@@ -4,6 +4,8 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import { resolveTimeSlots } from '@/utils/timetable';
+import { PageShell } from '@/app/components/Brand';
+import { GraduationCap } from 'lucide-react';
 
 function normalizeText(value = '') {
   return value.toString().trim().replace(/\s+/g, ' ').toLowerCase();
@@ -180,23 +182,23 @@ export default async function StudentDashboard() {
   const studentRollNumber = student?.rollNumber || 'FC-PENDING';
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.05}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              Student Dashboard
-              {isAlumni && <span className="text-[10px] px-2 py-1 bg-purple-950/50 text-purple-400 border border-purple-500/30 rounded font-bold uppercase tracking-widest align-middle shadow-lg shadow-purple-900/20">🎓 ALUMNI (READ-ONLY)</span>}
-            </h1>
-            <p className="text-zinc-400 text-sm mt-1">Welcome back, {student?.name || user.email}</p>
-          </div>
-          <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
-            <div className="font-bold text-white">{studentClassName}</div>
-            <div className="text-[10px] text-zinc-400 mt-0.5">Roll No: {studentRollNumber}</div>
-          </div>
+    <PageShell
+      title={
+        <div className="flex items-center gap-3">
+          Student Dashboard
+          {isAlumni && <span className="text-[10px] px-2 py-1 bg-purple-950/50 text-purple-400 border border-purple-500/30 rounded font-bold uppercase tracking-widest align-middle shadow-lg shadow-purple-900/20">🎓 ALUMNI (READ-ONLY)</span>}
         </div>
-      </AnimatedSection>
-
+      }
+      icon={<GraduationCap />}
+      description={`Welcome back, ${student?.name || user.email}`}
+      rightContent={
+        <div className="bg-[#16192b] border border-[#2b3052] rounded-lg px-4 py-2.5 text-xs text-zinc-300">
+          <div className="font-bold text-white">{studentClassName}</div>
+          <div className="text-[10px] text-zinc-400 mt-0.5">Roll No: {studentRollNumber}</div>
+        </div>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
       {/* Overview Cards */}
       <AnimatedSection delay={0.1}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -299,6 +301,7 @@ export default async function StudentDashboard() {
           </div>
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

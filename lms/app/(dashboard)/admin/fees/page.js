@@ -12,6 +12,8 @@ import { generateMonthlyBills } from '@/app/actions/fees';
 import BillingExecutionForm from './BillingExecutionForm';
 import BankSettingsForm from './BankSettingsForm';
 import IndividualBillingForm from './IndividualBillingForm';
+import { PageShell } from '@/app/components/Brand';
+import { Banknote } from 'lucide-react';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -64,26 +66,11 @@ export default async function FeeHubPage() {
   });
 
   return (
-    <div className="space-y-8 font-sans">
-      {/* Header */}
-      <AnimatedSection delay={0.05}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-zinc-500 text-xs mb-2">
-            <Link href="/admin" className="hover:text-cyan-400 transition-colors">Dashboard</Link>
-            <IconChevronRight className="w-3 h-3" />
-            <span className="text-zinc-300">Fee Management</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <IconChart className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Fee Management</h1>
-          </div>
-          <p className="text-zinc-400 text-sm mt-2 font-medium">
-            {MONTH_NAMES[month - 1]} {year} Overview • {stats.total} bills generated
-          </p>
-        </div>
+    <PageShell
+      title="Fee Management"
+      icon={<Banknote />}
+      description={`${MONTH_NAMES[month - 1]} ${year} Overview • ${stats.total} bills generated`}
+      rightContent={
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/fees/packages"
@@ -107,8 +94,9 @@ export default async function FeeHubPage() {
             Teacher Payroll
           </Link>
         </div>
-      </div>
-    </AnimatedSection>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       {/* Warning: students without package */}
       {studentsWithoutPackage > 0 && (
@@ -137,12 +125,12 @@ export default async function FeeHubPage() {
       <AnimatedSection delay={0.15}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Bills', value: stats.total, icon: <IconDocumentText className="w-5 h-5 text-cyan-400" />, bg: 'bg-cyan-500/10' },
-          { label: 'Unpaid', value: stats.unpaid, icon: <IconXCircle className="w-5 h-5 text-red-400" />, bg: 'bg-red-500/10' },
-          { label: 'Paid', value: stats.paid, icon: <IconCheckCircle className="w-5 h-5 text-emerald-400" />, bg: 'bg-emerald-500/10' },
-          { label: 'Partial / Waived', value: `${stats.partial} / ${stats.waived}`, icon: <IconClock className="w-5 h-5 text-amber-400" />, bg: 'bg-amber-500/10' },
+          { label: 'Total Bills', value: stats.total, icon: <IconDocumentText className="w-5 h-5 text-cyan-400" />, bg: 'bg-cyan-500/10', link: '/admin/fees/reports?status=ALL' },
+          { label: 'Unpaid', value: stats.unpaid, icon: <IconXCircle className="w-5 h-5 text-red-400" />, bg: 'bg-red-500/10', link: '/admin/fees/reports?status=UNPAID' },
+          { label: 'Paid', value: stats.paid, icon: <IconCheckCircle className="w-5 h-5 text-emerald-400" />, bg: 'bg-emerald-500/10', link: '/admin/fees/reports?status=PAID' },
+          { label: 'Partial / Waived', value: `${stats.partial} / ${stats.waived}`, icon: <IconClock className="w-5 h-5 text-amber-400" />, bg: 'bg-amber-500/10', link: '/admin/fees/reports?status=PARTIAL' },
         ].map((s, idx) => (
-          <div key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-5 hover:border-[#2a304e] transition-colors group">
+          <Link href={s.link} key={idx} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-5 hover:border-[#2a304e] hover:bg-white/5 hover:-translate-y-1 transition-all group block cursor-pointer">
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
                 {s.icon}
@@ -150,7 +138,7 @@ export default async function FeeHubPage() {
             </div>
             <div className="text-2xl font-bold text-white group-hover:text-cyan-50 transition-colors">{s.value}</div>
             <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-1">{s.label}</div>
-          </div>
+          </Link>
         ))}
         </div>
       </AnimatedSection>
@@ -158,8 +146,8 @@ export default async function FeeHubPage() {
       {/* Revenue Cards */}
       <AnimatedSection delay={0.2}>
         <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-[#0d0f1a] to-[#111322] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+        <Link href="/admin/fees/reports?status=UNPAID" className="bg-gradient-to-br from-[#0d0f1a] to-[#111322] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden block hover:border-cyan-500/30 hover:shadow-[0_10px_30px_-15px_rgba(6,182,212,0.3)] hover:-translate-y-1 transition-all cursor-pointer group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-150 transition-transform duration-500" />
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
             <span className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Total Due This Month</span>
@@ -171,10 +159,10 @@ export default async function FeeHubPage() {
           <div className="text-xs font-medium text-zinc-500 mt-2 bg-black/20 inline-block px-2.5 py-1 rounded-md border border-white/5">
             Across {stats.total} generated bills
           </div>
-        </div>
+        </Link>
 
-        <div className="bg-gradient-to-br from-[#0d0f1a] to-[#0a1614] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+        <Link href="/admin/fees/reports?status=PAID" className="bg-gradient-to-br from-[#0d0f1a] to-[#0a1614] border border-[#1e233d] rounded-2xl p-6 relative overflow-hidden block hover:border-emerald-500/30 hover:shadow-[0_10px_30px_-15px_rgba(16,185,129,0.3)] hover:-translate-y-1 transition-all cursor-pointer group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-150 transition-transform duration-500" />
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
             <span className="text-zinc-400 text-sm font-medium uppercase tracking-wider">Collected So Far</span>
@@ -188,7 +176,7 @@ export default async function FeeHubPage() {
               ? `${Math.round((stats.totalCollected / stats.totalDue) * 100)}% collection rate achieved`
               : 'Awaiting bill generation'}
           </div>
-        </div>
+        </Link>
         </div>
       </AnimatedSection>
 
@@ -301,6 +289,7 @@ export default async function FeeHubPage() {
           )}
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

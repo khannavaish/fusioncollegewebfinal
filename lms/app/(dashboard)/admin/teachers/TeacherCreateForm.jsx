@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { createTeacher } from '@/app/actions/admin';
 import { IconSparkles, IconAlertTriangle, IconMail, IconKey } from '@/app/components/icons';
 
-const inputCls = "w-full bg-[#0a0c14] border border-[#1e233d] rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors";
+const inputCls = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner";
 
 export default function TeacherCreateForm() {
   const [state, action, pending] = useActionState(createTeacher, null);
@@ -27,7 +27,7 @@ export default function TeacherCreateForm() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-lg transition-colors shadow-lg flex items-center gap-2"
+        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-sm font-black rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
         New Teacher
@@ -35,16 +35,16 @@ export default function TeacherCreateForm() {
 
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
-          <div className="relative w-full max-w-2xl bg-[#0d0f1a] border border-[#1e233d] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e233d]">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsOpen(false)} />
+          <div className="relative w-full max-w-2xl bg-[#0c0e1a]/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-8 py-5 border-b border-white/5 bg-white/5">
               <div>
-                <h2 className="text-sm font-bold text-white">Register New Teacher</h2>
-                <p className="text-[11px] text-zinc-500 mt-0.5">A secure password is auto-generated - no need to set one manually</p>
+                <h2 className="text-base font-black text-white tracking-wide">Register New Teacher</h2>
+                <p className="text-[11px] text-zinc-400 mt-1">A secure password is auto-generated - no need to set one manually</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#1e233d] text-zinc-500 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -52,9 +52,9 @@ export default function TeacherCreateForm() {
               </button>
             </div>
             
-            <div className="p-6">
-              <form ref={formRef} action={action}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+            <div className="p-8">
+              <form ref={formRef} action={action} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <input name="name" placeholder="Full Name *" className={inputCls} required />
                   <input name="email" type="email" placeholder="Email Address *" className={inputCls} required />
                   <input name="phone" placeholder="Phone Number" className={inputCls} />
@@ -64,23 +64,24 @@ export default function TeacherCreateForm() {
                 </div>
 
                 {state?.error && (
-                  <div className="mb-4 px-3 py-2 bg-red-950/40 border border-red-500/30 rounded-lg text-xs text-red-400">
+                  <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm font-medium text-red-400 flex items-center gap-2">
+                    <IconAlertTriangle className="w-4 h-4 flex-shrink-0" />
                     {state.error}
                   </div>
                 )}
 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border border-[#1e233d] text-zinc-400 text-xs font-semibold hover:text-white hover:bg-[#1e233d] transition-colors"
+                    className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={pending}
-                    className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                    className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] w-full md:w-auto"
                   >
                     {pending ? 'Registering…' : 'Register & Generate Credentials'}
                   </button>
@@ -94,50 +95,50 @@ export default function TeacherCreateForm() {
       {/* Credential Modal */}
       <dialog
         ref={dialogRef}
-        className="bg-[#0d0f1a] border border-cyan-500/30 rounded-2xl p-0 shadow-2xl shadow-cyan-900/20 w-full max-w-md backdrop:bg-black/70"
+        className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md"
       >
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-full bg-cyan-900/50 border border-cyan-500/40 flex items-center justify-center">
-              <IconSparkles className="w-5 h-5 text-cyan-400" />
+        <div className="bg-[#0c0e1a]/90 backdrop-blur-3xl border border-emerald-500/30 rounded-3xl p-6 shadow-[0_8px_32px_rgba(16,185,129,0.2)] animate-in zoom-in-95 duration-200">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 flex-shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <IconSparkles className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Teacher Registered!</h2>
-              <p className="text-[11px] text-zinc-400">Share these login credentials with the teacher</p>
+              <h2 className="text-lg font-black text-white tracking-wide">Teacher Registered!</h2>
+              <p className="text-[11px] text-zinc-400 mt-0.5">Share these login credentials with the teacher.</p>
             </div>
           </div>
 
-          <div className="bg-[#0a0c14] border border-[#1e233d] rounded-xl p-5 space-y-3 mb-4">
+          <div className="bg-black/20 border border-white/5 rounded-2xl p-5 mb-6 space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">Name</span>
-              <span className="text-sm font-bold text-white">{creds?.name}</span>
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Name</span>
+              <span className="text-sm font-bold text-white tracking-wider">{creds?.name}</span>
             </div>
-            <div className="border-t border-[#1e233d]" />
+            <div className="border-t border-white/5" />
             <div className="flex justify-between items-center">
-              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
-                <IconMail className="w-3.5 h-3.5" /> Login Email
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
+                <IconMail className="w-4 h-4 text-blue-400" /> Login Email
               </span>
-              <span className="text-xs font-mono text-zinc-300">{creds?.email}</span>
+              <span className="text-sm font-mono font-bold text-cyan-400">{creds?.email}</span>
             </div>
-            <div className="border-t border-[#1e233d]" />
+            <div className="border-t border-white/5" />
             <div className="flex justify-between items-center">
-              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
-                <IconKey className="w-3.5 h-3.5" /> Password
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">
+                <IconKey className="w-4 h-4 text-emerald-400" /> Password
               </span>
-              <span className="text-sm font-mono font-bold text-cyan-400 bg-cyan-950/30 px-3 py-1 rounded-lg border border-cyan-500/20 tracking-widest">
+              <span className="text-sm font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 tracking-widest">
                 {creds?.password}
               </span>
             </div>
           </div>
 
-          <p className="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-500/20 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
-            <IconAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+          <p className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-2 font-medium">
+            <IconAlertTriangle className="w-4 h-4 flex-shrink-0" />
             Save these credentials now - the password cannot be recovered later.
           </p>
 
           <button
             onClick={() => dialogRef.current?.close()}
-            className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white text-sm font-black rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
           >
             Done
           </button>

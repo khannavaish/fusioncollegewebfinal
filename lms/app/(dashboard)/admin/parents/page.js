@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { IconChevronLeft } from '@/app/components/icons';
 import { createParent } from '@/app/actions/admin';
 import ParentsClient from './ParentsClient';
+import { PageShell } from '@/app/components/Brand';
+import { HeartHandshake } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,18 +65,17 @@ export default async function AdminParentsPage() {
   const checkboxCls = "accent-cyan-500 w-3.5 h-3.5 rounded cursor-pointer";
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Parents</h1>
-            <p className="text-zinc-400 text-sm mt-1">{parents.length} parent{parents.length !== 1 ? 's' : ''} registered</p>
-          </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Manage Parents"
+      icon={<HeartHandshake />}
+      description={`${parents.length} parent${parents.length !== 1 ? 's' : ''} registered`}
+      rightContent={
+        <Link href="/admin" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-all hover:bg-cyan-500/20">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       {/* Add Parent Form */}
       <AnimatedSection delay={0.2}>
@@ -120,6 +121,7 @@ export default async function AdminParentsPage() {
           <ParentsClient parents={serialisedParents} students={serialisedStudents} />
         )}
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

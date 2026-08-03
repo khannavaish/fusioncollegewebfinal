@@ -5,6 +5,8 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import AdminTimetableShell from './AdminTimetableShell';
 import { resolveTimeSlots } from '@/utils/timetable';
+import { PageShell } from '@/app/components/Brand';
+import { Calendar } from 'lucide-react';
 
 export default async function AdminTimetablePage() {
   const supabase = await createClient();
@@ -45,27 +47,21 @@ export default async function AdminTimetablePage() {
   const initialTimeSlots = resolveTimeSlots(config?.slots);
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">College Timetable</h1>
-            <p className="text-zinc-400 text-sm mt-1">Review the live timetable, then open edit mode when changes are needed</p>
-          </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300">
-            &larr; Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
-
+    <PageShell
+      title="Manage Timetable"
+      icon={<Calendar />}
+      description="Configure classes, assign subjects, and resolve conflicts"
+    >
+      <div className="space-y-8 font-sans mt-4">
       <AnimatedSection delay={0.2}>
-        <AdminTimetableShell initialSlots={slots} 
-          dbClasses={dbClasses} 
-          initialTimeSlots={initialTimeSlots} 
+        <AdminTimetableShell
+          initialSlots={slots}
+          dbClasses={dbClasses}
           dbTeachers={dbTeachers}
+          initialTimeSlots={initialTimeSlots}
         />
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }
-

@@ -5,6 +5,8 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft, IconChevronRight, IconEdit } from '@/app/components/icons';
 import { createSubject, updateSubject, deleteSubject } from '@/app/actions/admin';
+import { PageShell } from '@/app/components/Brand';
+import { BookOpen } from 'lucide-react';
 
 export default async function AdminSubjectsPage() {
   const supabase = await createClient();
@@ -26,18 +28,17 @@ export default async function AdminSubjectsPage() {
   const inputCls = "w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500";
 
   return (
-    <div className="space-y-8 font-sans">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Manage Subjects</h1>
-            <p className="text-zinc-400 text-sm mt-1">{subjects.length} subject{subjects.length !== 1 ? 's' : ''} total</p>
-          </div>
-          <Link href="/admin" className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-            <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
-          </Link>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Manage Subjects"
+      icon={<BookOpen />}
+      description={`${subjects.length} subject${subjects.length !== 1 ? 's' : ''} total`}
+      rightContent={
+        <Link href="/admin" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-full border border-cyan-500/20 transition-all hover:bg-cyan-500/20">
+          <IconChevronLeft className="w-3 h-3" /> Back to Dashboard
+        </Link>
+      }
+    >
+      <div className="space-y-8 font-sans mt-4">
 
       {/* Add Subject */}
       <AnimatedSection delay={0.2}>
@@ -93,6 +94,7 @@ export default async function AdminSubjectsPage() {
           </div>
         )}
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

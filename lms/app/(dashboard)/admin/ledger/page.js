@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import prisma from '@/utils/db';
 import LedgerClient from './LedgerClient';
+import { PageShell } from '@/app/components/Brand';
+import { History } from 'lucide-react';
 
 export const metadata = {
   title: 'Ledgers | Fusion College LMS',
@@ -54,15 +56,12 @@ export default async function AdminLedgerPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <AnimatedSection delay={0.1}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1e233d] pb-6 print:hidden">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Financial Ledgers</h1>
-            <p className="text-zinc-400 text-sm mt-1">Export professional PDF ledgers for students, teachers, and classes</p>
-          </div>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="Financial Ledgers"
+      icon={<History />}
+      description="Export professional PDF ledgers for students, teachers, and classes"
+    >
+      <div className="space-y-6 mt-4">
 
       <AnimatedSection delay={0.2}>
         <LedgerClient
@@ -71,6 +70,7 @@ export default async function AdminLedgerPage() {
           classes={classes}
         />
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

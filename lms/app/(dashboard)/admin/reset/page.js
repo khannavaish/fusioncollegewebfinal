@@ -4,6 +4,8 @@ import prisma from '@/utils/db';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import { IconTrash, IconAlertTriangle } from '@/app/components/icons';
 import { resetSchoolData } from '@/app/actions/admin';
+import { PageShell } from '@/app/components/Brand';
+import { AlertTriangle } from 'lucide-react';
 
 export const metadata = {
   title: 'System Reset | Fusion College LMS',
@@ -27,18 +29,12 @@ export default async function AdminResetPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <AnimatedSection delay={0.1}>
-        <div className="flex items-center gap-3 border-b border-[#1e233d] pb-6 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-red-950/50 border border-red-500/30 flex items-center justify-center">
-            <IconAlertTriangle className="w-6 h-6 text-red-500" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">System Reset</h1>
-            <p className="text-zinc-400 text-sm mt-1">Danger Zone: Permanently erase the academic roster.</p>
-          </div>
-        </div>
-      </AnimatedSection>
+    <PageShell
+      title="System Reset"
+      icon={<AlertTriangle />}
+      description="Danger Zone: Permanently erase the academic roster."
+    >
+      <div className="space-y-6 max-w-4xl mx-auto mt-4">
 
       <AnimatedSection delay={0.2}>
         <div className="rounded-2xl border border-red-500/20 bg-red-950/10 p-8 shadow-2xl">
@@ -80,6 +76,7 @@ export default async function AdminResetPage() {
           </div>
         </div>
       </AnimatedSection>
-    </div>
+      </div>
+    </PageShell>
   );
 }

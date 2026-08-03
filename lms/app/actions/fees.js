@@ -131,17 +131,27 @@ export async function generateMonthlyBills(_prev, formData) {
       where: { isActive: true },
     });
 
+    const existingBills = await prisma.feeBill.findMany({
+      where: { month, year, isTuition: true, studentId: { in: students.map(s => s.id) } },
+      select: { studentId: true }
+    });
+    const existingStudentIds = new Set(existingBills.map(b => b.studentId));
+
     let created = 0;
     let skipped = 0;
+    const createOperations = [];
 
     for (const student of students) {
-      const existing = await prisma.feeBill.findFirst({
-        where: { studentId: student.id, month, year, isTuition: true },
-      });
-      if (existing) { skipped++; continue; }
+      if (existingStudentIds.has(student.id)) { 
+        skipped++; 
+        continue; 
+      }
 
       const baseAmount = student.feeMonthlyOverride ?? student.feePackage?.monthlyFee;
-      if (!baseAmount) { skipped++; continue; }
+      if (!baseAmount) { 
+        skipped++; 
+        continue; 
+      }
 
       const extraItems = activeGeneralCharges.map(charge => ({
         title: charge.title,
@@ -150,24 +160,33 @@ export async function generateMonthlyBills(_prev, formData) {
       
       const totalAmount = Number(baseAmount) + extraItems.reduce((sum, item) => sum + Number(item.amount), 0);
 
-      await prisma.feeBill.create({
-        data: {
-          studentId: student.id,
-          month,
-          year,
-          baseAmount,
-          totalAmount,
-          dueDate,
-          isTuition: true,
-          items: {
-            create: [
-              { title: 'Monthly Tuition Fee', amount: baseAmount },
-              ...extraItems
-            ],
+      createOperations.push(
+        prisma.feeBill.create({
+          data: {
+            studentId: student.id,
+            month,
+            year,
+            baseAmount,
+            totalAmount,
+            dueDate,
+            isTuition: true,
+            items: {
+              create: [
+                { title: 'Monthly Tuition Fee', amount: baseAmount },
+                ...extraItems
+              ],
+            },
           },
-        },
-      });
+        })
+      );
       created++;
+    }
+
+    // Execute in batches of 50 to avoid connection limits and timeouts
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < createOperations.length; i += BATCH_SIZE) {
+      const batch = createOperations.slice(i, i + BATCH_SIZE);
+      await prisma.$transaction(batch);
     }
 
     // Fire-and-forget WhatsApp batch send
