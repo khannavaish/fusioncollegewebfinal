@@ -112,81 +112,96 @@ export default function PackagesClient({ packages }) {
           <div className="grid md:grid-cols-2 gap-4">
             {filtered.map((pkg, idx) => (
             <div key={pkg.id} className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl overflow-hidden h-full">
-              {editId === pkg.id ? (
-                <form action={updateAction} className="p-5 space-y-4">
-                  <input type="hidden" name="id" value={pkg.id} />
-                  <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1"><IconEdit className="w-3 h-3" /> Editing - {pkg.name}</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="col-span-2">
-                      <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Package Name</label>
-                      <input name="name" type="text" defaultValue={pkg.name} className={inputCls} required />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Min %</label>
-                      <input name="minPercentage" type="number" step="0.01" defaultValue={pkg.minPercentage} className={inputCls} required />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Max %</label>
-                      <input name="maxPercentage" type="number" step="0.01" defaultValue={pkg.maxPercentage} className={inputCls} required />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Monthly Fee (₨)</label>
-                      <input name="monthlyFee" type="number" step="1" defaultValue={pkg.monthlyFee} className={inputCls} required />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Description</label>
-                      <input name="description" type="text" defaultValue={pkg.description || ''} className={inputCls} />
-                    </div>
+              <div>
+                {/* Gradient header */}
+                <div className={`bg-gradient-to-r ${BADGE_COLORS[idx % BADGE_COLORS.length]} p-5`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-white">{pkg.name}</h3>
+                    <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full font-medium">
+                      {pkg.studentCount} students
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button type="submit" disabled={updatePending}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
-                      {updatePending ? <><IconLoader className="w-4 h-4 animate-spin" /> Saving...</> : <><IconSave className="w-4 h-4" /> Save</>}
+                  <p className="text-white/70 text-sm mt-1">
+                    {pkg.minPercentage}% – {pkg.maxPercentage}% admission marks
+                  </p>
+                </div>
+                {/* Details */}
+                <div className="p-5">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    ₨{pkg.monthlyFee.toLocaleString()}
+                    <span className="text-sm font-normal text-zinc-500">/month</span>
+                  </div>
+                  {pkg.description && (
+                    <p className="text-zinc-500 text-xs mt-1">{pkg.description}</p>
+                  )}
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => setEditId(pkg.id)}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-[#1e233d] text-zinc-400 text-xs hover:text-cyan-400 hover:border-cyan-600/40 transition-colors cursor-pointer">
+                      <IconEdit className="w-3 h-3" /> Edit
                     </button>
-                    <button type="button" onClick={() => setEditId(null)}
-                      className="px-4 py-2 rounded-lg border border-[#1e233d] text-zinc-400 text-sm hover:text-white transition-colors">
-                      Cancel
-                    </button>
-                    {updateState?.error && <p className="text-red-400 text-xs">❌ {updateState.error}</p>}
-                  </div>
-                </form>
-              ) : (
-                <div>
-                  {/* Gradient header */}
-                  <div className={`bg-gradient-to-r ${BADGE_COLORS[idx % BADGE_COLORS.length]} p-5`}>
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-white">{pkg.name}</h3>
-                      <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full font-medium">
-                        {pkg.studentCount} students
-                      </span>
-                    </div>
-                    <p className="text-white/70 text-sm mt-1">
-                      {pkg.minPercentage}% – {pkg.maxPercentage}% admission marks
-                    </p>
-                  </div>
-                  {/* Details */}
-                  <div className="p-5">
-                    <div className="text-3xl font-bold text-white mb-1">
-                      ₨{pkg.monthlyFee.toLocaleString()}
-                      <span className="text-sm font-normal text-zinc-500">/month</span>
-                    </div>
-                    {pkg.description && (
-                      <p className="text-zinc-500 text-xs mt-1">{pkg.description}</p>
-                    )}
-                    <div className="flex gap-2 mt-4">
-                      <button onClick={() => setEditId(pkg.id)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg border border-[#1e233d] text-zinc-400 text-xs hover:text-cyan-400 hover:border-cyan-600/40 transition-colors">
-                        <IconEdit className="w-3 h-3" /> Edit
+                    <form action={deleteAction} className="flex-1">
+                      <input type="hidden" name="id" value={pkg.id} />
+                      <button type="submit" disabled={deletePending}
+                        className="w-full flex items-center justify-center gap-1 py-2 rounded-lg border border-red-800/30 text-red-400 text-xs hover:bg-red-950/40 transition-colors disabled:opacity-50 cursor-pointer">
+                        <IconTrash className="w-3 h-3" /> Delete
                       </button>
-                      <form action={deleteAction} className="flex-1">
+                    </form>
+                  </div>
+                  {deleteState?.error && <p className="text-red-400 text-xs mt-2 flex items-center gap-1"><IconXCircle className="w-3 h-3" /> {deleteState.error}</p>}
+                </div>
+              </div>
+
+              {/* Edit Modal Overlay */}
+              {editId === pkg.id && (
+                <div className="fixed inset-0 top-16 md:top-0 z-[9999] flex items-start md:items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setEditId(null)} />
+                  <div className="relative w-full max-w-lg max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col bg-[#0c0e1a]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5 rounded-t-3xl">
+                      <h2 className="text-base font-black text-white tracking-wide">Edit Package - {pkg.name}</h2>
+                      <button
+                        type="button"
+                        onClick={() => setEditId(null)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="px-6 py-6 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                      <form action={updateAction} className="space-y-4">
                         <input type="hidden" name="id" value={pkg.id} />
-                        <button type="submit" disabled={deletePending}
-                          className="w-full flex items-center justify-center gap-1 py-2 rounded-lg border border-red-800/30 text-red-400 text-xs hover:bg-red-950/40 transition-colors disabled:opacity-50">
-                          <IconTrash className="w-3 h-3" /> Delete
-                        </button>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="col-span-2">
+                            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Package Name</label>
+                            <input name="name" type="text" defaultValue={pkg.name} className={inputCls} required />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Min %</label>
+                            <input name="minPercentage" type="number" step="0.01" defaultValue={pkg.minPercentage} className={inputCls} required />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Max %</label>
+                            <input name="maxPercentage" type="number" step="0.01" defaultValue={pkg.maxPercentage} className={inputCls} required />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Monthly Fee (₨)</label>
+                            <input name="monthlyFee" type="number" step="1" defaultValue={pkg.monthlyFee} className={inputCls} required />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-zinc-500 mb-1.5 font-medium">Description</label>
+                            <input name="description" type="text" defaultValue={pkg.description || ''} className={inputCls} />
+                          </div>
+                        </div>
+                        <div className="pt-4 border-t border-white/5">
+                          <button type="submit" disabled={updatePending}
+                            className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-black rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 cursor-pointer">
+                            {updatePending ? 'Saving...' : 'Save Changes'}
+                          </button>
+                        </div>
+                        {updateState?.error && <p className="text-red-400 text-xs text-center mt-2">❌ {updateState.error}</p>}
                       </form>
                     </div>
-                    {deleteState?.error && <p className="text-red-400 text-xs mt-2 flex items-center gap-1"><IconXCircle className="w-3 h-3" /> {deleteState.error}</p>}
                   </div>
                 </div>
               )}
