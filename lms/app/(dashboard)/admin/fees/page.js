@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import {
   IconChart, IconSettings, IconDocumentText, IconAlertTriangle,
   IconCheckCircle, IconXCircle, IconClock, IconDownload, IconBolt,
-  IconChevronRight
+  IconChevronRight, IconClipboardCheck
 } from '@/app/components/icons';
 import AnimatedSection from '@/app/components/AnimatedSection';
 import { generateMonthlyBills } from '@/app/actions/fees';
