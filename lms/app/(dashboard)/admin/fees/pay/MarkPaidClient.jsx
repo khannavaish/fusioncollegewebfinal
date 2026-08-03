@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { updateBillAmount } from '@/app/actions/fees';
+import { markBillPaid } from '@/app/actions/fees';
 import { IconCheckCircle, IconXCircle, IconSchool } from '@/app/components/icons';
 import { Search as IconSearch, Upload as IconUpload } from 'lucide-react';
 import Link from 'next/link';
@@ -37,8 +37,7 @@ export default function MarkPaidClient({ bills, classes, filters, monthNames }) 
     const fd = new FormData(e.target);
     fd.set('billId', billId);
     
-    // In updateBillAmount, it sets status based on amount vs totalAmount automatically
-    const result = await updateBillAmount(fd);
+    const result = await markBillPaid(fd);
     setLoading(false);
     
     if (result?.success) {
@@ -201,9 +200,9 @@ export default function MarkPaidClient({ bills, classes, filters, monthNames }) 
                     <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Amount Received (₨) <span className="text-red-400">*</span></label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
-                      <input 
+                    <input 
                         type="number" 
-                        name="amount" 
+                        name="paidAmount" 
                         defaultValue={activeBill.totalAmount - (activeBill.paidAmount || 0)} 
                         required 
                         min="1" 
@@ -217,7 +216,7 @@ export default function MarkPaidClient({ bills, classes, filters, monthNames }) 
                   <div>
                     <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Payment Photo/Receipt (Optional)</label>
                     <div className="relative group">
-                      <input type="file" name="receipt" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                      <input type="file" name="receiptImage" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                       <div className="w-full bg-white/5 group-hover:bg-white/10 border border-white/10 border-dashed rounded-xl px-4 py-6 flex flex-col items-center justify-center text-center transition-colors">
                         <IconUpload className="w-6 h-6 text-cyan-400 mb-2" />
                         <span className="text-sm font-medium text-white">Tap to upload receipt</span>
