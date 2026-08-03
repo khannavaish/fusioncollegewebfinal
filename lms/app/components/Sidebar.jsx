@@ -371,6 +371,11 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
                 </Link>
               );
             })}
+            
+            {/* Mobile Sign Out */}
+            <form action={handleSignOutAction} className="flex-shrink-0 snap-center">
+              <MobileSignOutButton />
+            </form>
           </div>
         </div>
       </nav>
@@ -407,6 +412,26 @@ function SignOutButton({ isOpen }) {
           </motion.span>
         )}
       </AnimatePresence>
+    </button>
+  );
+}
+
+function MobileSignOutButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="relative flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-2xl transition-all duration-300 drop-shadow-md text-rose-400 hover:text-rose-300 disabled:opacity-50"
+    >
+      {pending ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        <LogOut className="w-5 h-5" />
+      )}
+      <span className="text-[9px] font-bold tracking-wider uppercase transition-colors text-rose-400">
+        Sign Out
+      </span>
     </button>
   );
 }
