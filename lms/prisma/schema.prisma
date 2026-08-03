@@ -396,3 +396,17 @@ model TeacherSalaryBill {
   @@unique([teacherId, month, year])
 }
 
+model SystemSetting {
+  id    String @id @default("default")
+  key   String @unique
+  value String
+}
+
+model BankAccountChangeLog {
+  id               String   @id @default(uuid())
+  oldAccountNumber String
+  newAccountNumber String
+  adminId          String
+  adminName        String
+  changedAt        DateTime @default(now())
+}

@@ -237,8 +237,8 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
                 key={item.href}
                 href={item.href}
                 title={!isOpen ? item.label : undefined}
-                className={`relative flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 group min-h-[44px] overflow-hidden ${
-                  active ? "text-white" : "text-slate-400 hover:text-white"
+                className={`relative flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 group min-h-[44px] overflow-hidden drop-shadow-md ${
+                  active ? "text-white" : "text-slate-200 hover:text-white"
                 }`}
               >
                 {active && (
