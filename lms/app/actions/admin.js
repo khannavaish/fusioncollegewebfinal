@@ -488,7 +488,7 @@ export async function createStudent(_prev, formData) {
     rollNumber = await generateRollNumber(classId);
   }
 
-  const email = `${rollNumber.toLowerCase().replace('-', '')}@fusionlms.edu`;
+  const email = `${rollNumber.toLowerCase().replace(/-/g, '')}@fusionlms.edu`;
   const password = generatePassword(8);
 
   const admin = adminClient();
@@ -516,7 +516,7 @@ export async function createStudent(_prev, formData) {
       isExistingParent = true;
       parentDbId = existingParent.id;
     } else {
-      parentEmail = `parent_${rollNumber.toLowerCase().replace('-', '')}@fusionlms.edu`;
+      parentEmail = `parent_${rollNumber.toLowerCase().replace(/-/g, '')}@fusionlms.edu`;
       parentPassword = generatePassword(8);
 
       const { data: parentAuthData, error: parentAuthError } = await admin.auth.admin.createUser({
