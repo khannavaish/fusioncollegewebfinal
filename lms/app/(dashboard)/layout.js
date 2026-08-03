@@ -136,8 +136,8 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <div className="dashboard-layout flex w-full min-h-screen relative overflow-hidden">
-      {/* Global Background Patterns - Hidden on mobile */}
-      <div className="bg-dot-pattern pointer-events-none fixed inset-0 z-[1] hidden md:block" />
+      {/* Global Background Patterns */}
+      <div className="bg-dot-pattern pointer-events-none fixed inset-0 z-[1]" />
 
       {/* Sidebar with higher z-index to sit above bg */}
       <div className="relative z-20">
