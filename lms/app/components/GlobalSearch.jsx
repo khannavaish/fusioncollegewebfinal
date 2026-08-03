@@ -55,7 +55,7 @@ export default function GlobalSearch() {
       <div className="relative isolate rounded-full overflow-hidden shadow-[0_8px_30px_-10px_rgba(0,0,0,0.5)] group">
         
         {/* Dynamic Flowing Neon Water Background - Contained inside the search pill */}
-        <div className="absolute inset-0 pointer-events-none z-0 opacity-75 mix-blend-screen transition-opacity duration-300 group-focus-within:opacity-100">
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-75 mix-blend-screen transition-opacity duration-300 group-focus-within:opacity-100 overflow-hidden rounded-full">
           <svg className="w-full h-full scale-110" viewBox="0 0 1000 100" preserveAspectRatio="none">
             <defs>
               <linearGradient id="searchWater" x1="0%" y1="0%" x2="100%" y2="0%">
