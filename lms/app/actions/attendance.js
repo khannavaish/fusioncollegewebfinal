@@ -28,7 +28,7 @@ export async function getDailyAttendance(dateStr) {
         }
       },
       orderBy: {
-        startTime: 'asc'
+        date: 'asc'
       }
     });
 
