@@ -140,7 +140,7 @@ export default async function DashboardLayout({ children }) {
   return (
     <div className="dashboard-layout flex w-full min-h-screen relative overflow-hidden">
       {/* Global Background Patterns */}
-      <div className="bg-dot-pattern pointer-events-none fixed inset-0 z-[1]" />
+      <div className="bg-dot-pattern pointer-events-none fixed inset-0" />
 
       {/* Sidebar with higher z-index to sit above bg */}
       <div className="relative z-20">
@@ -148,7 +148,7 @@ export default async function DashboardLayout({ children }) {
       </div>
 
       {/* Main pane */}
-      <div className="flex-1 min-w-0 w-full relative z-10 h-screen overflow-y-auto">
+      <div className="flex-1 min-w-0 w-full relative h-screen overflow-y-auto">
         <TopBar />
         <div className="max-w-[1400px] px-6 py-6 pb-28 mx-auto w-full">
           {children}
