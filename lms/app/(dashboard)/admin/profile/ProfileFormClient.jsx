@@ -1,12 +1,26 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
 import { updateAdminProfile } from '@/app/actions/admin';
 import { Camera, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button 
+      type="submit" 
+      disabled={pending}
+      className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] disabled:opacity-50 flex items-center gap-2"
+    >
+      {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+      {pending ? 'Saving...' : 'Save Changes'}
+    </button>
+  );
+}
+
 export default function ProfileFormClient({ admin, dbUser }) {
-  const [isPending, setIsPending] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(dbUser.avatarUrl || null);
   const fileInputRef = useRef(null);
 
@@ -18,16 +32,10 @@ export default function ProfileFormClient({ admin, dbUser }) {
     }
   };
 
-  const handleSubmit = async (formData) => {
-    setIsPending(true);
-    await updateAdminProfile(formData);
-    setIsPending(false);
-  };
-
   const inputCls = 'w-full bg-[#0d0f1a] border border-[#1e233d] rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 transition-colors';
 
   return (
-    <form action={handleSubmit} className="space-y-8 max-w-3xl">
+    <form action={updateAdminProfile} className="space-y-8 max-w-3xl">
       {/* Avatar Section */}
       <div className="flex items-center gap-6 bg-[#0d0f1a] border border-[#1e233d] p-6 rounded-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-400 to-purple-500" />
@@ -88,14 +96,7 @@ export default function ProfileFormClient({ admin, dbUser }) {
         </div>
 
         <div className="pt-4 flex justify-end">
-          <button 
-            type="submit" 
-            disabled={isPending}
-            className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] disabled:opacity-50 flex items-center gap-2"
-          >
-            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {isPending ? 'Saving...' : 'Save Changes'}
-          </button>
+          <SubmitButton />
         </div>
       </div>
     </form>
