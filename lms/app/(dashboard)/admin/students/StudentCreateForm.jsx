@@ -64,7 +64,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
   return (
     <>
-      <dialog ref={dialogRef} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-emerald-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+      <dialog ref={dialogRef} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md max-h-[calc(100dvh-11rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-emerald-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
         <div className="bg-[#0c0e1a]/90 backdrop-blur-3xl border border-emerald-500/30 rounded-3xl p-6 shadow-[0_8px_32px_rgba(16,185,129,0.2)] animate-in zoom-in-95 duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 flex-shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -172,8 +172,8 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
       {/* CSV Import Modal */}
       {showCsvModal && (
-        <div className="fixed inset-0 top-16 md:top-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-md max-h-[calc(100dvh-11rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
               <h2 className="text-base font-black text-white tracking-wide">Bulk Import via CSV</h2>
               <button

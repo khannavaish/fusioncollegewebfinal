@@ -121,7 +121,7 @@ export default function GlobalSearch() {
 
       {/* Dropdown */}
       {isOpen && query.trim().length >= 2 && (
-        <div className="absolute top-full mt-2 w-full bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-2xl overflow-hidden z-[9999]">
+        <div className="absolute top-full mt-2 w-full bg-[#0d0f1a] border border-[#1e233d] rounded-xl shadow-2xl overflow-hidden z-[99999]">
           {results.length > 0 ? (
             <ul className="max-h-80 overflow-y-auto">
               {results.map((user, idx) => (

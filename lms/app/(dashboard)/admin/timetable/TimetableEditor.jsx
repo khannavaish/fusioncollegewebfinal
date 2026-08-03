@@ -478,13 +478,13 @@ export default function TimetableEditor({ initialSlots, dbClasses, initialTimeSl
       {/* Edit Slot Modal */}
       <AnimatePresence>
         {editingSlot && (
-          <div className="fixed inset-0 top-16 md:top-0 z-[9999] flex items-start md:items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-[99999] flex items-start md:items-center justify-center bg-black/85 backdrop-blur-sm p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1,   opacity: 1, y: 0  }}
               exit={{    scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 w-full max-w-sm max-h-[calc(100vh-6rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full shadow-2xl"
+              className="bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-6 w-full max-w-sm max-h-[calc(100dvh-11rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full shadow-2xl"
             >
               <h3 className="text-base font-bold text-white mb-1">
                 {editingSlot.subject && !editingSlot.teacher?.trim() ? '⚠ Assign Missing Teacher' : 'Edit Timetable Slot'}

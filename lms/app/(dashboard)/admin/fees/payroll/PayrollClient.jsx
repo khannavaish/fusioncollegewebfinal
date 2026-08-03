@@ -272,8 +272,8 @@ export default function PayrollClient({ initialBills, allTeachers, currentMonth,
 
       {/* Pay Modal */}
       {payModal && (
-        <div className="fixed inset-0 top-16 md:top-0 z-50 flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 top-16 pb-24 md:pb-4 md:top-0 z-50 flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl w-full max-w-md max-h-[calc(100dvh-11rem)] md:max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex-shrink-0 p-6 pb-4 border-b border-[#1e233d]">
               <h3 className="text-lg font-bold text-white mb-1">Process Salary</h3>
               <p className="text-xs text-zinc-400">Pay salary to {payModal.teacher.name}</p>

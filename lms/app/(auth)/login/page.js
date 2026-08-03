@@ -248,7 +248,7 @@ export default function LoginPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[9999] bg-[#080a14] flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[99999] bg-[#080a14] flex flex-col items-center justify-center"
           >
             <div className="absolute inset-0 bg-grid-glow pointer-events-none opacity-50" />
             <div className="relative flex flex-col items-center z-10">
