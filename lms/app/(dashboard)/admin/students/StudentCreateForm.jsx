@@ -3,6 +3,7 @@
 import ClientPortal from '@/app/components/ClientPortal';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { createStudent, checkGuardianName, bulkImportStudents } from '@/app/actions/admin';
+import { sendCredentialsWhatsApp } from '@/app/actions/whatsapp';
 import { IconCheckCircle, IconAlertTriangle, IconIdCard, IconMail, IconKey, IconUsers } from '@/app/components/icons';
 
 const inputCls = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner";
@@ -17,6 +18,9 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
+  const [whatsappSent, setWhatsappSent] = useState(false);
+  const [whatsappError, setWhatsappError] = useState(null);
   const formRef = useRef(null);
   const dialogRef = useRef(null);
 
@@ -29,6 +33,8 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
       setSuggestedPkg(null);
       setManualPkgId('');
       setIsFormOpen(false);
+      setWhatsappSent(false);
+      setWhatsappError(null);
       dialogRef.current?.showModal();
     }
   }, [state]);
@@ -60,6 +66,20 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
     const match = feePackages.find(p => pct >= p.minPercentage && pct <= p.maxPercentage);
     setSuggestedPkg(match || null);
   }, [admissionPct, feePackages]);
+
+  const handleSendWhatsapp = async () => {
+    if (!state?.credentials) return;
+    setSendingWhatsapp(true);
+    setWhatsappError(null);
+    
+    const res = await sendCredentialsWhatsApp(state.credentials);
+    if (res.error) {
+      setWhatsappError(res.error);
+    } else {
+      setWhatsappSent(true);
+    }
+    setSendingWhatsapp(false);
+  };
 
   const creds = state?.credentials;
 
@@ -132,12 +152,32 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
             </>
           )}
 
-          <button
-            onClick={() => dialogRef.current?.close()}
-            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white text-sm font-black rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
-          >
-            Done
-          </button>
+          {whatsappError && (
+            <div className="mt-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm font-medium text-red-400">
+              {whatsappError}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <button
+              onClick={handleSendWhatsapp}
+              disabled={sendingWhatsapp || whatsappSent}
+              className={`flex-1 py-3 px-4 flex items-center justify-center gap-2 text-sm font-black rounded-xl transition-all ${
+                whatsappSent 
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                  : 'bg-green-500 hover:bg-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-50'
+              }`}
+            >
+              {sendingWhatsapp ? 'Sending...' : whatsappSent ? 'WhatsApp Sent!' : 'Send via WhatsApp'}
+            </button>
+
+            <button
+              onClick={() => dialogRef.current?.close()}
+              className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-sm font-black rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer"
+            >
+              Done
+            </button>
+          </div>
         </div>
       </dialog>
 

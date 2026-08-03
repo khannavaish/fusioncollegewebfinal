@@ -406,3 +406,35 @@ export async function sendBroadcastMessage(formData) {
     return { error: e.message || 'Failed to send broadcast.' };
   }
 }
+
+export async function sendCredentialsWhatsApp(creds) {
+  await verifyAdmin();
+  
+  let parentText = '';
+  if (creds.parent.isExisting) {
+    parentText = `*Parent Portal:*\n(Use your existing parent login)\n\n`;
+  } else {
+    parentText = `*Parent Portal:*\nLogin: ${creds.parent.email}\nPassword: ${creds.parent.password}\n\n`;
+  }
+  
+  const msg = `*Welcome to Fusion College LMS!*\n\n` +
+    `Hello ${creds.name},\n` +
+    `Your student account has been successfully enrolled.\n\n` +
+    `*Student Portal:*\n` +
+    `Login: ${creds.email}\n` +
+    `Password: ${creds.password}\n\n` +
+    parentText +
+    `You will be asked to set a new password on your first login.\n` +
+    `Access the portal here: https://fusioncollegewebfinal.vercel.app`;
+    
+  const phone = creds.parent.phone;
+  if (!phone) return { error: 'No parent phone number provided.' };
+  
+  try {
+    const res = await sendWhatsAppMessage(phone, msg);
+    if (res.error) return res;
+    return { success: true };
+  } catch (e) {
+    return { error: 'Failed to send WhatsApp message: ' + e.message };
+  }
+}
