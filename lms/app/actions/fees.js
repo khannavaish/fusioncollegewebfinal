@@ -760,3 +760,50 @@ export async function generateIndividualBill(_prev, formData) {
     return { error: 'Failed to generate bill: ' + e.message };
   }
 }
+
+export async function createCustomBill(formData) {
+  await verifyAdmin();
+  const studentId = formData.get('studentId')?.toString();
+  const title = formData.get('title')?.toString().trim();
+  const amount = parseFloat(formData.get('amount'));
+
+  if (!studentId || !title || isNaN(amount)) {
+    return { error: 'All fields required.' };
+  }
+
+  try {
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) return { error: 'Student not found.' };
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 5);
+
+    const now = new Date();
+    
+    const newBill = await prisma.feeBill.create({
+      data: {
+        studentId,
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+        baseAmount: 0,
+        totalAmount: amount,
+        dueDate,
+        isTuition: false,
+        status: 'UNPAID',
+        items: {
+          create: [{ title, amount }]
+        }
+      }
+    });
+    
+    const fakeFd = new FormData();
+    fakeFd.append('billId', newBill.id);
+    await resendBillWhatsApp(fakeFd).catch(console.error);
+
+    revalidatePath('/admin/fees/bills');
+    return { success: true, newBillId: newBill.id };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to create custom bill.' };
+  }
+}

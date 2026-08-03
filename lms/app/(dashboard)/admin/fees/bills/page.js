@@ -53,12 +53,14 @@ export default async function BillsPage({ searchParams }) {
   // Serialize
   const serializedBills = bills.map((b) => ({
     id: b.id,
+    studentId: b.studentId,
     month: b.month,
     year: b.year,
     baseAmount: Number(b.baseAmount),
     totalAmount: Number(b.totalAmount),
     dueDate: b.dueDate.toISOString(),
     status: b.status,
+    isTuition: b.isTuition,
     paidAmount: b.paidAmount ? Number(b.paidAmount) : null,
     paidAt: b.paidAt ? b.paidAt.toISOString() : null,
     remarks: b.remarks,
