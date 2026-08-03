@@ -622,12 +622,20 @@ export async function createStudent(_prev, formData) {
       },
     };
   } catch (e) {
-    await admin.auth.admin.deleteUser(authId);
-    if (parentAuthId) {
-      await admin.auth.admin.deleteUser(parentAuthId);
+    console.error('[createStudent] Fatal Error:', e);
+    
+    // Attempt safe cleanup
+    try {
+      if (authId) await admin.auth.admin.deleteUser(authId);
+      if (parentAuthId && !isExistingParent) {
+        await admin.auth.admin.deleteUser(parentAuthId);
+      }
+    } catch (cleanupError) {
+      console.error('[createStudent] Cleanup failed:', cleanupError);
     }
-    if (e.code === 'P2002') return { error: 'Roll number conflict. Please try again.' };
-    return { error: `DB error: ${e.message}` };
+
+    if (e.code === 'P2002') return { error: 'Roll number or email conflict. Please try again.' };
+    return { error: `Database error: ${e.message || 'Unknown error occurred'}` };
   }
 }
 
