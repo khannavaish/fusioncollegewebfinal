@@ -360,12 +360,12 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
                   key={item.href}
                   href={item.href}
                   id={`mobile-nav-item-${index}`}
-                  className={`flex-shrink-0 snap-center relative flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-2xl transition-all duration-300 ${
-                    active ? "text-white bg-white/5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-400 hover:text-white"
+                  className={`flex-shrink-0 snap-center relative flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-2xl transition-all duration-300 drop-shadow-md ${
+                    active ? "text-white bg-white/5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]" : "text-slate-200 hover:text-white"
                   }`}
                 >
                   <Icon className={`w-5 h-5 transition-transform ${active ? "text-cyan-400 scale-110" : ""}`} />
-                  <span className={`text-[9px] font-bold tracking-wider uppercase transition-colors ${active ? "text-cyan-400" : "text-slate-500"}`}>
+                  <span className={`text-[9px] font-bold tracking-wider uppercase transition-colors ${active ? "text-cyan-400" : "text-slate-300"}`}>
                     {item.label}
                   </span>
                 </Link>
