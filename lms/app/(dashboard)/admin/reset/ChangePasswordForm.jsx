@@ -2,7 +2,8 @@
 
 import { useActionState } from 'react';
 import { changeSystemPassword } from '@/app/actions/system';
-import { IconLoader, IconCheckCircle, IconXCircle, IconLock } from '@/app/components/icons';
+import { IconLoader, IconCheckCircle, IconXCircle } from '@/app/components/icons';
+import { Lock } from 'lucide-react';
 
 export default function ChangePasswordForm() {
   const [state, action, isPending] = useActionState(changeSystemPassword, null);
@@ -30,7 +31,7 @@ export default function ChangePasswordForm() {
           />
         </div>
         <button type="submit" disabled={isPending} className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#1e233d] px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#2a304e] disabled:opacity-50 mt-2">
-          {isPending ? <IconLoader className="h-5 w-5 animate-spin" /> : <IconLock className="h-5 w-5" />}
+          {isPending ? <IconLoader className="h-5 w-5 animate-spin" /> : <Lock className="h-5 w-5" />}
           Change Password
         </button>
       </form>
