@@ -84,6 +84,7 @@ export default function Sidebar({ role, name, avatarUrl, handleSignOutAction }) 
   // Simplified Nav for LMS mapping
   const navItems = role === 'ADMIN' ? [
     { href: "/admin", label: "Home" },
+    { href: "/admin/users", label: "Users" },
     { href: "/admin/students", label: "Students" },
     { href: "/admin/teachers", label: "Teachers" },
     { href: "/admin/parents", label: "Parents" },
