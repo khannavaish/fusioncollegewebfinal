@@ -10,7 +10,7 @@ import {
   ClipboardCheck, Bell, History, Settings,
   LogOut, PanelLeftClose, PanelLeftOpen,
   Phone, GraduationCap, Banknote, Calendar, BarChart3, Database,
-  Download, AlertTriangle, UserCheck, HeartHandshake, Menu, X
+  Download, AlertTriangle, UserCheck, HeartHandshake, Menu, X, CreditCard
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -21,6 +21,7 @@ const ICON_MAP = {
   Classes: Layers,
   Subjects: BookOpen,
   Fees: Banknote,
+  Payroll: CreditCard,
   Ledger: History,
   Reports: BarChart3,
   Timetable: Calendar,
@@ -85,6 +86,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
     { href: "/admin/classes", label: "Classes" },
     { href: "/admin/subjects", label: "Subjects" },
     { href: "/admin/fees", label: "Fees" },
+    { href: "/admin/fees/payroll", label: "Payroll" },
     { href: "/admin/ledger", label: "Ledger" },
     { href: "/admin/reports", label: "Reports" },
     { href: "/admin/timetable", label: "Timetable" },
