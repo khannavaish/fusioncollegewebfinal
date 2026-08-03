@@ -1371,9 +1371,9 @@ export default function ReportsClient({ students, classes, teachers }) {
 
       {/* --- EDIT MODAL DIALOG --- */}
       {editModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex justify-between items-center">
+        <div className="fixed inset-0 top-16 md:top-0 bg-black/70 backdrop-blur-sm z-50 flex items-start md:items-center justify-center p-4">
+          <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex-shrink-0 flex justify-between items-center">
               <h3 className="text-sm font-black text-white uppercase tracking-wider">
                 <span className="inline-flex items-center gap-2">
                   <IconEdit className="w-4 h-4 text-cyan-400" />
@@ -1389,7 +1389,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                 e.preventDefault();
                 const marksVal = e.target.marks.value;
                 editModal.onSave(marksVal);
-              }} className="p-6 space-y-4">
+              }} className="p-6 space-y-4 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Student</label>
                   <input type="text" disabled value={editModal.data.student?.name || 'Student'}
@@ -1422,7 +1422,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                 const topicVal = e.target.topic.value;
                 const dateVal = e.target.date.value;
                 editModal.onSave(topicVal, dateVal);
-              }} className="p-6 space-y-4">
+              }} className="p-6 space-y-4 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Lecture Date</label>
                   <input type="date" name="date" defaultValue={new Date(editModal.data.date).toISOString().split('T')[0]} required
@@ -1453,7 +1453,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                 const dateVal = e.target.date.value;
                 const marksVal = e.target.totalMarks.value;
                 editModal.onSave(titleVal, dateVal, marksVal);
-              }} className="p-6 space-y-4">
+              }} className="p-6 space-y-4 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Test Title</label>
                   <input type="text" name="title" defaultValue={editModal.data.title} required
