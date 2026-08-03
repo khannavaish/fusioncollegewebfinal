@@ -64,7 +64,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
   return (
     <>
-      <dialog ref={dialogRef} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md">
+      <dialog ref={dialogRef} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-emerald-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
         <div className="bg-[#0c0e1a]/90 backdrop-blur-3xl border border-emerald-500/30 rounded-3xl p-6 shadow-[0_8px_32px_rgba(16,185,129,0.2)] animate-in zoom-in-95 duration-200">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 flex-shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -172,18 +172,19 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
       {/* CSV Import Modal */}
       {showCsvModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
+        <div className="fixed inset-0 top-16 md:top-0 z-[9999] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
               <h2 className="text-base font-black text-white tracking-wide">Bulk Import via CSV</h2>
               <button
+                type="button"
                 onClick={() => setShowCsvModal(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               <form
                 action={async (fd) => {
                   setIsImporting(true);
@@ -231,10 +232,10 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
 
       {/* Main Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-[9000] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-4xl bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative my-4 md:my-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 top-16 md:top-0 z-[9000] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-4xl max-h-[calc(100vh-6rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-8 py-5 border-b border-white/5 sticky top-0 bg-[#0c0e1a]/90 backdrop-blur-3xl z-10 rounded-t-3xl">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 md:px-8 md:py-5 border-b border-white/5 bg-[#0c0e1a]/90 rounded-t-3xl">
               <div>
                 <h2 className="text-base font-black text-white tracking-wide">Enroll New Student</h2>
                 <p className="text-[11px] text-zinc-400 mt-1">Roll number, login email & password are auto-generated</p>
@@ -247,7 +248,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="p-6 md:p-8 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               {classes.length === 0 ? (
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5">
                   <p className="text-sm font-medium text-amber-400">Please <a href="/admin/classes" className="underline font-bold">create at least one class</a> before enrolling students.</p>
