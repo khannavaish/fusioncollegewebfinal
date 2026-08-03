@@ -133,7 +133,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
       >
       {/* Dynamic Flowing Neon Water Background - Clean & Aesthetic */}
       <div 
-        className="absolute inset-0 pointer-events-none z-0 opacity-[0.15] mix-blend-screen [mask-image:linear-gradient(to_bottom,white_0%,transparent_60%)]"
+        className="absolute inset-0 pointer-events-none z-0 opacity-75 mix-blend-screen overflow-hidden rounded-[2rem]"
       >
         <svg className="w-full h-full" viewBox="0 0 100 1000" preserveAspectRatio="none">
           <defs>

@@ -52,8 +52,8 @@ export default function BankSettingsForm({ initialConfig, bankLogs = [] }) {
       )}
 
       {showLogs ? (
-        <div className="mb-6 border border-[#1e233d] rounded-xl overflow-hidden">
-          <table className="w-full text-left text-sm text-zinc-400">
+        <div className="mb-6 border border-[#1e233d] rounded-xl overflow-x-auto">
+          <table className="w-full min-w-[500px] text-left text-sm text-zinc-400">
             <thead className="bg-[#1e233d]/50 text-xs uppercase font-semibold text-zinc-300">
               <tr>
                 <th className="px-4 py-3">Date</th>
@@ -66,9 +66,9 @@ export default function BankSettingsForm({ initialConfig, bankLogs = [] }) {
               {bankLogs.map(log => (
                 <tr key={log.id} className="hover:bg-[#1e233d]/30 transition-colors">
                   <td className="px-4 py-3 whitespace-nowrap">{new Date(log.changedAt).toLocaleString()}</td>
-                  <td className="px-4 py-3">{log.adminName}</td>
-                  <td className="px-4 py-3 text-red-300 font-mono">{log.oldAccountNumber}</td>
-                  <td className="px-4 py-3 text-emerald-300 font-mono">{log.newAccountNumber}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{log.adminName}</td>
+                  <td className="px-4 py-3 text-red-300 font-mono whitespace-nowrap">{log.oldAccountNumber}</td>
+                  <td className="px-4 py-3 text-emerald-300 font-mono whitespace-nowrap">{log.newAccountNumber}</td>
                 </tr>
               ))}
             </tbody>
