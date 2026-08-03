@@ -34,7 +34,7 @@ export default async function FeeHubPage() {
   const year = now.getFullYear();
 
   // Aggregate stats for current month
-  const [bills, packages, allStudents, bankConfig] = await Promise.all([
+  const [bills, packages, allStudents, bankConfig, bankLogs] = await Promise.all([
     prisma.feeBill.findMany({
       where: { month, year },
       select: { status: true, totalAmount: true, paidAmount: true },
@@ -45,6 +45,7 @@ export default async function FeeHubPage() {
       select: { id: true, name: true, rollNumber: true }
     }),
     prisma.bankConfig.findUnique({ where: { id: 'default' } }),
+    prisma.bankAccountChangeLog.findMany({ orderBy: { changedAt: 'desc' } })
   ]);
 
   const totalStudents = allStudents.length;
@@ -182,7 +183,7 @@ export default async function FeeHubPage() {
 
       {/* Bank Config Settings */}
       <AnimatedSection delay={0.3}>
-        <BankSettingsForm initialConfig={bankConfig || { accountTitle: 'Fusion College Narowal', accountNumber: '', bankName: '', branchCode: '' }} />
+        <BankSettingsForm initialConfig={bankConfig || { accountTitle: 'Fusion College Narowal', accountNumber: '', bankName: '', branchCode: '' }} bankLogs={bankLogs} />
       </AnimatedSection>
 
       {/* Generate Bills Section */}

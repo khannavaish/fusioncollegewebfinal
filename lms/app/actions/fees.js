@@ -630,23 +630,54 @@ export async function assignFeePackages(studentIds, feePackageId, customOverride
 }
 
 // ─── Bank Config ──────────────────────────────────────────────────────────────
+import { internalVerifySystemPassword } from './system';
+
 export async function updateBankConfig(formData) {
-  await verifyAdmin();
+  const { dbUser } = await verifyAdmin();
   const accountTitle = formData.get('accountTitle')?.toString().trim() || '';
   const accountNumber = formData.get('accountNumber')?.toString().trim() || '';
   const bankName = formData.get('bankName')?.toString().trim() || '';
   const branchCode = formData.get('branchCode')?.toString().trim() || '';
+  const systemPassword = formData.get('systemPassword')?.toString();
+
+  if (!systemPassword) {
+    return { error: 'System Password is required.' };
+  }
+
+  const isValid = await internalVerifySystemPassword(systemPassword);
+  if (!isValid) {
+    return { error: 'Incorrect System Password.' };
+  }
 
   try {
-    await prisma.bankConfig.upsert({
-      where: { id: 'default' },
-      update: { accountTitle, accountNumber, bankName, branchCode },
-      create: { id: 'default', accountTitle, accountNumber, bankName, branchCode },
+    const oldConfig = await prisma.bankConfig.findUnique({ where: { id: 'default' } });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.bankConfig.upsert({
+        where: { id: 'default' },
+        update: { accountTitle, accountNumber, bankName, branchCode },
+        create: { id: 'default', accountTitle, accountNumber, bankName, branchCode },
+      });
+
+      if (oldConfig && oldConfig.accountNumber !== accountNumber) {
+        // Log the account number change
+        const adminData = await tx.admin.findUnique({ where: { userId: dbUser.id } });
+        await tx.bankAccountChangeLog.create({
+          data: {
+            oldAccountNumber: oldConfig.accountNumber,
+            newAccountNumber: accountNumber,
+            adminId: dbUser.id,
+            adminName: adminData?.name || 'Unknown Admin',
+          }
+        });
+      }
     });
+
     revalidatePath('/admin/fees');
     revalidatePath('/admin/fees/bills');
     return { success: true };
   } catch (e) {
+    console.error('Failed to update bank details:', e);
     return { error: 'Failed to update bank details.' };
   }
 }

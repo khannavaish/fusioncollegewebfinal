@@ -1059,12 +1059,19 @@ export async function updateUserPassword(formData) {
 }
 
 
-export async function resetSchoolData(formData) {
+import { internalVerifySystemPassword } from './system';
+
+export async function resetSchoolData(prevState, formData) {
   await verifyAdmin();
 
-  const confirmText = formData.get('confirmText')?.toString().trim();
-  if (confirmText !== 'RESET') {
-    return { error: 'Type RESET to confirm the reset.' };
+  const systemPassword = formData.get('systemPassword')?.toString();
+  if (!systemPassword) {
+    return { error: 'System Password is required.' };
+  }
+  
+  const isValid = await internalVerifySystemPassword(systemPassword);
+  if (!isValid) {
+    return { error: 'Incorrect System Password.' };
   }
 
   try {
@@ -1078,8 +1085,32 @@ export async function resetSchoolData(formData) {
     });
 
     await prisma.$transaction(async (tx) => {
-      await tx.classSubject.deleteMany();
+      // 1. Wipe Financials & Fees
+      await tx.feeBillItem.deleteMany();
+      await tx.feeBill.deleteMany();
+      await tx.teacherSalaryBill.deleteMany();
+      await tx.expense.deleteMany();
+      await tx.generalCharge.deleteMany();
+      await tx.feePackage.deleteMany();
+      
+      // 2. Wipe Academic Logs & Submissions
+      await tx.attendance.deleteMany();
+      await tx.examResult.deleteMany();
+      await tx.submission.deleteMany();
       await tx.assignment.deleteMany();
+      
+      // 3. Wipe Time Tables & Subjects
+      await tx.timeTablePeriod.deleteMany();
+      await tx.classSubject.deleteMany();
+      await tx.subject.deleteMany();
+      
+      // 4. Wipe Classes & Announcements
+      await tx.class.deleteMany();
+      await tx.announcementRead.deleteMany();
+      await tx.announcement.deleteMany();
+      await tx.enquiry.deleteMany();
+      
+      // 5. Finally wipe all non-admin users
       await tx.user.deleteMany({
         where: {
           role: {
@@ -1104,14 +1135,13 @@ export async function resetSchoolData(formData) {
     revalidatePath('/admin/teachers');
     revalidatePath('/admin/parents');
     revalidatePath('/admin/classes');
-    revalidatePath('/teacher');
-    revalidatePath('/student');
-    revalidatePath('/parent');
-
+    revalidatePath('/admin/fees');
+    revalidatePath('/admin/timetable');
+    
     return { success: true };
   } catch (e) {
     console.error('Failed to reset school data:', e);
-    return { error: e.message || 'Failed to reset teachers and students.' };
+    return { error: e.message || 'Failed to reset system roster.' };
   }
 }
 
