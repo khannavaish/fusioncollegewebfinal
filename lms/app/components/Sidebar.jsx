@@ -71,10 +71,15 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
   };
 
   const isActive = (href) => {
+    if (pathname === href) return true;
     if (href === '/admin' || href === '/student' || href === '/teacher' || href === '/parent') {
-      return pathname === href;
+      return false;
     }
-    return pathname === href || (href.length > 1 && pathname?.startsWith(href + "/"));
+    // Prevent "Fees" from being highlighted when we are specifically on "Payroll"
+    if (href === '/admin/fees' && pathname?.startsWith('/admin/fees/payroll')) {
+      return false;
+    }
+    return href.length > 1 && pathname?.startsWith(href + "/");
   };
 
   // Simplified Nav for LMS mapping
