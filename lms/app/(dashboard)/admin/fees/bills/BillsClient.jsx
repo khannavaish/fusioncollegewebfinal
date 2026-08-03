@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { markBillPaid, waiveBill, addBillItem, resendBillWhatsApp, removeBillItem, updateBillAmount, updateStudentFeeAccount } from '@/app/actions/fees';
+import { markBillPaid, waiveBill, addBillItem, resendBillWhatsApp, removeBillItem, updateBillAmount, updateStudentFeeAccount, createCustomBill } from '@/app/actions/fees';
 import { generateBillPDF, getBillFilename } from '@/app/utils/billPdf';
 import { IconClipboardCheck, IconDownload, IconCheckCircle, IconXCircle, IconSchool, IconChart, IconDocumentText, IconBolt, IconPlus, IconChatBubble, IconAlertTriangle, IconEdit, IconLoader } from '@/app/components/icons';
 
@@ -66,14 +66,15 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
     else setMsg('❌ ' + (result?.error || 'Failed'));
   }
 
-  async function handleAddCharge(e, billId) {
+  // Now used for creating a new custom bill at the student level
+  async function handleAddCharge(e, studentId) {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.target);
-    fd.set('billId', billId);
-    const result = await addBillItem(fd);
+    fd.set('studentId', studentId);
+    const result = await createCustomBill(fd);
     setLoading(false);
-    if (result?.success) { e.target.reset(); setMsg('✅ Charge added!'); setTimeout(() => { setActionBillId(null); router.refresh(); }, 1000); }
+    if (result?.success) { e.target.reset(); setMsg('✅ Custom Bill created!'); setTimeout(() => { setActionBillId(null); router.refresh(); }, 1000); }
     else setMsg('❌ ' + (result?.error || 'Failed'));
   }
 
@@ -362,9 +363,51 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                               ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300'
                               : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40'
                           }`}>
-                          <IconDocumentText className="w-3.5 h-3.5" /> {isGroupOpen ? 'Hide Bills' : 'View Bills'}
+                          <IconDocumentText className="w-3.5 h-3.5" /> {isGroupOpen ? 'Hide Bills' : 'Manage Bills'}
+                        </button>
+                        
+                        <button onClick={() => openPanel(group.student.id, 'charge')}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                            actionBillId === group.student.id && panelType === 'charge'
+                              ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300'
+                              : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40'
+                          }`}>
+                          <IconPlus className="w-3.5 h-3.5" /> Add Charge (New Bill)
                         </button>
                       </div>
+
+                      {/* Add Charge Panel at Group Level */}
+                      {actionBillId === group.student.id && panelType === 'charge' && (
+                        <div className="mt-4 p-4 bg-[#0c0e1a]/95 border border-[#1e233d] rounded-xl relative">
+                          <button onClick={() => { setActionBillId(null); setPanelType(null); setMsg(''); }} className="absolute top-4 right-4 text-zinc-500 hover:text-white">
+                            <IconXCircle className="w-4 h-4" />
+                          </button>
+                          <h3 className="text-sm font-bold text-white mb-4">Create Custom Bill</h3>
+                          {msg && (
+                            <div className={`px-4 py-3 rounded-xl text-xs font-bold mb-4 border ${msg.startsWith('✅') ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                              {msg}
+                            </div>
+                          )}
+                          <form onSubmit={(e) => handleAddCharge(e, group.student.id)} className="space-y-4 max-w-sm">
+                            <div>
+                              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Charge Title</label>
+                              <input type="text" name="title" placeholder="e.g. Fine, Books, Uniform" required className={inputCls} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Amount</label>
+                              <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
+                                <input type="number" name="amount" required min="1" step="0.01" className={`${inputCls} pl-10`} />
+                              </div>
+                            </div>
+                            <div className="pt-2">
+                              <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 cursor-pointer">
+                                Create Bill
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
                     </div>
 
                     {/* Expanded Individual Bills */}
@@ -397,35 +440,28 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                                 </Link>
 
                                 {bill.status !== 'PAID' && bill.status !== 'WAIVED' && (
-                                  <button onClick={() => openPanel(bill.id, 'pay')}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
-                                      isOpen && panelType === 'pay'
-                                        ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300'
-                                        : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400 hover:border-emerald-600/40'
-                                    }`}>
-                                    <IconCheckCircle className="w-3.5 h-3.5" /> Mark Paid
-                                  </button>
+                                  <>
+                                    <button onClick={() => openPanel(bill.id, 'pay')}
+                                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                                        isOpen && panelType === 'pay'
+                                          ? 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300'
+                                          : 'border-[#1e233d] text-zinc-400 hover:text-emerald-400 hover:border-emerald-600/40'
+                                      }`}>
+                                      <IconCheckCircle className="w-3.5 h-3.5" /> Mark Paid
+                                    </button>
+
+                                    <button onClick={() => openPanel(bill.id, 'edit-bill')}
+                                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                                        isOpen && panelType === 'edit-bill'
+                                          ? 'border-amber-600/60 bg-amber-950/40 text-amber-300'
+                                          : 'border-[#1e233d] text-zinc-400 hover:text-amber-400 hover:border-amber-600/40'
+                                      }`}>
+                                      <IconEdit className="w-3.5 h-3.5" /> Edit Amount
+                                    </button>
+                                  </>
                                 )}
 
-                                <button onClick={() => openPanel(bill.id, 'charge')}
-                                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
-                                    isOpen && panelType === 'charge'
-                                      ? 'border-cyan-600/60 bg-cyan-950/40 text-cyan-300'
-                                      : 'border-[#1e233d] text-zinc-400 hover:text-cyan-400 hover:border-cyan-600/40'
-                                  }`}>
-                                  <IconPlus className="w-3.5 h-3.5" /> Add Charge
-                                </button>
-
-                                <button onClick={() => openPanel(bill.id, 'edit-bill')}
-                                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
-                                    isOpen && panelType === 'edit-bill'
-                                      ? 'border-amber-600/60 bg-amber-950/40 text-amber-300'
-                                      : 'border-[#1e233d] text-zinc-400 hover:text-amber-400 hover:border-amber-600/40'
-                                  }`}>
-                                  <IconEdit className="w-3.5 h-3.5" /> Edit Amount
-                                </button>
-
-                                {bill.status !== 'WAIVED' && (
+                                {bill.status !== 'PAID' && bill.status !== 'WAIVED' && (
                                   <button onClick={() => openPanel(bill.id, 'waive')}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
                                       isOpen && panelType === 'waive'
@@ -494,27 +530,7 @@ export default function BillsClient({ bills, classes, filters, monthNames }) {
                                         </form>
                                       )}
 
-                                      {/* Add Charge Panel */}
-                                      {panelType === 'charge' && (
-                                        <form onSubmit={(e) => handleAddCharge(e, bill.id)} className="space-y-4">
-                                          <div>
-                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Charge Title</label>
-                                            <input type="text" name="title" placeholder="e.g. Fine, Books" required className={inputCls} />
-                                          </div>
-                                          <div>
-                                            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Amount</label>
-                                            <div className="relative">
-                                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">₨</span>
-                                              <input type="number" name="amount" required min="1" step="0.01" className={`${inputCls} pl-10`} />
-                                            </div>
-                                          </div>
-                                          <div className="pt-2 border-t border-white/5">
-                                            <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-black rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 cursor-pointer">
-                                              Add Charge
-                                            </button>
-                                          </div>
-                                        </form>
-                                      )}
+                                      {/* Add Charge Panel removed from here (now at group level) */}
 
                                       {/* Waive Panel */}
                                       {panelType === 'waive' && (
