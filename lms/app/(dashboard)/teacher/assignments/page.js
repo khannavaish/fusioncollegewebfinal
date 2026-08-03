@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import AnimatedSection from '@/app/components/AnimatedSection';
+import GradeSubmissionDialog from './GradeSubmissionDialog';
 import prisma from '@/utils/db';
 import Link from 'next/link';
 import { createAssignment, deleteAssignment, gradeSubmission } from '@/app/actions/assignments';
@@ -202,40 +203,7 @@ export default async function TeacherAssignmentsPage() {
                                 ) : (
                                   <span className="text-xs text-amber-400 font-medium">Pending</span>
                                 )}
-                                {/* Grade Dropdown */}
-                                <details className="relative">
-                                  <summary className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-xs font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer list-none">
-                                    {submission.grade ? 'Re-grade' : 'Grade'}
-                                  </summary>
-                                  <div className="absolute right-0 top-9 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-64 shadow-2xl">
-                                    <form action={gradeSubmission} className="space-y-2">
-                                      <input type="hidden" name="submissionId" value={submission.id} />
-                                      <div>
-                                        <label className="text-[10px] text-zinc-400 block mb-1">Grade (e.g. 85/100 or A+)</label>
-                                        <input
-                                          name="grade"
-                                          placeholder="Enter grade *"
-                                          defaultValue={submission.grade || ''}
-                                          className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white"
-                                          required
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="text-[10px] text-zinc-400 block mb-1">Remarks (optional)</label>
-                                        <textarea
-                                          name="remarks"
-                                          rows={2}
-                                          placeholder="Feedback for student..."
-                                          defaultValue={submission.remarks || ''}
-                                          className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white resize-none"
-                                        />
-                                      </div>
-                                      <button type="submit" className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer">
-                                        Save Grade
-                                      </button>
-                                    </form>
-                                  </div>
-                                </details>
+                                <GradeSubmissionDialog submission={submission} />
                               </div>
                             </div>
                           ))}

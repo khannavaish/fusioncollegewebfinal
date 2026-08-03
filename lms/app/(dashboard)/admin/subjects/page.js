@@ -5,6 +5,7 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { IconChevronLeft, IconChevronRight, IconEdit } from '@/app/components/icons';
 import { createSubject, updateSubject, deleteSubject } from '@/app/actions/admin';
+import EditSubjectDialog from './EditSubjectDialog';
 import { PageShell } from '@/app/components/Brand';
 import { BookOpen } from 'lucide-react';
 
@@ -69,16 +70,7 @@ export default async function AdminSubjectsPage() {
                 </div>
   
                 <div className="border-t border-[#1e233d] bg-[#16192b]/30 p-3">
-                  <details className="relative group">
-                    <summary className="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer list-none font-medium inline-flex items-center gap-1">
-                      <IconEdit className="w-3 h-3" /> Edit Name
-                    </summary>
-                    <form action={updateSubject} className="flex gap-2 mt-2">
-                      <input type="hidden" name="id" value={sub.id} />
-                      <input name="name" defaultValue={sub.name} className={`${inputCls} flex-1 text-xs py-1`} required />
-                      <button type="submit" className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-lg transition-colors cursor-pointer">Save</button>
-                    </form>
-                  </details>
+                  <EditSubjectDialog sub={sub} />
                 </div>
   
                 <div className="border-t border-[#1e233d] p-3">

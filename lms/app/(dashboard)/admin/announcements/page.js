@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 import prisma from '@/utils/db';
 import AnnouncementForm from './AnnouncementForm';
 import { IconChevronLeft, IconChatBubble } from '@/app/components/icons';
+import EditAnnouncementDialog from './EditAnnouncementDialog';
 import { deleteAnnouncement, editAnnouncement } from '@/app/actions/announcements';
 import { PageShell } from '@/app/components/Brand';
 import { Bell } from 'lucide-react';
@@ -68,17 +69,7 @@ export default async function AdminAnnouncementsPage() {
                           <IconChatBubble className="h-3 w-3" /> {item.whatsappSent} sent
                         </span>
                       )}
-                      <details className="relative">
-                        <summary className="px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-[10px] font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer list-none">Edit</summary>
-                        <div className="absolute right-0 top-8 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-3 w-72 shadow-2xl">
-                          <form action={editAnnouncement} className="space-y-2">
-                            <input type="hidden" name="id" value={item.id} />
-                            <input name="title" defaultValue={item.title} className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white" required />
-                            <textarea name="message" rows={3} defaultValue={item.message} className="w-full bg-[#16192b] border border-[#2b3052] rounded px-2 py-1.5 text-xs text-white resize-none" required />
-                            <button type="submit" className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold rounded uppercase tracking-wider cursor-pointer">Save</button>
-                          </form>
-                        </div>
-                      </details>
+                      <EditAnnouncementDialog item={item} />
                       <form action={deleteAnnouncement}>
                         <input type="hidden" name="id" value={item.id} />
                         <button type="submit" className="px-2 py-1 bg-[#1e233d] border border-[#2b3052] rounded text-red-400 text-[10px] font-medium hover:bg-red-950/20 transition-colors cursor-pointer">Del</button>

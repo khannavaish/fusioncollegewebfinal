@@ -5,7 +5,9 @@ import prisma from '@/utils/db';
 import Link from 'next/link';
 import { deleteAnnouncement, editAnnouncement } from '@/app/actions/announcements';
 import { resolvePasswordResetAction } from '@/app/actions/passwordReset';
-import { IconChatBubble, IconChevronLeft } from '@/app/components/icons';
+import { IconBell, IconChevronLeft, IconChatBubble } from '@/app/components/icons';
+import EditAnnouncementDialog from '../announcements/EditAnnouncementDialog';
+import { PageShell } from '@/app/components/Brand';
 
 export const metadata = {
   title: 'Notifications | Fusion College LMS',
@@ -227,28 +229,7 @@ export default async function AdminNotificationsPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {/* Edit */}
-                      <details className="relative">
-                        <summary className="px-3 py-1.5 bg-[#1e233d] border border-[#2b3052] rounded text-cyan-400 text-xs font-medium hover:bg-cyan-950/20 transition-colors cursor-pointer list-none">
-                          Edit
-                        </summary>
-                        <div className="absolute right-0 top-9 z-20 bg-[#0d0f1a] border border-[#1e233d] rounded-xl p-4 w-80 shadow-2xl">
-                          <h3 className="text-xs font-bold text-white mb-3">Edit Announcement</h3>
-                          <form action={editAnnouncement} className="space-y-2">
-                            <input type="hidden" name="id" value={item.id} />
-                            <input name="title" defaultValue={item.title} className={inputCls} required />
-                            <textarea
-                              name="message"
-                              rows={4}
-                              defaultValue={item.message}
-                              className={`${inputCls} resize-none`}
-                              required
-                            />
-                            <button type="submit" className="w-full py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer">
-                              Save Changes
-                            </button>
-                          </form>
-                        </div>
-                      </details>
+                      <EditAnnouncementDialog item={item} />
   
                       {/* Delete */}
                       <form action={deleteAnnouncement}>
