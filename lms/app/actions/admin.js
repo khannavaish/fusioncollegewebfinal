@@ -65,8 +65,20 @@ function classPrefix(className) {
 async function generateRollNumber(classId) {
   const cls = await prisma.class.findUnique({ where: { id: classId }, select: { name: true } });
   const prefix = classPrefix(cls?.name || 'STU');
-  const count = await prisma.student.count({ where: { classId } });
-  const next = count + 1;
+  
+  const students = await prisma.student.findMany({
+    where: { classId },
+    select: { rollNumber: true }
+  });
+  
+  let maxCount = students.length;
+  for (const s of students) {
+    const parts = s.rollNumber.split('-');
+    const num = parseInt(parts[parts.length - 1], 10);
+    if (!isNaN(num) && num > maxCount) maxCount = num;
+  }
+  
+  const next = maxCount + 1;
   return `${prefix}-${String(next).padStart(3, '0')}`;
 }
 

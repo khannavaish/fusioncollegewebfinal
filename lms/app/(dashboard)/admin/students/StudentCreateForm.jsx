@@ -233,7 +233,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
       {/* Main Form Modal */}
       {isFormOpen && (
         <div className="fixed inset-0 top-16 md:top-0 z-[9000] flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="w-full max-w-4xl max-h-[calc(100vh-6rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-4xl max-h-[calc(100dvh-6rem)] md:max-h-[90vh] bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col relative animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
             {/* Modal Header */}
             <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 md:px-8 md:py-5 border-b border-white/5 bg-[#0c0e1a]/90 rounded-t-3xl">
               <div>
@@ -248,7 +248,7 @@ export default function StudentCreateForm({ classes, feePackages = [] }) {
               </button>
             </div>
 
-            <div className="p-6 md:p-8 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+            <div className="flex-1 min-h-0 p-6 md:p-8 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               {classes.length === 0 ? (
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5">
                   <p className="text-sm font-medium text-amber-400">Please <a href="/admin/classes" className="underline font-bold">create at least one class</a> before enrolling students.</p>
