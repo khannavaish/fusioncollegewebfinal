@@ -298,7 +298,49 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
 
       {/* Mobile Bottom Dynamic Island Nav */}
       <nav className="md:hidden fixed bottom-4 left-4 right-4 z-[100] print:hidden pointer-events-none">
-        <div className="max-w-md mx-auto bg-[#0b051a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] pointer-events-auto">
+        <div className="max-w-md mx-auto bg-[#0b051a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] pointer-events-auto relative overflow-hidden isolate">
+          {/* Dynamic Flowing Neon Water Background - Contained inside the pill */}
+          <div className="absolute inset-0 pointer-events-none z-0 opacity-[0.25] mix-blend-screen [mask-image:linear-gradient(to_left,white_0%,transparent_50%)]">
+            <svg className="w-full h-full scale-110" viewBox="0 0 1000 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="mobileNavWater" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="1" />
+                  <stop offset="50%" stopColor="#a855f7" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#f43f5e" stopOpacity="0" />
+                </linearGradient>
+                <filter id="mobileNavGlowFilter">
+                  <feGaussianBlur stdDeviation="12" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <motion.path
+                fill="url(#mobileNavWater)"
+                filter="url(#mobileNavGlowFilter)"
+                initial={{ d: "M 0,0 L 0,30 C 250,40 500,10 750,30 C 900,40 1000,20 1000,30 L 1000,0 Z" }}
+                animate={{ d: [
+                  "M 0,0 L 0,30 C 250,40 500,10 750,30 C 900,40 1000,20 1000,30 L 1000,0 Z",
+                  "M 0,0 L 0,20 C 250,10 500,40 750,20 C 900,10 1000,40 1000,20 L 1000,0 Z",
+                  "M 0,0 L 0,30 C 250,40 500,10 750,30 C 900,40 1000,20 1000,30 L 1000,0 Z"
+                ]}}
+                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.path
+                fill="url(#mobileNavWater)"
+                opacity="0.6"
+                initial={{ d: "M 0,0 L 0,40 C 200,60 400,20 600,40 C 800,60 1000,30 1000,40 L 1000,0 Z" }}
+                animate={{ d: [
+                  "M 0,0 L 0,40 C 200,60 400,20 600,40 C 800,60 1000,30 1000,40 L 1000,0 Z",
+                  "M 0,0 L 0,30 C 200,20 400,60 600,30 C 800,20 1000,50 1000,30 L 1000,0 Z",
+                  "M 0,0 L 0,40 C 200,60 400,20 600,40 C 800,60 1000,30 1000,40 L 1000,0 Z"
+                ]}}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </svg>
+          </div>
+
           <div 
             className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory relative scroll-smooth"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
