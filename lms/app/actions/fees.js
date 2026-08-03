@@ -679,7 +679,7 @@ export async function generateIndividualBill(_prev, formData) {
     });
 
     if (existing) {
-      return { error: `A regular fee bill already exists for this student for ${month}/${year}.` };
+      return { warning: `A regular fee bill already exists for this student for ${month}/${year}.` };
     }
 
     const baseAmount = student.feeMonthlyOverride ?? student.feePackage?.monthlyFee;

@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { generateIndividualBill } from '@/app/actions/fees';
-import { IconDocumentText, IconLoader, IconCheckCircle, IconXCircle } from '@/app/components/icons';
+import { IconDocumentText, IconLoader, IconCheckCircle, IconXCircle, IconAlertTriangle } from '@/app/components/icons';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -104,6 +104,12 @@ export default function GenerateBillButton({ studentId }) {
                 <div className="px-3 py-2.5 rounded-lg bg-red-950/40 border border-red-700/40 text-red-300 text-[11px] font-medium flex items-center gap-2">
                   <IconXCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
                   {state.error}
+                </div>
+              )}
+              {state?.warning && (
+                <div className="px-3 py-2.5 rounded-lg bg-amber-950/40 border border-amber-700/40 text-amber-300 text-[11px] font-medium flex items-center gap-2">
+                  <IconAlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  {state.warning}
                 </div>
               )}
               {state?.success && (
