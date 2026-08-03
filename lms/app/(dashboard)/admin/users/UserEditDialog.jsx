@@ -14,9 +14,12 @@ export default function UserEditDialog({ user, onClose }) {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState(user.status);
   
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
+  const onDialogRef = (node) => {
+    if (node && !node.open) {
+      node.showModal();
+    }
+    dialogRef.current = node;
+  };
 
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -63,7 +66,7 @@ export default function UserEditDialog({ user, onClose }) {
 
   return (
     <ClientPortal>
-      <dialog ref={dialogRef} onClose={onClose} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md max-h-[100dvh] overflow-y-auto scroll-smooth pt-20 pb-28 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+      <dialog ref={onDialogRef} onClose={onClose} className="bg-transparent m-auto backdrop:bg-black/60 backdrop:backdrop-blur-md p-4 w-full max-w-md max-h-[100dvh] overflow-y-auto scroll-smooth pt-20 pb-28 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
         <div className="bg-[#0c0e1a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200">
           <div className="flex justify-between items-center mb-6">
             <div>

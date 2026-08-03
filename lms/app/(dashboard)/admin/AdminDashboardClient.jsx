@@ -77,10 +77,10 @@ export default function AdminDashboardClient({
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: "Total Users", value: stats.studentCount + stats.teacherCount + stats.parentCount, color: "text-cyan-400", link: "/admin/students" },
+              { label: "Total Users", value: stats.studentCount + stats.teacherCount + stats.parentCount, color: "text-cyan-400", link: "/admin/users" },
               { label: "Students", value: stats.studentCount, color: "text-emerald-400", link: "/admin/students" },
               { label: "Teachers", value: stats.teacherCount, color: "text-violet-400", link: "/admin/teachers" },
-              { label: "Parents", value: stats.parentCount, color: "text-amber-400", link: "#" },
+              { label: "Parents", value: stats.parentCount, color: "text-amber-400", link: "/admin/parents" },
               { label: "Classes", value: stats.classCount, color: "text-rose-400", link: "/admin/classes" },
               { label: "Subjects", value: stats.subjectCount, color: "text-indigo-400", link: "/admin/subjects" },
               { label: "Enquiries", value: enquiries.length, color: "text-pink-400", link: "/admin/enquiries" },
