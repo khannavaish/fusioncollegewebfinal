@@ -239,7 +239,7 @@ export default function Sidebar({ role, name, avatarUrl, handleSignOutAction }) 
                 href={item.href}
                 title={!isOpen ? item.label : undefined}
                 className={`relative flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 group min-h-[44px] overflow-hidden drop-shadow-md ${
-                  active ? "text-white" : "text-slate-200 hover:text-white"
+                  active ? "text-white" : "text-slate-100 hover:text-white"
                 }`}
               >
                 {active && (
@@ -250,7 +250,7 @@ export default function Sidebar({ role, name, avatarUrl, handleSignOutAction }) 
                   />
                 )}
                 <div className="relative flex shrink-0 items-center justify-center w-6 h-6">
-                  <Icon className={`w-4 h-4 transition-transform duration-300 ${active ? "text-cyan-400" : "text-slate-500 group-hover:scale-110 group-hover:text-cyan-400"}`} />
+                  <Icon className={`w-4 h-4 transition-transform duration-300 ${active ? "text-cyan-400" : "text-slate-400 group-hover:scale-110 group-hover:text-cyan-400"}`} />
                 </div>
                 <AnimatePresence>
                   {isOpen && (
