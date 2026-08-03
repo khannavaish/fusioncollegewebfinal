@@ -194,6 +194,11 @@ export async function generateMonthlyBills(_prev, formData) {
 
     revalidatePath('/admin/fees/bills');
     revalidatePath('/admin/fees');
+    
+    if (created === 0 && skipped > 0) {
+      return { warning: `Bills for this month have already been generated. Skipped ${skipped} existing bills.` };
+    }
+    
     return { success: true, created, skipped };
   } catch (e) {
     console.error('Bill generation error:', e);

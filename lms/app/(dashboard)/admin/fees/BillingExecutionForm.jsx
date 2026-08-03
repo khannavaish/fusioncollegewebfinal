@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { generateMonthlyBills } from '@/app/actions/fees';
-import { IconBolt, IconCheckCircle, IconXCircle, IconLoader } from '@/app/components/icons';
+import { IconBolt, IconCheckCircle, IconXCircle, IconLoader, IconAlertTriangle } from '@/app/components/icons';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -56,6 +56,12 @@ export default function BillingExecutionForm({ month, year }) {
         <div className="mt-4 px-4 py-3 rounded-xl bg-red-950/40 border border-red-700/40 text-red-300 text-sm font-medium flex items-center gap-2">
           <IconXCircle className="w-4 h-4 text-red-400" />
           {state.error}
+        </div>
+      )}
+      {state?.warning && (
+        <div className="mt-4 px-4 py-3 rounded-xl bg-amber-950/40 border border-amber-700/40 text-amber-300 text-sm font-medium flex items-center gap-2">
+          <IconAlertTriangle className="w-4 h-4 text-amber-400" />
+          {state.warning}
         </div>
       )}
       {state?.success && (
