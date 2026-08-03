@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IconSearch, IconFilter, IconEdit, IconCheckCircle, IconX } from '@/app/components/icons';
+import { Search as IconSearch, Filter as IconFilter, Edit as IconEdit, CheckCircle as IconCheckCircle, X as IconX } from 'lucide-react';
 import UserEditDialog from './UserEditDialog';
 
 const TABS = ['STUDENT', 'TEACHER', 'PARENT', 'ADMIN'];

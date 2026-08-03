@@ -3,7 +3,7 @@
 import ClientPortal from '@/app/components/ClientPortal';
 import { useState, useRef, useEffect } from 'react';
 import { updateUser, deleteUser } from '@/app/actions/users';
-import { IconCheckCircle, IconAlertTriangle, IconKey, IconX } from '@/app/components/icons';
+import { CheckCircle as IconCheckCircle, AlertTriangle as IconAlertTriangle, Key as IconKey, X as IconX } from 'lucide-react';
 
 const inputCls = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner";
 
