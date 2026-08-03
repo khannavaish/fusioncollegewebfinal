@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { editAnnouncement } from '@/app/actions/admin';
+import { editAnnouncement } from '@/app/actions/announcements';
 import { useFormStatus } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 

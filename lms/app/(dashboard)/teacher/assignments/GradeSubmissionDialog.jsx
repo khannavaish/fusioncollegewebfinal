@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { gradeSubmission } from '@/app/actions/teacher';
+import { gradeSubmission } from '@/app/actions/assignments';
 import { useFormStatus } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 
