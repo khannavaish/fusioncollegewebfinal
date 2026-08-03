@@ -490,7 +490,7 @@ export async function createStudent(_prev, formData) {
 
   const firstName = name.split(' ')[0];
   const cleanName = firstName.toLowerCase().replace(/[^a-z]/g, '');
-  const randomCode = Math.floor(100 + Math.random() * 900); // 3 digits
+  const randomCode = Math.floor(10000 + Math.random() * 90000); // 5 digits
   const email = `${cleanName}${randomCode}@fusionlms.edu`;
   const password = `${firstName}123`;
 
@@ -521,7 +521,7 @@ export async function createStudent(_prev, formData) {
     } else {
       const parentFirstName = guardianName.split(' ')[0];
       const parentCleanName = parentFirstName.toLowerCase().replace(/[^a-z]/g, '');
-      const parentRandomCode = Math.floor(100 + Math.random() * 900);
+      const parentRandomCode = Math.floor(10000 + Math.random() * 90000); // 5 digits
       parentEmail = `p_${parentCleanName}${parentRandomCode}@fusionlms.edu`;
       parentPassword = `${parentFirstName}123`;
 
