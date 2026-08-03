@@ -39,7 +39,7 @@ export default function AdminTimetableShell({ initialSlots, dbClasses, initialTi
 
       <AnimatePresence>
         {isEditing && (
-          <div className="fixed inset-0 z-50 bg-black/80 p-3 backdrop-blur-sm md:p-6">
+          <div className="fixed inset-0 top-16 md:top-0 z-[9999] bg-black/80 p-3 backdrop-blur-sm md:p-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
