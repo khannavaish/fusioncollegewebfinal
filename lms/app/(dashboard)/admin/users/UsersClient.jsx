@@ -99,7 +99,7 @@ export default function UsersClient({ initialUsers, classes }) {
                   <option value="">All Classes</option>
                   {classes.map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.grade} {c.section && `- ${c.section}`}
+                      {c.name}
                     </option>
                   ))}
                 </select>

@@ -15,7 +15,7 @@ export default async function UsersPage() {
   const [users, classes] = await Promise.all([
     getUsers(),
     prisma.class.findMany({
-      orderBy: [{ grade: 'asc' }, { section: 'asc' }],
+      orderBy: { name: 'asc' },
     }),
   ]);
 
