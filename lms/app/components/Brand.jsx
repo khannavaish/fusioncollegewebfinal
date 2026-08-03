@@ -43,7 +43,7 @@ export function TopBar() {
         <div className="absolute inset-0 rounded-3xl pointer-events-none border border-white/5 [mask-image:linear-gradient(to_bottom,white,transparent)]" />
         
         {/* Dynamic Flowing Neon Water Background - Contained inside the pill */}
-        <div className="absolute inset-0 rounded-3xl pointer-events-none z-0 opacity-[0.25] mix-blend-screen [mask-image:linear-gradient(to_left,white_0%,transparent_50%)] overflow-hidden">
+        <div className="absolute inset-0 rounded-3xl pointer-events-none z-0 opacity-75 mix-blend-screen">
           <svg className="w-full h-full scale-110" viewBox="0 0 1000 100" preserveAspectRatio="none">
             <defs>
               <linearGradient id="topbarWater" x1="0%" y1="0%" x2="100%" y2="0%">

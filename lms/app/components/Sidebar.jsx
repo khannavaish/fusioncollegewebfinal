@@ -300,7 +300,7 @@ export default function Sidebar({ role, name, handleSignOutAction }) {
       <nav className="md:hidden fixed bottom-4 left-4 right-4 z-[100] print:hidden pointer-events-none">
         <div className="max-w-md mx-auto bg-[#0b051a]/90 backdrop-blur-3xl border border-white/10 rounded-3xl p-2 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] pointer-events-auto relative overflow-hidden isolate">
           {/* Dynamic Flowing Neon Water Background - Contained inside the pill */}
-          <div className="absolute inset-0 pointer-events-none z-0 opacity-[0.25] mix-blend-screen [mask-image:linear-gradient(to_left,white_0%,transparent_50%)]">
+          <div className="absolute inset-0 pointer-events-none z-0 opacity-75 mix-blend-screen overflow-hidden rounded-3xl">
             <svg className="w-full h-full scale-110" viewBox="0 0 1000 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="mobileNavWater" x1="0%" y1="0%" x2="100%" y2="0%">
