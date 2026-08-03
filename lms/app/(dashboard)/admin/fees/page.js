@@ -179,6 +179,29 @@ export default async function FeeHubPage() {
           </div>
         </Link>
         </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <Link href="/admin/fees/pay" className="flex items-center gap-4 bg-emerald-950/20 hover:bg-emerald-950/40 border border-emerald-900/30 hover:border-emerald-500/50 rounded-2xl p-5 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+              <IconCheckCircle className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-lg">Fast Mark Paid</h3>
+              <p className="text-zinc-400 text-xs mt-0.5">Quickly process incoming fee payments</p>
+            </div>
+          </Link>
+          
+          <Link href="/admin/fees/bills" className="flex items-center gap-4 bg-cyan-950/20 hover:bg-cyan-950/40 border border-cyan-900/30 hover:border-cyan-500/50 rounded-2xl p-5 transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform">
+              <IconClipboardCheck className="w-6 h-6 text-cyan-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-lg">View All Bills</h3>
+              <p className="text-zinc-400 text-xs mt-0.5">Manage, print, and WhatsApp bills</p>
+            </div>
+          </Link>
+        </div>
       </AnimatedSection>
 
       {/* Bank Config Settings */}
