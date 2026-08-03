@@ -486,16 +486,16 @@ export default function TeacherReportsClient({ teacherId, classSubjects }) {
 
       {/* --- CREATE EXAM DIALOG DIALOG --- */}
       {showCreateExam && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex justify-between items-center">
+        <div className="fixed inset-0 top-16 md:top-0 bg-black/75 z-50 flex items-start md:items-center justify-center p-4">
+          <div className="bg-[#0d0f1a] border border-[#1e233d] w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 bg-[#16192b] border-b border-[#1e233d] flex-shrink-0 flex justify-between items-center">
               <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                 <IconPlus className="w-4 h-4 text-cyan-400" /> Create New Test / Exam
               </h3>
               <button onClick={() => setShowCreateExam(false)} className="text-zinc-500 hover:text-white text-lg font-black">&times;</button>
             </div>
             
-            <form onSubmit={handleCreateExamSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleCreateExamSubmit} className="p-6 space-y-4 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               <div>
                 <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Class & Course</label>
                 <input

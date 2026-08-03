@@ -272,12 +272,14 @@ export default function PayrollClient({ initialBills, allTeachers, currentMonth,
 
       {/* Pay Modal */}
       {payModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Process Salary</h3>
-            <p className="text-xs text-zinc-400 mb-5">Pay salary to {payModal.teacher.name}</p>
+        <div className="fixed inset-0 top-16 md:top-0 z-50 flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0d0f1a] border border-[#1e233d] rounded-2xl w-full max-w-md max-h-[calc(100vh-6rem)] md:max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex-shrink-0 p-6 pb-4 border-b border-[#1e233d]">
+              <h3 className="text-lg font-bold text-white mb-1">Process Salary</h3>
+              <p className="text-xs text-zinc-400">Pay salary to {payModal.teacher.name}</p>
+            </div>
             
-            <form onSubmit={handlePay} className="space-y-4">
+            <form onSubmit={handlePay} className="p-6 space-y-4 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/20 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               <input type="hidden" name="billId" value={payModal.id} />
               
               <div>
