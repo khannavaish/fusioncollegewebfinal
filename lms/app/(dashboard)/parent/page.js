@@ -39,6 +39,7 @@ export default async function ParentDashboard() {
                 student: {
                   include: {
                     class: true,
+                    examResults: true,
                     attendance: {
                       select: { status: true },
                     },
