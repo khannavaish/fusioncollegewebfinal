@@ -41,6 +41,8 @@ export async function generateBillPDF(bill, bankConfig = null) {
     const M = 15; // Margin
     const CW = W - M * 2; // Content Width
     const currentY = startY + M;
+    // Maximum Y for content within this section (leave 12mm for signatures)
+    const maxContentY = startY + sectionHeight - 14;
 
     // Draw dashed line separator if not the first section
     if (index > 0) {
@@ -125,7 +127,7 @@ export async function generateBillPDF(bill, bankConfig = null) {
 
     sy += 22; // Move below the box
 
-    // Fee Items Table
+    // Fee Items Table — clamp to section height to prevent jsPDF adding extra pages
     const tableData = (bill.items || []).map((item, i) => [
       i + 1,
       item.title,
@@ -147,9 +149,20 @@ export async function generateBillPDF(bill, bankConfig = null) {
       margin: { left: M, right: M },
       tableWidth: CW,
       styles: { cellPadding: 2, minCellHeight: 6 },
+      // Critical: never allow autoTable to overflow onto a new page
+      startY: sy,
+      pageBreak: 'avoid',
+      rowPageBreak: 'avoid',
     });
 
-    const finalY = doc.lastAutoTable.finalY + 4;
+    // If jsPDF added extra pages (content overflow), delete them and stay on page 1
+    while (doc.getNumberOfPages() > 1) {
+      doc.deletePage(doc.getNumberOfPages());
+    }
+
+    // Clamp finalY so totals/signatures always stay within the section
+    const rawFinalY = doc.lastAutoTable.finalY + 4;
+    const finalY = Math.min(rawFinalY, maxContentY - 20);
 
     // Total Amount Box
     doc.setFillColor(240, 240, 240);
@@ -196,6 +209,11 @@ export async function generateBillPDF(bill, bankConfig = null) {
     doc.line(W - M - 30, sigY - 4, W - M, sigY - 4);
     doc.text('Depositor Signature', W - M - 28, sigY);
   });
+
+  // Final safety: ensure the PDF is exactly 1 page
+  while (doc.getNumberOfPages() > 1) {
+    doc.deletePage(doc.getNumberOfPages());
+  }
 
   return doc;
 }
