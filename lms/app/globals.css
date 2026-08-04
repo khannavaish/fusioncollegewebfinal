@@ -272,12 +272,15 @@ body {
 /* ─── GLOBAL PRINT STYLES ─────────────────────────────────────── */
 @media print {
   @page {
-    margin: 0;
+    margin: 1cm;
     size: auto;
   }
   
   body {
-    margin: 1cm;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
   }
 
   /* Kill scrollbars */
@@ -291,7 +294,12 @@ body {
   }
 
   /* White base */
-  html, body {
+  html {
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+  body {
     background: #ffffff !important;
     color: #000000 !important;
   }
