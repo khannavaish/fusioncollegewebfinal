@@ -710,7 +710,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto print:overflow-x-visible border border-[#1e233d] rounded-xl print:border-zinc-300">
+                  <div className="overflow-x-auto border border-[#1e233d] rounded-xl print:border-zinc-300 print:overflow-hidden">
                     <table className="w-full text-center text-sm border-collapse">
                       <thead>
                         <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-300 font-bold print:bg-blue-700 print:text-white">
@@ -1004,7 +1004,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto print:overflow-x-visible border border-[#1e233d] rounded-xl print:border-zinc-300">
+                  <div className="overflow-x-auto border border-[#1e233d] rounded-xl print:border-zinc-300 print:overflow-hidden">
                     <table className="w-full text-left text-sm border-collapse">
                       <thead>
                         <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold print:bg-blue-700 print:text-white">
@@ -1120,7 +1120,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                 <h3 className="text-base font-black text-white uppercase tracking-wider">WhatsApp Broadcast Logs</h3>
               </div>
 
-              <div className="overflow-x-auto print:overflow-x-visible">
+              <div className="overflow-x-auto print:overflow-hidden">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead>
                     <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1241,7 +1241,7 @@ export default function ReportsClient({ students, classes, teachers }) {
             {warningsSubTab === 'absentees' && absenteesList.length > 0 && (
               <div className="bg-[#070810] p-5 rounded-xl border border-[#1e233d] space-y-4">
                 <h3 className="text-sm font-black text-red-400 uppercase tracking-wider">Absentee Record - {selectedDateIssues}</h3>
-                <div className="overflow-x-auto print:overflow-x-visible">
+                <div className="overflow-x-auto print:overflow-hidden">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1288,7 +1288,7 @@ export default function ReportsClient({ students, classes, teachers }) {
                   <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider">Students with Attendance below 75%</h3>
                   <span className="text-xs text-zinc-500">Auto generated warning list</span>
                 </div>
-                <div className="overflow-x-auto print:overflow-x-visible">
+                <div className="overflow-x-auto print:overflow-hidden">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">
@@ -1327,7 +1327,7 @@ export default function ReportsClient({ students, classes, teachers }) {
             {warningsSubTab === 'completeness' && completenessList.length > 0 && (
               <div className="bg-[#070810] p-5 rounded-xl border border-[#1e233d] space-y-4">
                 <h3 className="text-sm font-black text-cyan-400 uppercase tracking-wider">Teacher Timetable Submissions checklist</h3>
-                <div className="overflow-x-auto print:overflow-x-visible">
+                <div className="overflow-x-auto print:overflow-hidden">
                   <table className="w-full text-left text-sm border-collapse">
                     <thead>
                       <tr className="bg-[#16192b]/60 border-b border-[#1e233d] text-zinc-400 font-bold">

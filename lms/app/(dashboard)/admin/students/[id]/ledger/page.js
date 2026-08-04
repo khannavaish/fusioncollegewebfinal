@@ -113,7 +113,7 @@ export default async function StudentLedgerPage({ params }) {
           <div className="bg-[#16192b]/50 print:bg-transparent p-4 border-b border-[#1e233d] print:border-black">
             <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider">Financial Ledger</h2>
           </div>
-          <div className="overflow-x-auto print:overflow-visible">
+          <div className="overflow-x-auto print:overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[#1e233d] print:border-black">

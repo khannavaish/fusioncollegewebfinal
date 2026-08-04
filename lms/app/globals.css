@@ -352,17 +352,57 @@ body {
     display: block !important;
   }
 
-  /* Table improvements for print */
+  /* ── TABLE OVERFLOW FIX — no more horizontal bleed on any report ── */
+  /* All tables scale to fit the printable area */
   table {
     width: 100% !important;
+    max-width: 100% !important;
     border-collapse: collapse !important;
+    table-layout: auto !important;
   }
   th, td {
-    padding: 6px 10px !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    max-width: none !important;
+    padding: 4px 6px !important;
     font-size: 11px !important;
   }
   thead tr {
     background-color: #e0f2fe !important;
     color: #0f172a !important;
+  }
+
+  /* ── OVERFLOW CONTAINMENT — all wrapper divs honour page width ── */
+  /* Remove any overflow-x:auto or visible that would cause bleed */
+  .overflow-x-auto,
+  .overflow-x-scroll {
+    overflow-x: visible !important;
+    overflow: visible !important;
+  }
+
+  /* Fixed and min-widths that would cause bleed — nuke them */
+  [class*="min-w-["] {
+    min-width: 0 !important;
+  }
+  [class*="w-32"],
+  [class*="w-36"],
+  [class*="w-64"],
+  [class*="w-80"] {
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Grid layouts — collapse multi-column grids to single column on narrow paper */
+  .grid-cols-3,
+  .md\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Ensure the root page container never exceeds the printable width */
+  body > div,
+  #__next,
+  main {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 }
