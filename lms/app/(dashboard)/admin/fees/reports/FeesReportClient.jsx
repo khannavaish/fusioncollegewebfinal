@@ -151,8 +151,9 @@ export default function FeesReportClient({ initialData, initialStatus, initialMo
             </div>
           </div>
 
-          {/* Data Table — Ledger Style */}
-          <table className="w-full text-left border-collapse mb-8 text-sm">
+          {/* Data Table — Scrollable on mobile */}
+          <div className="overflow-x-auto -mx-4 px-4 print:mx-0 print:px-0 print:overflow-visible">
+          <table className="w-full text-left border-collapse mb-8 text-sm min-w-[540px] print:min-w-0">
             <thead>
               <tr className="border-b-2 border-black bg-zinc-100 print:bg-transparent">
                 <th className="py-2 px-2 font-bold uppercase tracking-wider">Roll No</th>
@@ -188,10 +189,11 @@ export default function FeesReportClient({ initialData, initialStatus, initialMo
               )}
             </tbody>
           </table>
+          </div>
 
-          {/* Summary Totals — Same as Class Ledger */}
+          {/* Summary Totals */}
           <div className="flex justify-end pt-4 mt-8 border-t-2 border-black">
-            <div className="w-80 space-y-2 text-sm">
+            <div className="w-full max-w-xs space-y-2 text-sm">
               <div className="flex justify-between font-medium">
                 <span>Total Billed:</span>
                 <span className="font-mono">₨ {totalAmount.toLocaleString()}</span>

@@ -114,7 +114,7 @@ export default async function StudentLedgerPage({ params }) {
             <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider">Financial Ledger</h2>
           </div>
           <div className="overflow-x-auto print:overflow-hidden">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[540px] print:min-w-0">
               <thead>
                 <tr className="border-b border-[#1e233d] print:border-black">
                   <th className="px-5 py-3 text-[10px] font-bold text-zinc-400 print:text-black uppercase tracking-wider">Billing Period</th>

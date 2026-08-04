@@ -152,7 +152,8 @@ export default function LedgerClient({ students, teachers, classes }) {
                 </button>
               </div>
 
-              <table className="w-full text-left border-collapse mb-8 text-sm">
+              <div className="overflow-x-auto -mx-4 px-4 print:mx-0 print:px-0 print:overflow-visible">
+              <table className="w-full text-left border-collapse mb-8 text-sm min-w-[440px] print:min-w-0">
                 <thead>
                   <tr className="border-b-2 border-black">
                     <th className="py-2 px-2 font-bold uppercase tracking-wider">Date/Period</th>
@@ -188,9 +189,9 @@ export default function LedgerClient({ students, teachers, classes }) {
                   )}
                 </tbody>
               </table>
-
+              </div>
               <div className="flex justify-end pt-4">
-                <div className="w-64 space-y-2 text-sm">
+                <div className="w-full max-w-xs space-y-2 text-sm">
                   <div className="flex justify-between font-medium">
                     <span>Total Billed:</span>
                     <span className="font-mono">₨ {studentData.feeBills.reduce((acc, b) => acc + Number(b.totalAmount), 0).toLocaleString()}</span>
@@ -276,7 +277,8 @@ export default function LedgerClient({ students, teachers, classes }) {
                 </button>
               </div>
 
-              <table className="w-full text-left border-collapse mb-8 text-sm">
+              <div className="overflow-x-auto -mx-4 px-4 print:mx-0 print:px-0 print:overflow-visible">
+              <table className="w-full text-left border-collapse mb-8 text-sm min-w-[440px] print:min-w-0">
                 <thead>
                   <tr className="border-b-2 border-black">
                     <th className="py-2 px-2 font-bold uppercase tracking-wider">Date/Period</th>
@@ -310,9 +312,10 @@ export default function LedgerClient({ students, teachers, classes }) {
                   )}
                 </tbody>
               </table>
+              </div>
 
               <div className="flex justify-end pt-4">
-                <div className="w-64 space-y-2 text-sm">
+                <div className="w-full max-w-xs space-y-2 text-sm">
                   <div className="flex justify-between font-medium">
                     <span>Total Accrued:</span>
                     <span className="font-mono">₨ {teacherData.salaryBills.reduce((acc, b) => acc + Number(b.baseAmount), 0).toLocaleString()}</span>
@@ -392,7 +395,8 @@ export default function LedgerClient({ students, teachers, classes }) {
                 </button>
               </div>
 
-              <table className="w-full text-left border-collapse mb-8 text-sm">
+              <div className="overflow-x-auto -mx-4 px-4 print:mx-0 print:px-0 print:overflow-visible">
+              <table className="w-full text-left border-collapse mb-8 text-sm min-w-[440px] print:min-w-0">
                 <thead>
                   <tr className="border-b-2 border-black bg-zinc-100 print:bg-transparent">
                     <th className="py-2 px-2 font-bold uppercase tracking-wider">Roll No</th>
@@ -418,9 +422,10 @@ export default function LedgerClient({ students, teachers, classes }) {
                   )}
                 </tbody>
               </table>
+              </div>
 
               <div className="flex justify-end pt-4 mt-8 border-t-2 border-black">
-                <div className="w-80 space-y-2 text-sm">
+                <div className="w-full max-w-xs space-y-2 text-sm">
                   <div className="flex justify-between font-medium">
                     <span>Class Total Billed:</span>
                     <span className="font-mono">₨ {classData.studentLedgers.reduce((acc, s) => acc + s.totalBilled, 0).toLocaleString()}</span>
