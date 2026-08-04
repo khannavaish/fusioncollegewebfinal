@@ -400,9 +400,215 @@ body {
 
   /* Ensure the root page container never exceeds the printable width */
   body > div,
+.theme-light .border-\[\#1e233d\] {
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light .border-\[\#2b3052\] {
+  border-color: #94a3b8 !important;
+}
+
+.theme-light .text-zinc-100 {
+  color: #1e293b !important;
+}
+
+.theme-light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+.theme-light .text-zinc-400 {
+  color: #475569 !important;
+}
+
+.theme-light .text-zinc-500 {
+  color: #64748b !important;
+}
+
+.theme-light .text-white {
+  color: #0f172a !important;
+}
+
+.theme-light aside {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light header {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light input, 
+.theme-light select, 
+.theme-light textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.theme-light input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-light table thead tr {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+.theme-light table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.theme-light dialog {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* ─── GLOBAL PRINT STYLES ─────────────────────────────────────── */
+@media print {
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+  
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Kill scrollbars */
+  * { scrollbar-width: none !important; }
+  *::-webkit-scrollbar { display: none !important; }
+
+  /* Force color printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* White base */
+  html {
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide app chrome */
+  aside, header, nav, footer { display: none !important; }
+
+  /* Flatten layout wrappers - remove overflow clipping */
+  div {
+    overflow: visible !important;
+  }
+
+  /* Nuke ALL dark hex background classes used in this app */
+  .bg-\[\#090b11\],
+  .bg-\[\#0a0c14\],
+  .bg-\[\#0d0f1a\],
+  .bg-\[\#070810\],
+  .bg-\[\#16192b\] {
+    background-color: #ffffff !important;
+  }
+
+  /* Nuke dark border colours */
+  .border-\[\#1e233d\],
+  .border-\[\#2b3052\] {
+    border-color: #e5e7eb !important;
+  }
+
+  /* Make ALL text readable on white */
+  .text-white,
+  .text-zinc-100,
+  .text-zinc-200,
+  .text-zinc-300,
+  .text-zinc-400,
+  .text-zinc-500 {
+    color: #111827 !important;
+  }
+
+  /* Flatten card heights so layout isn't clipped */
+  .min-h-screen,
+  .min-h-\[400px\],
+  .h-dvh,
+  .overflow-hidden {
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
+  }
+
+  /* Remove padding/margin from dashboard wrappers */
+  .flex-1 {
+    display: block !important;
+  }
+
+  /* ── TABLE OVERFLOW FIX — no more horizontal bleed on any report ── */
+  /* All tables scale to fit the printable area */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+  }
+  th, td {
+    word-break: break-word !important;
+    white-space: normal !important;
+    max-width: none !important;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+  }
+  thead tr {
+    background-color: #e0f2fe !important;
+    color: #0f172a !important;
+  }
+
+  /* ── OVERFLOW CONTAINMENT — all wrapper divs honour page width ── */
+  /* Remove any overflow-x:auto or visible that would cause bleed */
+  .overflow-x-auto,
+  .overflow-x-scroll {
+    overflow-x: visible !important;
+    overflow: visible !important;
+  }
+
+  /* Fixed and min-widths that would cause bleed — nuke them */
+  [class*="min-w-["] {
+    min-width: 0 !important;
+  }
+  [class*="w-32"],
+  [class*="w-36"],
+  [class*="w-64"],
+  [class*="w-80"] {
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Grid layouts — collapse multi-column grids to single column on narrow paper */
+  .grid-cols-3,
+  .md\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Ensure the root page container never exceeds the printable width */
+  body > div,
   #__next,
   main {
     max-width: 100% !important;
     overflow-x: hidden !important;
+  }
+}
+
+/* ── GLOBAL MOBILE TABLE FIX ── */
+/* Ensures no table across the entire application ever bleeds off a mobile screen */
+@media screen and (max-width: 768px) {
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
   }
 }
